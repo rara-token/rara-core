@@ -1,0 +1,29 @@
+{
+  "name": "bsc-rara",
+  "version": "1.0.0",
+  "description": "Smart contracts for the Rara token, and minting stake pool",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VIDY/bsc-rara.git"
+  },
+  "author": "jake",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/VIDY/bsc-rara/issues"
+  },
+  "homepage": "https://github.com/VIDY/bsc-rara#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.1.0",
+    "@openzeppelin/test-helpers": "^0.5.11",
+    "@truffle/hdwallet-provider": "^1.4.0",
+    "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.2.0"
+  }
+}
