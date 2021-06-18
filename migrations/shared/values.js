@@ -84,7 +84,9 @@ module.exports = exports = ({ network, web3 }) => {
   // emitter inputs
   const emitter = values['emitter'] = {
     raraPerBlock: expandTo8Decimals(48),
-    startBlock: blocks.start
+    startBlock: blocks.start,
+    raraToMiningPool: expandTo8Decimals(12),
+    raraToMysteryBox: expandTo8Decimals(8),
   }
 
   // mining pool inputs
