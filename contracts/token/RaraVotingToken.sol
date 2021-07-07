@@ -6,9 +6,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 // RaraVotingToken with Governance.
 contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
+    using ERC165Checker for address;
+
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
@@ -23,7 +26,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
             require(_requirements[i - 1] <= _requirements[i], "vRARA::constructor: _requirements elements must monotonically increase");
         }
 
-        require(address(0) == _listener || IVotingMembershipListener(_listener).isVotingMembershipListener(),
+        require(address(0) == _listener || _listener.supportsInterface(type(IVotingMembershipListener).interfaceId),
             "vRARA::constructor: address must be zero or implement IVotingMembershipListener");
 
         membershipRequirement = _requirements;
@@ -37,7 +40,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
     }
 
     function decimals() public view virtual override returns (uint8) {
-        return 8;
+        return 18;
     }
 
     /// @notice Mint the indicated amount of vRARA to the sender. This requires
@@ -150,7 +153,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
 
     function setVotingMembershipListener(address _listener) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "vRARA::setVotingMembershipListener: must have manager role to setVotingMembershipListener");
-        require(address(0) == _listener || IVotingMembershipListener(_listener).isVotingMembershipListener(),
+        require(address(0) == _listener || _listener.supportsInterface(type(IVotingMembershipListener).interfaceId),
             "vRARA::setVotingMembershipListener: address must be zero or implement IVotingMembershipListener");
         listener = _listener;
     }
