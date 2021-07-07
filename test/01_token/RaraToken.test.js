@@ -14,7 +14,7 @@ contract('RaraToken', ([alice, bob, carol]) => {
         const decimals = await this.rara.decimals();
         assert.equal(name.valueOf(), 'Rara Token');
         assert.equal(symbol.valueOf(), 'RARA');
-        assert.equal(decimals.valueOf(), '8');
+        assert.equal(decimals.valueOf(), '18');
     });
 
     it('should only allow minter to mint token', async () => {

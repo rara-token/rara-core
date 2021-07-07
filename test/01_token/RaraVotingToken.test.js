@@ -31,7 +31,7 @@ contract('RaraVotingToken', ([alice, bob, carol, dave, edith, minter, manager, p
       const decimals = await token.decimals();
       assert.equal(name.valueOf(), 'Rara Voting Token');
       assert.equal(symbol.valueOf(), 'vRARA');
-      assert.equal(decimals.valueOf(), '8');
+      assert.equal(decimals.valueOf(), '18');
     });
 
     it('should have state set by constructor', async () => {
