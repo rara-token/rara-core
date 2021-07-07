@@ -20,8 +20,7 @@ module.exports = function (deployer, network, accounts) {
     factory = await UniswapV2Factory.deployed();
     await factory.setCreationDisallowed(true);    // temporary; authority pair creation only
     if (tokens.BUSD) { // Disable creation of BUSD/WBNB pair; special consideration later
-      await factory.setPairDisallowed(tokens.BUSD, wbnb);
+      await factory.setPairDisallowed(tokens.BUSD, wbnb, true);
     }
-    await deployer.deploy(UniswapV2Router02, factory.address, wbnb);
   });
 };
