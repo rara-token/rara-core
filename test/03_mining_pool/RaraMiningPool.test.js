@@ -62,6 +62,44 @@ contract('RaraMiningPool', ([alice, bob, carol, dave, edith, minter, manager, le
       await expectRevert.unspecified(this.pool.add('50', this.lp2.address, ZERO_ADDRESS, { from:lender }));
     });
 
+    it('setUnlockBlock reverts for non-manager', async () => {
+      let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
+
+      const pool = await RaraMiningPool.new(this.token.address, this.emitter.address, unlockBlock, { from: alice });
+      await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+
+      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:bob }), "RaraMiningPool: must have MANAGER role to setUnlockBlock");
+      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:carol }), "RaraMiningPool: must have MANAGER role to setUnlockBlock");
+    });
+
+    it('setUnlockBlock reverts if already unlocked', async () => {
+      let unlockBlock = (await web3.eth.getBlockNumber()) - 1;
+
+      const pool = await RaraMiningPool.new(this.token.address, this.emitter.address, unlockBlock, { from: alice });
+      await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+
+      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:alice }), "RaraMiningPool: no setUnlockBlock after unlocked");
+      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:manager }), "RaraMiningPool: no setUnlockBlock after unlocked");
+    });
+
+    it('setUnlockBlock succeeds when expected', async () => {
+      let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
+
+      const pool = await RaraMiningPool.new(this.token.address, this.emitter.address, unlockBlock, { from: alice });
+      await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+
+      await pool.setUnlockBlock(unlockBlock + 10, { from:alice });
+      assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock + 10}`);
+
+      await pool.setUnlockBlock(unlockBlock + 50, { from:manager });
+      assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock + 50}`);
+
+      await pool.setUnlockBlock(unlockBlock - 30, { from:alice });
+      assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock - 30}`);
+
+      await expectRevert(pool.setUnlockBlock(unlockBlock + 100, { from:manager }), "RaraMiningPool: no setUnlockBlock after unlocked");
+    });
+
     it('deposit should move LP token as expected', async () => {
       await this.pool.add('100', this.lp.address, ZERO_ADDRESS, { from:alice });
       await this.pool.deposit(0, 100, alice, { from:alice });
