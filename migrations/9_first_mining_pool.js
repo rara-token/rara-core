@@ -2,6 +2,7 @@ const UniswapV2Factory = artifacts.require("UniswapV2Factory");
 
 const RaraMiningPool = artifacts.require("RaraMiningPool");
 const WithdrawFeeStakeManager = artifacts.require("WithdrawFeeStakeManager");
+const MockWETH = artifacts.require("MockWETH");
 
 const values = require('./shared/values');
 

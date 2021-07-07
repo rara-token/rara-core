@@ -1,6 +1,5 @@
 const MockWETH = artifacts.require("MockWETH");
 const UniswapV2Factory = artifacts.require("UniswapV2Factory");
-const UniswapV2Router02 = artifacts.require("UniswapV2Router02");
 
 const values = require('./shared/values');
 
