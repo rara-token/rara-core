@@ -1,0 +1,458 @@
+{
+  "contractName": "IUniswapV2SwapValuator",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_client",
+          "type": "address"
+        }
+      ],
+      "name": "swapRateDimi",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isSwapValuator",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"isSwapValuator\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_client\",\"type\":\"address\"}],\"name\":\"swapRateDimi\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"a SwapValuator; Pairs will allow {swap} output amounts up to a proportion of input amount. This interface determines the proportion, which may differ based on caller (standard behavior is a minimum 0.3% fee). Note that most UniswapV2Pair interaction happens through a UniswapV2Router02; that router should receive full value (10000) swap rates so that any appropriate rate can be applied to clients.\",\"kind\":\"dev\",\"methods\":{\"isSwapValuator()\":{\"details\":\"is a SwapValuator (must return TRUE)\"},\"swapRateDimi(address)\":{\"details\":\"The swap rate offered the specified client, out of 10000. Standard Uniswapv2 behavior is \\\"9970\\\", i.e. a 0.3% fee is charged on swaps. \\\"10000\\\" is a fee-less swap (full value); \\\"0\\\" means no swap is possible (full value is confiscated). Numbers outside that range are invalid.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/interfaces/IUniswapV2SwapValuator.sol\":\"IUniswapV2SwapValuator\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/interfaces/IUniswapV2SwapValuator.sol\":{\"keccak256\":\"0xb421a7643c2ee0cf01e828cddb3068ecb3f3c720f92819774fac412e39d0f588\",\"urls\":[\"bzz-raw://a10c10e429a5304b1ba13685de3158e97c4cbe74ea7bd18afe28485e04e72783\",\"dweb:/ipfs/QmX2ZwMVQ1N8DJaspRCkagVemh4NV48ebakunpF9ZN4zuW\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.8.0;\n\n/// @dev a SwapValuator; Pairs will allow {swap} output amounts up to a proportion\n/// of input amount. This interface determines the proportion, which may differ\n/// based on caller (standard behavior is a minimum 0.3% fee).\n/// Note that most UniswapV2Pair interaction happens through a UniswapV2Router02;\n/// that router should receive full value (10000) swap rates so that any appropriate\n/// rate can be applied to clients.\ninterface IUniswapV2SwapValuator {\n    /// @dev The swap rate offered the specified client, out of 10000.\n    /// Standard Uniswapv2 behavior is \"9970\", i.e. a 0.3% fee is charged\n    /// on swaps. \"10000\" is a fee-less swap (full value); \"0\" means no swap\n    /// is possible (full value is confiscated). Numbers outside that range\n    /// are invalid.\n    function swapRateDimi(address _client) external view returns (uint);\n\n    /// @dev is a SwapValuator (must return TRUE)\n    function isSwapValuator() external pure returns (bool);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/interfaces/IUniswapV2SwapValuator.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/interfaces/IUniswapV2SwapValuator.sol",
+    "exportedSymbols": {
+      "IUniswapV2SwapValuator": [
+        12046
+      ]
+    },
+    "id": 12047,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 12030,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:32"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 12031,
+          "nodeType": "StructuredDocumentation",
+          "src": "25:429:32",
+          "text": "@dev a SwapValuator; Pairs will allow {swap} output amounts up to a proportion\n of input amount. This interface determines the proportion, which may differ\n based on caller (standard behavior is a minimum 0.3% fee).\n Note that most UniswapV2Pair interaction happens through a UniswapV2Router02;\n that router should receive full value (10000) swap rates so that any appropriate\n rate can be applied to clients."
+        },
+        "fullyImplemented": false,
+        "id": 12046,
+        "linearizedBaseContracts": [
+          12046
+        ],
+        "name": "IUniswapV2SwapValuator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 12032,
+              "nodeType": "StructuredDocumentation",
+              "src": "493:314:32",
+              "text": "@dev The swap rate offered the specified client, out of 10000.\n Standard Uniswapv2 behavior is \"9970\", i.e. a 0.3% fee is charged\n on swaps. \"10000\" is a fee-less swap (full value); \"0\" means no swap\n is possible (full value is confiscated). Numbers outside that range\n are invalid."
+            },
+            "functionSelector": "b13b90ff",
+            "id": 12039,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "swapRateDimi",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 12035,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12034,
+                  "mutability": "mutable",
+                  "name": "_client",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12039,
+                  "src": "834:15:32",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 12033,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "834:7:32",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "833:17:32"
+            },
+            "returnParameters": {
+              "id": 12038,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12037,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12039,
+                  "src": "874:4:32",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 12036,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "874:4:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "873:6:32"
+            },
+            "scope": 12046,
+            "src": "812:68:32",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 12040,
+              "nodeType": "StructuredDocumentation",
+              "src": "886:45:32",
+              "text": "@dev is a SwapValuator (must return TRUE)"
+            },
+            "functionSelector": "b83269dc",
+            "id": 12045,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isSwapValuator",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 12041,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "959:2:32"
+            },
+            "returnParameters": {
+              "id": 12044,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12043,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12045,
+                  "src": "985:4:32",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 12042,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "985:4:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "984:6:32"
+            },
+            "scope": 12046,
+            "src": "936:55:32",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 12047,
+        "src": "454:539:32"
+      }
+    ],
+    "src": "0:994:32"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/interfaces/IUniswapV2SwapValuator.sol",
+    "exportedSymbols": {
+      "IUniswapV2SwapValuator": [
+        12046
+      ]
+    },
+    "id": 12047,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 12030,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:32"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 12031,
+          "nodeType": "StructuredDocumentation",
+          "src": "25:429:32",
+          "text": "@dev a SwapValuator; Pairs will allow {swap} output amounts up to a proportion\n of input amount. This interface determines the proportion, which may differ\n based on caller (standard behavior is a minimum 0.3% fee).\n Note that most UniswapV2Pair interaction happens through a UniswapV2Router02;\n that router should receive full value (10000) swap rates so that any appropriate\n rate can be applied to clients."
+        },
+        "fullyImplemented": false,
+        "id": 12046,
+        "linearizedBaseContracts": [
+          12046
+        ],
+        "name": "IUniswapV2SwapValuator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 12032,
+              "nodeType": "StructuredDocumentation",
+              "src": "493:314:32",
+              "text": "@dev The swap rate offered the specified client, out of 10000.\n Standard Uniswapv2 behavior is \"9970\", i.e. a 0.3% fee is charged\n on swaps. \"10000\" is a fee-less swap (full value); \"0\" means no swap\n is possible (full value is confiscated). Numbers outside that range\n are invalid."
+            },
+            "functionSelector": "b13b90ff",
+            "id": 12039,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "swapRateDimi",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 12035,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12034,
+                  "mutability": "mutable",
+                  "name": "_client",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12039,
+                  "src": "834:15:32",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 12033,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "834:7:32",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "833:17:32"
+            },
+            "returnParameters": {
+              "id": 12038,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12037,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12039,
+                  "src": "874:4:32",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 12036,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "874:4:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "873:6:32"
+            },
+            "scope": 12046,
+            "src": "812:68:32",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 12040,
+              "nodeType": "StructuredDocumentation",
+              "src": "886:45:32",
+              "text": "@dev is a SwapValuator (must return TRUE)"
+            },
+            "functionSelector": "b83269dc",
+            "id": 12045,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isSwapValuator",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 12041,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "959:2:32"
+            },
+            "returnParameters": {
+              "id": 12044,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 12043,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 12045,
+                  "src": "985:4:32",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 12042,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "985:4:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "984:6:32"
+            },
+            "scope": 12046,
+            "src": "936:55:32",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 12047,
+        "src": "454:539:32"
+      }
+    ],
+    "src": "0:994:32"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-06-18T20:52:53.850Z",
+  "devdoc": {
+    "details": "a SwapValuator; Pairs will allow {swap} output amounts up to a proportion of input amount. This interface determines the proportion, which may differ based on caller (standard behavior is a minimum 0.3% fee). Note that most UniswapV2Pair interaction happens through a UniswapV2Router02; that router should receive full value (10000) swap rates so that any appropriate rate can be applied to clients.",
+    "kind": "dev",
+    "methods": {
+      "isSwapValuator()": {
+        "details": "is a SwapValuator (must return TRUE)"
+      },
+      "swapRateDimi(address)": {
+        "details": "The swap rate offered the specified client, out of 10000. Standard Uniswapv2 behavior is \"9970\", i.e. a 0.3% fee is charged on swaps. \"10000\" is a fee-less swap (full value); \"0\" means no swap is possible (full value is confiscated). Numbers outside that range are invalid."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

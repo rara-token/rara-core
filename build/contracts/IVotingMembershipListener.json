@@ -1,0 +1,468 @@
+{
+  "contractName": "IVotingMembershipListener",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_prevLevel",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_level",
+          "type": "uint32"
+        }
+      ],
+      "name": "membershipChanged",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isVotingMembershipListener",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"isVotingMembershipListener\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_prevLevel\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"_level\",\"type\":\"uint32\"}],\"name\":\"membershipChanged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol\":\"IVotingMembershipListener\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol\":{\"keccak256\":\"0xd331c8266de8664054c0d1a7acd680abcfa9e13bf4d842a8f6bf7f0b6c8a5890\",\"urls\":[\"bzz-raw://5dc208db3a88c791a7db2a9bd607c2ec81359c450aaef6d3aadfa372fc96bb1d\",\"dweb:/ipfs/Qmbg5LZakr9UFBTZESxov7E6oChwvY4UQsJgNqH6xAYZmm\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// An ITokenEmitter accumulates tokens on its own internal schedule,\n// allocating it to specific recipients.\npragma solidity ^0.8.0;\ninterface IVotingMembershipListener {\n    function membershipChanged(address _user, uint32 _prevLevel, uint32 _level) external;\n    function isVotingMembershipListener() external pure returns (bool);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol",
+    "exportedSymbols": {
+      "IVotingMembershipListener": [
+        6558
+      ]
+    },
+    "id": 6559,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6543,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "110:23:16"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 6558,
+        "linearizedBaseContracts": [
+          6558
+        ],
+        "name": "IVotingMembershipListener",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "e4efa241",
+            "id": 6552,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "membershipChanged",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6550,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6545,
+                  "mutability": "mutable",
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6552,
+                  "src": "203:13:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6544,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "203:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6547,
+                  "mutability": "mutable",
+                  "name": "_prevLevel",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6552,
+                  "src": "218:17:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 6546,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "218:6:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6549,
+                  "mutability": "mutable",
+                  "name": "_level",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6552,
+                  "src": "237:13:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 6548,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "237:6:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "202:49:16"
+            },
+            "returnParameters": {
+              "id": 6551,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "260:0:16"
+            },
+            "scope": 6558,
+            "src": "176:85:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "b404be64",
+            "id": 6557,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isVotingMembershipListener",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6553,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "301:2:16"
+            },
+            "returnParameters": {
+              "id": 6556,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6555,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6557,
+                  "src": "327:4:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6554,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "327:4:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "326:6:16"
+            },
+            "scope": 6558,
+            "src": "266:67:16",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6559,
+        "src": "134:201:16"
+      }
+    ],
+    "src": "110:226:16"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol",
+    "exportedSymbols": {
+      "IVotingMembershipListener": [
+        6558
+      ]
+    },
+    "id": 6559,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6543,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "110:23:16"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 6558,
+        "linearizedBaseContracts": [
+          6558
+        ],
+        "name": "IVotingMembershipListener",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "e4efa241",
+            "id": 6552,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "membershipChanged",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6550,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6545,
+                  "mutability": "mutable",
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6552,
+                  "src": "203:13:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6544,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "203:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6547,
+                  "mutability": "mutable",
+                  "name": "_prevLevel",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6552,
+                  "src": "218:17:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 6546,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "218:6:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6549,
+                  "mutability": "mutable",
+                  "name": "_level",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6552,
+                  "src": "237:13:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 6548,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "237:6:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "202:49:16"
+            },
+            "returnParameters": {
+              "id": 6551,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "260:0:16"
+            },
+            "scope": 6558,
+            "src": "176:85:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "b404be64",
+            "id": 6557,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isVotingMembershipListener",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6553,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "301:2:16"
+            },
+            "returnParameters": {
+              "id": 6556,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6555,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6557,
+                  "src": "327:4:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6554,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "327:4:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "326:6:16"
+            },
+            "scope": 6558,
+            "src": "266:67:16",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6559,
+        "src": "134:201:16"
+      }
+    ],
+    "src": "110:226:16"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-06-18T20:52:53.744Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
