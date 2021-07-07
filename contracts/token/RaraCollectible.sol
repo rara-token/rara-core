@@ -39,8 +39,9 @@ contract RaraCollectibleToken is ERC721ValuableCollectibleToken {
      * @dev Burns `tokenId` from `from`, notifying the listener if
      * it exists.
      */
-    function _burn(address from, uint256 tokenId) internal virtual override {
-        super._burn(from, tokenId);
+    function _burn(uint256 tokenId) internal virtual override {
+        address from = ERC721.ownerOf(tokenId);
+        super._burn(tokenId);
         if (tokenCollectionListener != address(0)) {
             ITokenCollectionListener(tokenCollectionListener).tokenRemovedFromCollection(from, tokenId);
         }

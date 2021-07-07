@@ -69,7 +69,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     // Mapping from type and token id to position in the _allTypeTokens array
     mapping(uint256 => mapping(uint256 => uint256)) private _allTypeTokensIndex;
 
-    event AddTokenType(uint256 indexed type, string name, string symbol, uint256 value);
+    event AddTokenType(uint256 indexed tokenType, string name, string symbol, uint256 value);
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
@@ -91,7 +91,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerable, ERC721, ERC721Enumerable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerable, ERC721, ERC721Enumerable, IERC165) returns (bool) {
         return interfaceId == type(IERC721CollectibleMintable).interfaceId
             || interfaceId == type(IERC721Collectible).interfaceId
             || interfaceId == type(IERC721Valuable).interfaceId
@@ -102,16 +102,16 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
         return _baseTokenURI;
     }
 
-    function totalTypes() external view virtual override returns (uint256 count) {
+    function totalTypes() public view virtual override returns (uint256 count) {
         return typeInfo.length;
     }
 
-    function typeName(uint256 _type) external view virtual override returns (string) {
+    function typeName(uint256 _type) external view virtual override returns (string memory) {
         require(_type < totalTypes(), "ERC721ValuableCollectibleToken: type out of bounds");
         return typeInfo[_type].name;
     }
 
-    function typeSymbol(uint256 _type) external view virtal override returns (string) {
+    function typeSymbol(uint256 _type) external view virtual override returns (string memory) {
         require(_type < totalTypes(), "ERC721ValuableCollectibleToken: type out of bounds");
         return typeInfo[_type].symbol;
     }
@@ -122,7 +122,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     }
 
     function tokenType(uint256 _tokenId) external view override returns (uint256) {
-        require(_exists(tokenId), "ERC721ValuableCollectibleToken: value query for nonexistent token");
+        require(_exists(_tokenId), "ERC721ValuableCollectibleToken: value query for nonexistent token");
         return _tokenTypeHypothetical(_tokenId);
     }
 
@@ -131,7 +131,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     }
 
     function tokenValue(uint256 _tokenId) external view override returns (uint256) {
-        require(_exists(tokenId), "ERC721ValuableCollectibleToken: value query for nonexistent token");
+        require(_exists(_tokenId), "ERC721ValuableCollectibleToken: value query for nonexistent token");
         return _tokenValueHypothetical(_tokenId);
     }
 
@@ -141,18 +141,18 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
 
     function totalSupplyByType(uint256 _type) public view virtual override returns (uint256) {
         require(_type < totalTypes(), "ERC721ValuableCollectibleToken: type out of bounds");
-        _allTypeTokens[_type].length;
+        return _allTypeTokens[_type].length;
     }
 
     function totalValue() external view virtual override returns (uint256) {
         return _totalValue;
     }
 
-    function ownerTypes(uint256 _owner) external view virtual override returns (uint256) {
+    function ownerTypes(address _owner) external view virtual override returns (uint256) {
         return _ownedTypes[_owner];
     }
 
-    function ownerValue(uint256 _owner) external view virtual override returns (uint256) {
+    function ownerValue(address _owner) external view virtual override returns (uint256) {
         return _ownedValue[_owner];
     }
 
@@ -167,7 +167,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
         return _ownedTypeTokens[_owner][_type][_index];
     }
 
-    function tokenByTypeAndIndex(address _type, uint256 _index) external view virtual override returns (uint256) {
+    function tokenByTypeAndIndex(uint256 _type, uint256 _index) external view virtual override returns (uint256) {
         require(_type < totalTypes(), "ERC721ValuableCollectibleToken: type out of bounds");
         require(_index < totalSupplyByType(_type), "ERC721ValuableCollectibleToken: index out of bounds");
         return _allTypeTokens[_type][_index];
@@ -175,13 +175,13 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
 
     function addTokenType(string memory _name, string memory _symbol, uint256 _value) public virtual {
         require(hasRole(MANAGER_ROLE, _msgSender()), "ERC721ValuableCollectibleToken: must have manager role to add token type");
-        uint256 tokenType = typeInfo.length;
+        uint256 tType = typeInfo.length;
         typeInfo.push(TypeInfo({
             name: _name,
             symbol: _symbol,
             value: _value
         }));
-        emit AddTokenType(tokenType, _name, _symbol, _value);
+        emit AddTokenType(tType, _name, _symbol, _value);
     }
 
     /**
@@ -197,7 +197,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
      */
     function mint(address _to, uint256 _type) public virtual override {
         require(hasRole(MINTER_ROLE, _msgSender()), "ERC721ValuableCollectibleToken: must have minter role to mint");
-        require(type < totalTypes(), "ERC721ValuableCollectibleToken: type out of bounds");
+        require(_type < totalTypes(), "ERC721ValuableCollectibleToken: type out of bounds");
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
@@ -207,8 +207,8 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
         // minting function requires knowledge  of the token type; write it first.
         // this is sufficient to support _tokenTypeHypothetical and
         //  _tokenValueHypothetical.
-        _tokenType[tokenId] = type;
-        _mint(to, tokenId);
+        _tokenType[tokenId] = _type;
+        _mint(_to, tokenId);
     }
 
     /**
@@ -242,76 +242,76 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721Enumerable, ERC721Pausable) {
         super._beforeTokenTransfer(from, to, tokenId);
 
-        uint256 type = _tokenTypeHypothetical(tokenId);
-        uint256 value = _tokenValueHypothetical(tokenId);
+        uint256 tType = _tokenTypeHypothetical(tokenId);
+        uint256 tValue = _tokenValueHypothetical(tokenId);
 
         if (from == address(0)) {
-            _addTokenToAllTypeTokens(tokenId, type, value);
+            _addTokenToAllTypeTokens(tokenId, tType, tValue);
         } else if (from != to) {
-            _removeTokenFromOwnerTypeTokens(from, tokenId, type, value);
+            _removeTokenFromOwnerTypeTokens(from, tokenId, tType, tValue);
         }
 
         if  (to == address(0)) {
-            _removeTokenFromAllTypeTokens(tokenId, type, value);
+            _removeTokenFromAllTypeTokens(tokenId, tType, tValue);
         } else if (to != from) {
-            _addTokenToOwnerTypeTokens(to, tokenId, type, value);
+            _addTokenToOwnerTypeTokens(to, tokenId, tType, tValue);
         }
     }
 
-    function _addTokenToAllTypeTokens(uint256 _tokenId, uint256 _tokenType, uint256 _tokenValue) private {
-        _allTypeTokensIndex[_tokenId] = _allTypeTokens[_tokenType].length;
-        _allTypeTokens[_tokenType].push(_tokenId);
-        _totalValue =  _totalValue + _tokenValue;
+    function _addTokenToAllTypeTokens(uint256 _tokenId, uint256 _type, uint256 _value) private {
+        _allTypeTokensIndex[_type][_tokenId] = _allTypeTokens[_type].length;
+        _allTypeTokens[_type].push(_tokenId);
+        _totalValue =  _totalValue + _value;
     }
 
-    function _removeTokenFromAllTypeTokens(uint256 _tokenId, uint256 _tokenType, uint256 _tokenValue) private {
+    function _removeTokenFromAllTypeTokens(uint256 _tokenId, uint256 _type, uint256 _value) private {
         // To prevent a gap in the tokens array, store the last token in the
         // vacated index (swap and pop).
-        uint256 lastTokenIndex = _allTypeTokens[_tokenType].length - 1;
-        uint256 tokenIndex = _allTypeTokensIndex[_tokenType][_tokenId];
+        uint256 lastTokenIndex = _allTypeTokens[_type].length - 1;
+        uint256 tokenIndex = _allTypeTokensIndex[_type][_tokenId];
 
-        uint256 lastTokenId = _allTypeTokens[_tokenType][lastTokenIndex];
+        uint256 lastTokenId = _allTypeTokens[_type][lastTokenIndex];
 
         // move the last token into place and update its index
-        _allTypeTokens[_tokenType][tokenIndex] = lastTokenId;
-        _allTypeTokensIndex[_tokenType][lastTokenId] = tokenIndex;
+        _allTypeTokens[_type][tokenIndex] = lastTokenId;
+        _allTypeTokensIndex[_type][lastTokenId] = tokenIndex;
 
         // pop the last off
-        delete _allTypeTokensIndex[_tokenType][_tokenId];
-        _allTypeTokens[_tokenType].pop();
+        delete _allTypeTokensIndex[_type][_tokenId];
+        _allTypeTokens[_type].pop();
 
         // update value
-        _totalValue = _totalValue - _tokenValue;
+        _totalValue = _totalValue - _value;
     }
 
-    function _addTokenToOwnerTypeTokens(address _to, uint256 _tokenId, uint256 _tokenType, uint256 _tokenValue) private {
-        uint256 length = _ownedTypeTokens[_to][_tokenType].length;
-        _ownedTypeTokens[_to][_tokenType].push(_tokenId);
-        _ownedTypeTokensIndex[_to][_tokenType][_tokenId] = length;
-        _ownedValue[_to] = _ownedValue[_to] + _tokenValue;
+    function _addTokenToOwnerTypeTokens(address _to, uint256 _tokenId, uint256 _type, uint256 _value) private {
+        uint256 length = _ownedTypeTokens[_to][_type].length;
+        _ownedTypeTokens[_to][_type].push(_tokenId);
+        _ownedTypeTokensIndex[_to][_type][_tokenId] = length;
+        _ownedValue[_to] = _ownedValue[_to] + _value;
         if (length == 0) {  // first token of type for user
             _ownedTypes[_to] = _ownedTypes[_to] + 1;
         }
     }
 
-    function _removeTokenFromOwnerTypeTokens(address _from, uint256 _tokenId, uint256 _tokenType, uint256 _tokenValue) private {
+    function _removeTokenFromOwnerTypeTokens(address _from, uint256 _tokenId, uint256 _type, uint256 _value) private {
         // To prevent a gap in the tokens array, store the last token in the
         // vacated index.
-        uint256 lastTokenIndex = _ownedTypeTokens[_from][_tokenType].length - 1;
-        uint256 tokenIndex = _ownedTypeTokensIndex[_from][_tokenType][_tokenId];
+        uint256 lastTokenIndex = _ownedTypeTokens[_from][_type].length - 1;
+        uint256 tokenIndex = _ownedTypeTokensIndex[_from][_type][_tokenId];
 
-        uint256 lastTokenId = _ownedTypeTokens[_from][_tokenType][lastTokenIndex];
+        uint256 lastTokenId = _ownedTypeTokens[_from][_type][lastTokenIndex];
 
         // move the last token into place and update its index
-        _ownedTypeTokens[_from][_tokenType][tokenIndex] = lastTokenId;
-        _ownedTypeTokensIndex[_from][_tokenType][lastTokenId] = tokenIndex;
+        _ownedTypeTokens[_from][_type][tokenIndex] = lastTokenId;
+        _ownedTypeTokensIndex[_from][_type][lastTokenId] = tokenIndex;
 
         // pop the last off
-        delete _ownedTypeTokensIndex[_from][_tokenType][_tokenId];
-        _ownedTypeTokens[_from][_tokenType].pop();
+        delete _ownedTypeTokensIndex[_from][_type][_tokenId];
+        _ownedTypeTokens[_from][_type].pop();
 
         // update value
-        _ownedValue[_from] = _ownedValue[_from] - _tokenValue;
+        _ownedValue[_from] = _ownedValue[_from] - _value;
         if (lastTokenIndex == 0) {  // last token of type for user
             _ownedTypes[_from] = _ownedTypes[_from] - 1;
         }

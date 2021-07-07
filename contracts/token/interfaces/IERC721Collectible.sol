@@ -20,17 +20,17 @@ interface IERC721Collectible is IERC721 {
   /**
    * @dev Returns a name for the indicated type.
    */
-  function typeName(uint256 type) external view returns (string);
+  function typeName(uint256 tType) external view returns (string memory);
 
   /**
    * @dev Returns a symbol for the indicated type.
    */
-  function typeSymbol(uint256 type) external view returns (string);
+  function typeSymbol(uint256 tType) external view returns (string memory);
 
   /**
    * @dev Returns the total amount of `type` tokens stored by the contract.
    */
-  function totalSupplyByType(uint256 type) external view returns (uint256);
+  function totalSupplyByType(uint256 tType) external view returns (uint256);
 
   /**
    * @dev Returns the number of token types of which the indicated owner has at least one.
@@ -40,24 +40,24 @@ interface IERC721Collectible is IERC721 {
   /**
    * @dev Returns the number of tokens of type ``type`` in ``owner``'s account.
    */
-  function balanceOfOwnerByType(address owner, uint256 type) external view returns (uint256);
+  function balanceOfOwnerByType(address owner, uint256 tType) external view returns (uint256);
 
   /**
    * @dev Returns a token ID owned by `owner` at the given `index` of all tokens
    * of the indicated `type`. Use along with {balanceOfOwnerByType} to enumerate
    * all of the ``owner``'s tokens of that type.
    */
-  function tokenOfOwnerByTypeAndIndex(address owner, uint256 type, uint256 index) external view returns (uint256);
+  function tokenOfOwnerByTypeAndIndex(address owner, uint256 tType, uint256 index) external view returns (uint256);
 
   /**
    * @dev Returns a token ID at the given `index` of all tokens
    * of the indicated `type`. Use along with {totalSupplyByType} to enumerate
    * all of the tokens of that type.
    */
-  function tokenByTypeAndIndex(uint256 type, uint256 index) external view returns (uint256);
+  function tokenByTypeAndIndex(uint256 tType, uint256 index) external view returns (uint256);
 
   /**
    * @dev Returns the type of the indicated `tokenId`.
    */
-  function tokenType(uint256 tokenId) external view returns (uint256 type);
+  function tokenType(uint256 tokenId) external view returns (uint256 tType);
 }
