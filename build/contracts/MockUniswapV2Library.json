@@ -28,7 +28,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"factory\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"}],\"name\":\"pairFor\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/mock/MockUniswapV2Library.sol\":\"MockUniswapV2Library\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/interfaces/IUniswapV2Pair.sol\":{\"keccak256\":\"0x56cbb8b878b80823003dcc2e21d8608d28678b593e859f25d0046bff9273d6b4\",\"urls\":[\"bzz-raw://ee19372773b17b7ab97dc5051f1ce27958bed8ad687e8e129c95d456806bb53d\",\"dweb:/ipfs/QmdDUxYE8VLhbRg5z5Twh2uokzH6nmNGxWMZoyED3tQ4zY\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/libraries/UniswapV2Library.sol\":{\"keccak256\":\"0x1677852e69b73f6ac9fac672073861fac9418b10b07602aad6cb429503fe378c\",\"urls\":[\"bzz-raw://02ea96a7d98b8b2770b6967ebd4fa886c07e75354a1187ae503aa03d160ada0c\",\"dweb:/ipfs/QmVk4AVSDF8m59EgVctYzLZiVq3QXpQjbxTTTvNxzt2Lpa\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/uniswapv2/mock/MockUniswapV2Library.sol\":{\"keccak256\":\"0x3c033c97ed1437a7ff2da56d1b49ec896d19d6d6bb46afd64f748bc67f756ed3\",\"urls\":[\"bzz-raw://f391e53f2bd4f61b5c4431846c82fc5bd787b410b486da146d829a45127a143d\",\"dweb:/ipfs/QmXbuZQcLbAiViQvKALzS7TL1y8iwpHrmdMoZhpjAwdNCU\"]}},\"version\":1}",
@@ -2164,9 +2165,17 @@
     "name": "solc",
     "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "56": {
+      "events": {},
+      "links": {},
+      "address": "0x539e74c186a59D4aF4fB53EB4e4cfeE6D138c60E",
+      "transactionHash": "0x3981d4f09d59af72b459532d8fd22a7df8847a0fd482e5dd7afcbdf6d8dc5b41"
+    }
+  },
   "schemaVersion": "3.4.1",
-  "updatedAt": "2021-06-29T19:35:47.847Z",
+  "updatedAt": "2021-07-08T01:48:25.675Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},

@@ -19065,6 +19065,101 @@
     "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
   },
   "networks": {
+    "56": {
+      "events": {
+        "0xd204bf95d46998c1ae5aaabf58de1a430562e0dfd6ba8b4ad52a303b3073211a": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "disallowed",
+              "type": "bool"
+            }
+          ],
+          "name": "CreationPermissionChanged",
+          "type": "event"
+        },
+        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "token0",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "token1",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "pair",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "PairCreated",
+          "type": "event"
+        },
+        "0x431e3f18abe3ef3743cd4e9a0786403f2081f187cc598d2d0ca9183a78325bf7": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "token0",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "token1",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "disallowed",
+              "type": "bool"
+            }
+          ],
+          "name": "PairPermissionChanged",
+          "type": "event"
+        },
+        "0x78b38338595479ce6725e8ce075c7666ce6b9c987fb3c853d988d4ef72115784": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "disallowed",
+              "type": "bool"
+            }
+          ],
+          "name": "TokenPermissionChanged",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x9b3fEF64b1Aa1144B04f46F8119F2C51c8fD0D1F",
+      "transactionHash": "0xf3a12fcf234cc37c9e3386d8a1bb5976988bd04ccd77401dd2c570421d5067cf"
+    },
     "97": {
       "events": {
         "0xd204bf95d46998c1ae5aaabf58de1a430562e0dfd6ba8b4ad52a303b3073211a": {
@@ -19162,7 +19257,7 @@
     }
   },
   "schemaVersion": "3.4.1",
-  "updatedAt": "2021-06-29T19:37:53.678Z",
+  "updatedAt": "2021-07-07T19:45:38.990Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

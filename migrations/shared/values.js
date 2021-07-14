@@ -66,7 +66,7 @@ module.exports = exports = ({ network, web3 }) => {
   const ONE_WEEK = ONE_DAY.mul(bn(7));
   const blocks = values['blocks'] = values['block'] = {
     bsc: {
-      start: bn('8207763')    // TODO: configure
+      start: bn('8978363')    // Estimated at 10 AM EST (2 PM UTC) July 8th.
     },
     bsc_test: {
       start: bn('9642666')    // TODO: configure
