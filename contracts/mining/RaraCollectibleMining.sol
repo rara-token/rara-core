@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "../token/interfaces/IToken.sol";
 import "../token/interfaces/ITokenEmitter.sol";
 import "../token/interfaces/ITokenListener.sol";
@@ -21,7 +22,7 @@ interface RCMRegistry {
 }
 
 pragma solidity ^0.8.0;
-contract RaraCollectibleMining is BoringBatchable {
+contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, BoringBatchable, ITokenListener, IVotingMembershipListener {
     using SafeERC20 for IERC20;
 
     uint256 private constant MAX_256 = 2**256 - 1;
@@ -36,7 +37,7 @@ contract RaraCollectibleMining is BoringBatchable {
     /// `rewardDebt` The amount of RARA entitled to the user.
     struct UserInfo {
         uint256 amount;
-        uint256 rewardDebt;
+        int256 rewardDebt;
     }
 
     /// @notice Info of each RCM pool.
@@ -72,8 +73,8 @@ contract RaraCollectibleMining is BoringBatchable {
     uint256[] public poolShares;
     /// @notice Mapping from tokens to the appropriate Pool PID, for when
     /// updatess come from listener methods (check the msg sender).
-    mapping(address => uint256) tokenPid;
-    mapping(address => uint256) registryPid;
+    mapping(address => uint256) public tokenPid;
+    mapping(address => uint256) public registryPid;
 
     /// @notice Info of each user that stakes LP tokens.
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
@@ -126,7 +127,7 @@ contract RaraCollectibleMining is BoringBatchable {
     }
 
     /// @notice Returns the number of RMP pools.
-    function poolLength() public override view returns (uint256 pools) {
+    function poolLength() public view returns (uint256 pools) {
         pools = poolInfo.length;
     }
 
@@ -162,7 +163,7 @@ contract RaraCollectibleMining is BoringBatchable {
     /// grows. Switch to batch-execution of {updatePool} and {unsafeSet} at that point.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
-    function set(uint256 _pid, uint256 _allocPoint) public override {
+    function set(uint256 _pid, uint256 _allocPoint) public {
         require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to set");
         require(_pid <= poolInfo.length, "RaraCollectibleMining: no such pid");
 
@@ -233,8 +234,6 @@ contract RaraCollectibleMining is BoringBatchable {
     /// @notice Add a new LP to the pool.
     /// DO NOT add without updating active pools. Rewards will be messed up if you do.
     /// @param _allocPoint AP of the new pool.
-    /// @param _lpToken Address of the LP ERC-20 token.
-    /// @param _stakeManager Address of the stake manager.
     function _add(uint256 _allocPoint, address _token, bool _tokenValued, address _votingRegistry) internal {
         uint256 lastRewardBlock = _blockNumber();
         uint256 retained = totalRetained();
@@ -267,8 +266,6 @@ contract RaraCollectibleMining is BoringBatchable {
     /// Rewards will be messed up if you do.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
-    /// @param _stakeManager Address of the stake manager.
-    /// @param overwrite True if _stakeManager should be `set`. Otherwise `_stakeManager` is ignored.
     function _set(uint256 _pid, uint256 _allocPoint) internal {
         totalAllocPoint = totalAllocPoint + _allocPoint - poolInfo[_pid].allocPoint;
         if (poolShares[_pid] > 0) {
@@ -352,7 +349,7 @@ contract RaraCollectibleMining is BoringBatchable {
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending Rara reward for a given user.
-    function pendingReward(uint256 _pid, address _user) external override view returns (uint256 pending) {
+    function pendingReward(uint256 _pid, address _user) external view returns (uint256 pending) {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accRaraPerShare = pool.accRaraPerShare;
@@ -365,7 +362,10 @@ contract RaraCollectibleMining is BoringBatchable {
 
             accRaraPerShare = accRaraPerShare + (poolReward * PRECISION) / supply;
         }
-        pending = uint256(int256((user.amount * accRaraPerShare) / PRECISION) - user.rewardDebt);
+        int256 pendingSigned = int256((user.amount * accRaraPerShare) / PRECISION) - user.rewardDebt;
+        if (pendingSigned > 0) {
+            pending = uint256(pendingSigned);
+        }
     }
 
     function _emissionIncludingSurplus(uint256 _emission) internal view returns (uint256) {
@@ -382,19 +382,19 @@ contract RaraCollectibleMining is BoringBatchable {
     /// determined by the amount received (and owed) from the emitter; if Rara
     /// is transferred into this contract directly, it is distributed 1-to-1
     /// with emitted Rara until exhausted.
-    function totalReceived() public override view returns (uint256 amount) {
+    function totalReceived() public view returns (uint256 amount) {
         uint256 owed = emitter.owed(address(this));
         amount = raraReceived + _emissionIncludingSurplus(owed);
     }
 
-    function totalRetained() public override view returns (uint256 amount) {
+    function totalRetained() public view returns (uint256 amount) {
         amount = raraRetained;
         uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)));
         uint256 burn = (owed * burnNumerator) / burnDenominator;
         amount += owed - burn;
     }
 
-    function totalMined() public override view returns (uint256 amount) {
+    function totalMined() public view returns (uint256 amount) {
         amount = raraMined;
         if (totalStakedAllocPoint != 0) {
           uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)));
@@ -448,7 +448,7 @@ contract RaraCollectibleMining is BoringBatchable {
         uint256 blockNumber = _blockNumber();
         pool = poolInfo[pid];
         if (blockNumber > pool.lastRewardBlock) {
-            uint256 s = poolShares[pid];
+            uint256 supply = poolShares[pid];
             uint256 retained = totalRetained();
             if (supply > 0) {
                 uint256 retainedSince = retained - pool.lastRewardBlockRetainedRara;
@@ -466,7 +466,7 @@ contract RaraCollectibleMining is BoringBatchable {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerable, ERC165, IERC165) returns (bool) {
         return interfaceId == type(IVotingMembershipListener).interfaceId
             || interfaceId == type(ITokenListener).interfaceId
             || super.supportsInterface(interfaceId);
@@ -511,32 +511,32 @@ contract RaraCollectibleMining is BoringBatchable {
     function _updateUser(uint256 pid, PoolInfo memory pool, PoolSources memory sources, address owner) internal {
         // determine user share amount
         uint256 value = sources.tokenValued
-            ? RCMToken(sources.token).valueOf(user)
-            : RCMToken(sources.token).balanceOf(user);
+            ? RCMToken(sources.token).valueOf(owner)
+            : RCMToken(sources.token).balanceOf(owner);
         if (sources.votingRegistry != address(0)) {
-            uint256 level = RCMRegistry(sources.votingRegistry).getCurrentLevel();
+            uint256 level = RCMRegistry(sources.votingRegistry).getCurrentLevel(owner);
             if (level > 0) {  // Level 1 => 2x.   Level 2 => 4x.   Level 3 => 6x.
                 value = value * level * 2;
             }
         }
 
-        UserInfo storage user = userInfo[owner];
+        UserInfo storage user = userInfo[pid][owner];
 
         // Update "staked alloc points"
         uint256 prevPoolShares = poolShares[pid];   // save gas
         if (prevPoolShares == 0 && value > 0) {
             claimFromEmitter();
-            totalStakedAllocPoint = totalStakedAllocPoint + poolInfo.allocPoint;
+            totalStakedAllocPoint = totalStakedAllocPoint + pool.allocPoint;
         } else if (prevPoolShares > 0 && prevPoolShares == user.amount && value == 0) {
             claimFromEmitter();
-            totalStakedAllocPoint = totalStakedAllocPoint - poolInfo.allocPoint;
+            totalStakedAllocPoint = totalStakedAllocPoint - pool.allocPoint;
         }
 
         // Update user amount and pool shares
         int256 increase = int256(value) - int256(user.amount);
         poolShares[pid] = poolShares[pid] + value - user.amount;
         user.amount = value;
-        user.rewardDebt = user.rewardDebt + (increase * pool.accRaraPerShare) / PRECISION;
+        user.rewardDebt = user.rewardDebt + (increase * int256(pool.accRaraPerShare)) / int256(PRECISION);
 
         emit Update(owner, pid, value);
     }
@@ -550,7 +550,9 @@ contract RaraCollectibleMining is BoringBatchable {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
         int256 accumulatedRara = int256((user.amount * pool.accRaraPerShare) / PRECISION);
-        uint256 _pendingRara = uint256(accumulatedRara - user.rewardDebt);
+        int256 _pendingSigned = accumulatedRara - user.rewardDebt;
+        uint256 _pendingRara = _pendingSigned > 0 ? uint256(_pendingSigned) : 0;
+
 
         // Effects
         user.rewardDebt = accumulatedRara;
