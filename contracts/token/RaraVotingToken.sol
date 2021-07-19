@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IVotingMembershipListener.sol";
+import "./interfaces/IVotingRegistry.sol";
 import "../utils/boring-solidity/IPermitERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
@@ -9,7 +10,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 // RaraVotingToken with Governance.
-contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
+contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable, IVotingRegistry {
     using ERC165Checker for address;
 
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
@@ -199,7 +200,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
 
     /// @notice Total number of votes held by users (usually equivalent to totalSupply,
     /// but in this case does not include vRARA for users below level 1).
-    uint256 public totalVotes;
+    uint256 public override totalVotes;
 
     /// @notice A record of votes checkpoints for each account, by index
     mapping (address => mapping (uint32 => Checkpoint)) public checkpoints;
@@ -316,6 +317,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
     function getCurrentVotes(address account)
         external
         view
+        override
         returns (uint256)
     {
         uint32 nCheckpoints = numCheckpoints[account];
@@ -332,6 +334,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
     function getPriorVotes(address account, uint blockNumber)
         external
         view
+        override
         returns (uint256)
     {
         require(blockNumber < block.number, "vRARA::getPriorVotes: not yet determined");
@@ -409,6 +412,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
     function getCurrentLevel(address account)
         public
         view
+        override
         returns (uint256)
     {
         uint32 nCheckpoints = numMembershipCheckpoints[account];
@@ -425,6 +429,7 @@ contract RaraVotingToken is Context, AccessControlEnumerable, ERC20Pausable {
     function getPriorLevel(address account, uint blockNumber)
         external
         view
+        override
         returns (uint256)
     {
         require(blockNumber < block.number, "vRARA::getPriorLevel: not yet determined");

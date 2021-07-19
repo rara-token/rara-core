@@ -1,12 +1,12 @@
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "../interfaces/ITokenCollectionListener.sol";
+import "../interfaces/ITokenListener.sol";
 import "../interfaces/IERC721Valuable.sol";
 
 pragma solidity ^0.8.0;
-contract MockTokenCollectionListener is ITokenCollectionListener, ERC165 {
+contract MockTokenCollectionListener is ITokenListener, ERC165 {
     event CollectionChanged(address owner, uint256 ownerBalance, uint256 ownerValue);
 
-    function tokenCollectionChanged(address _owner) external override {
+    function balanceChanged(address _owner) external override {
         emit CollectionChanged(
             _owner,
             IERC721Valuable(msg.sender).balanceOf(_owner),

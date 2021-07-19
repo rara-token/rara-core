@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "../token/interfaces/IToken.sol";
 import "../token/interfaces/ITokenEmitter.sol";
-import "../token/interfaces/ITokenCollectionListener.sol";
+import "../token/interfaces/ITokenListener.sol";
 import "../token/interfaces/IVotingMembershipListener.sol";
 import "../utils/boring-solidity/BoringBatchable.sol";
 
@@ -114,7 +114,6 @@ contract RaraCollectibleMining is BoringBatchable {
         rara = _rara;
         emitter = _emitter;
         unlockBlock = _unlockBlock;
-        pauseBlock = MAX_256;     // not paused
 
         // start with a 0% burn
         burnNumerator = 0;
@@ -338,7 +337,7 @@ contract RaraCollectibleMining is BoringBatchable {
      */
     function unpause() public virtual {
         require(hasRole(PAUSER_ROLE, _msgSender()), "RaraCollectibleMining: must have pauser role to unpause");
-        pauseBlock = MAX_256;
+        pauseBlock = 0;
         _unpause();
     }
 
@@ -346,8 +345,7 @@ contract RaraCollectibleMining is BoringBatchable {
     /// is <= the actual block number. Use this instead of block.number when
     /// calculating mining output.
     function _blockNumber() internal view returns (uint256) {
-        // faster than checking paused(): when not paused pauseBlock is MAX_256.
-        return block.number < pauseBlock ? block.number : pauseBlock;
+        return pauseBlock == 0 ? block.number : pauseBlock;
     }
 
     /// @notice View function to see pending Rara on frontend.
@@ -370,7 +368,7 @@ contract RaraCollectibleMining is BoringBatchable {
         pending = uint256(int256((user.amount * accRaraPerShare) / PRECISION) - user.rewardDebt);
     }
 
-    function _emissionIncludingSurplus(uint256 _emission) internal view returns (uint256 amount) {
+    function _emissionIncludingSurplus(uint256 _emission) internal view returns (uint256) {
         uint256 surplus = rara.balanceOf(address(this)) + raraHarvested - raraMined;
         return _emission + (surplus > _emission ? _emission : surplus);
     }
@@ -470,11 +468,11 @@ contract RaraCollectibleMining is BoringBatchable {
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return interfaceId == type(IVotingMembershipListener).interfaceId
-            || interfaceId == type(ITokenCollectionListener).interfaceId
+            || interfaceId == type(ITokenListener).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
-    function tokenCollectionChanged(address _owner) external override {
+    function balanceChanged(address _owner) external override {
         // called by a token contract; update the corresponding pool
         address sender = _msgSender();
         uint256 pid = tokenPid[sender];
@@ -496,10 +494,10 @@ contract RaraCollectibleMining is BoringBatchable {
         }
     }
 
-    function update(uint256 pid) external {
+    function update(uint256 pid, address user) external {
         PoolInfo memory pool = updatePool(pid);
         PoolSources memory sources = poolSources[pid];
-        _updateUser(pid, pool, sources, msg.sender);
+        _updateUser(pid, pool, sources, user);
     }
 
     function updateUsers(uint256 pid, address[] calldata users) external {

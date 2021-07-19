@@ -2,7 +2,7 @@
 import "../interfaces/IERC721TypeExchangeable.sol";
 import "../interfaces/IERC721Collectible.sol";
 import "../interfaces/IERC721Valuable.sol";
-import "../interfaces/ITokenCollectionListener.sol";
+import "../interfaces/ITokenListener.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
@@ -97,8 +97,8 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     function setTokenCollectionListener(address _listener) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "ERC721ValuableCollectibleToken: must have manager role to set token collection listener");
         require(
-            _listener == address(0) || _listener.supportsInterface(type(ITokenCollectionListener).interfaceId),
-            "ERC721ValuableCollectibleToken: address must be zero or implement ITokenCollectionListener"
+            _listener == address(0) || _listener.supportsInterface(type(ITokenListener).interfaceId),
+            "ERC721ValuableCollectibleToken: address must be zero or implement ITokenListener"
         );
         tokenCollectionListener = _listener;
     }
@@ -205,8 +205,8 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, IERC721) {
         super.transferFrom(from, to, tokenId);
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(from);
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(to);
+            ITokenListener(tokenCollectionListener).balanceChanged(from);
+            ITokenListener(tokenCollectionListener).balanceChanged(to);
         }
     }
 
@@ -216,8 +216,8 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override(ERC721, IERC721) {
         super.safeTransferFrom(from, to, tokenId, _data);
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(from);
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(to);
+            ITokenListener(tokenCollectionListener).balanceChanged(from);
+            ITokenListener(tokenCollectionListener).balanceChanged(to);
         }
     }
 
@@ -242,7 +242,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
         _mint(_to, tokenId);
 
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(_to);
+            ITokenListener(tokenCollectionListener).balanceChanged(_to);
         }
     }
 
@@ -268,7 +268,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
             _mint(_to, tokenId);
         }
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(_to);
+            ITokenListener(tokenCollectionListener).balanceChanged(_to);
         }
     }
 
@@ -289,7 +289,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
 
         _burn(tokenId);
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(from);
+            ITokenListener(tokenCollectionListener).balanceChanged(from);
         }
     }
 
@@ -315,7 +315,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
             _burn(tokenIds[i]);
         }
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(from);
+            ITokenListener(tokenCollectionListener).balanceChanged(from);
         }
     }
 
@@ -343,8 +343,8 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
             _transfer(from, to, tokenIds[i]);
         }
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(from);
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(to);
+            ITokenListener(tokenCollectionListener).balanceChanged(from);
+            ITokenListener(tokenCollectionListener).balanceChanged(to);
         }
     }
 
@@ -387,7 +387,7 @@ contract ERC721ValuableCollectibleToken is Context, AccessControlEnumerable, ERC
         }
 
         if (tokenCollectionListener != address(0)) {
-            ITokenCollectionListener(tokenCollectionListener).tokenCollectionChanged(owner);
+            ITokenListener(tokenCollectionListener).balanceChanged(owner);
         }
     }
 
