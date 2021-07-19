@@ -1,0 +1,111 @@
+{
+  "contractName": "MockContract",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/mock/MockContract.sol\":\"MockContract\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/mock/MockContract.sol\":{\"keccak256\":\"0x48d5a7637c696cdafa3811f0bb18325f1bea32d55b709e20fd4c13790d03ab34\",\"urls\":[\"bzz-raw://a90cf098d50285f95a1258e22be0fc39f68e785153b3c54fc1b0bcabb4f34d06\",\"dweb:/ipfs/QmbyP4xiYjm9p3wMYmD29CSKqDxYjSDETxn3Pt8eTPzPAW\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220ae1b161d40ea405e84f608cf1a5928f15b6eae1ab716cab3b9944d9518de1c1c64736f6c63430008000033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220ae1b161d40ea405e84f608cf1a5928f15b6eae1ab716cab3b9944d9518de1c1c64736f6c63430008000033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "24:30:13:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "24:30:13:-:0;;;;;",
+  "source": "pragma solidity ^0.8.0;\ncontract MockContract {\n    \n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/mock/MockContract.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/mock/MockContract.sol",
+    "exportedSymbols": {
+      "MockContract": [
+        2242
+      ]
+    },
+    "id": 2243,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2241,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:13"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 2242,
+        "linearizedBaseContracts": [
+          2242
+        ],
+        "name": "MockContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 2243,
+        "src": "24:30:13"
+      }
+    ],
+    "src": "0:55:13"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/mock/MockContract.sol",
+    "exportedSymbols": {
+      "MockContract": [
+        2242
+      ]
+    },
+    "id": 2243,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2241,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:13"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 2242,
+        "linearizedBaseContracts": [
+          2242
+        ],
+        "name": "MockContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 2243,
+        "src": "24:30:13"
+      }
+    ],
+    "src": "0:55:13"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-07-14T20:50:06.129Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

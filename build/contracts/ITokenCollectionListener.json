@@ -48,28 +48,28 @@
     "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol",
     "exportedSymbols": {
       "IERC165": [
-        4878
+        5449
       ],
       "ITokenCollectionListener": [
-        200
+        234
       ]
     },
-    "id": 201,
+    "id": 235,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
         "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-        "id": 191,
+        "id": 225,
         "nodeType": "ImportDirective",
-        "scope": 201,
-        "sourceUnit": 4879,
-        "src": "0:65:4",
+        "scope": 235,
+        "sourceUnit": 5450,
+        "src": "0:65:6",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 192,
+        "id": 226,
         "literals": [
           "solidity",
           "^",
@@ -77,57 +77,57 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "208:23:4"
+        "src": "208:23:6"
       },
       {
         "abstract": false,
         "baseContracts": [
           {
             "baseName": {
-              "id": 193,
+              "id": 227,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 4878,
-              "src": "270:7:4"
+              "referencedDeclaration": 5449,
+              "src": "270:7:6"
             },
-            "id": 194,
+            "id": 228,
             "nodeType": "InheritanceSpecifier",
-            "src": "270:7:4"
+            "src": "270:7:6"
           }
         ],
         "contractDependencies": [
-          4878
+          5449
         ],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 200,
+        "id": 234,
         "linearizedBaseContracts": [
-          200,
-          4878
+          234,
+          5449
         ],
         "name": "ITokenCollectionListener",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "024e6b5a",
-            "id": 199,
+            "id": 233,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "tokenCollectionChanged",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 197,
+              "id": 231,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 196,
+                  "id": 230,
                   "mutability": "mutable",
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 199,
-                  "src": "559:14:4",
+                  "scope": 233,
+                  "src": "559:14:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -135,10 +135,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 195,
+                    "id": 229,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "559:7:4",
+                    "src": "559:7:6",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -148,53 +148,53 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "558:16:4"
+              "src": "558:16:6"
             },
             "returnParameters": {
-              "id": 198,
+              "id": 232,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "583:0:4"
+              "src": "583:0:6"
             },
-            "scope": 200,
-            "src": "527:57:4",
+            "scope": 234,
+            "src": "527:57:6",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 201,
-        "src": "232:354:4"
+        "scope": 235,
+        "src": "232:354:6"
       }
     ],
-    "src": "0:587:4"
+    "src": "0:587:6"
   },
   "legacyAST": {
     "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol",
     "exportedSymbols": {
       "IERC165": [
-        4878
+        5449
       ],
       "ITokenCollectionListener": [
-        200
+        234
       ]
     },
-    "id": 201,
+    "id": 235,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
         "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-        "id": 191,
+        "id": 225,
         "nodeType": "ImportDirective",
-        "scope": 201,
-        "sourceUnit": 4879,
-        "src": "0:65:4",
+        "scope": 235,
+        "sourceUnit": 5450,
+        "src": "0:65:6",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 192,
+        "id": 226,
         "literals": [
           "solidity",
           "^",
@@ -202,57 +202,57 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "208:23:4"
+        "src": "208:23:6"
       },
       {
         "abstract": false,
         "baseContracts": [
           {
             "baseName": {
-              "id": 193,
+              "id": 227,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 4878,
-              "src": "270:7:4"
+              "referencedDeclaration": 5449,
+              "src": "270:7:6"
             },
-            "id": 194,
+            "id": 228,
             "nodeType": "InheritanceSpecifier",
-            "src": "270:7:4"
+            "src": "270:7:6"
           }
         ],
         "contractDependencies": [
-          4878
+          5449
         ],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 200,
+        "id": 234,
         "linearizedBaseContracts": [
-          200,
-          4878
+          234,
+          5449
         ],
         "name": "ITokenCollectionListener",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "024e6b5a",
-            "id": 199,
+            "id": 233,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "tokenCollectionChanged",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 197,
+              "id": 231,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 196,
+                  "id": 230,
                   "mutability": "mutable",
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 199,
-                  "src": "559:14:4",
+                  "scope": 233,
+                  "src": "559:14:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -260,10 +260,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 195,
+                    "id": 229,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "559:7:4",
+                    "src": "559:7:6",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -273,26 +273,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "558:16:4"
+              "src": "558:16:6"
             },
             "returnParameters": {
-              "id": 198,
+              "id": 232,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "583:0:4"
+              "src": "583:0:6"
             },
-            "scope": 200,
-            "src": "527:57:4",
+            "scope": 234,
+            "src": "527:57:6",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 201,
-        "src": "232:354:4"
+        "scope": 235,
+        "src": "232:354:6"
       }
     ],
-    "src": "0:587:4"
+    "src": "0:587:6"
   },
   "compiler": {
     "name": "solc",
@@ -300,7 +300,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.1",
-  "updatedAt": "2021-07-13T14:57:18.919Z",
+  "updatedAt": "2021-07-14T20:50:06.076Z",
   "devdoc": {
     "kind": "dev",
     "methods": {

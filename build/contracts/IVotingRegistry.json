@@ -1,0 +1,1147 @@
+{
+  "contractName": "IVotingRegistry",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "totalVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "getCurrentVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPriorVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "getCurrentLevel",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPriorLevel",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"getCurrentLevel\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"getCurrentVotes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"}],\"name\":\"getPriorLevel\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"}],\"name\":\"getPriorVotes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalVotes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getCurrentLevel(address)\":{\"details\":\"Returns the \\\"level\\\" of the account, for systems using tiered representation.\"},\"getCurrentVotes(address)\":{\"details\":\"Returns the number of votes allocated to the indicated account. For voting tokens this may be equal to {balanceOf} but is often a combination of balance, delegated votes, and other conditions.\"},\"getPriorLevel(address,uint256)\":{\"details\":\"Returns the \\\"level\\\" of the account at the indicated block, which must be before the current block.\"},\"getPriorVotes(address,uint256)\":{\"details\":\"Returns the number of votes allocated to the indicated account at the indicated block, which must be before the current block.\"},\"totalVotes()\":{\"details\":\"Returns the total number of votes held by users. For voting tokens this is often equal to {totalSupply} but not always.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingRegistry.sol\":\"IVotingRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingRegistry.sol\":{\"keccak256\":\"0x521d82c5feab74aa7544ed3885bfbff1866b8952cb7beb60d94874316e040b37\",\"urls\":[\"bzz-raw://a12baefb49170fdaccc4cfb81783e9d7280be8e59282bd9b64d4d7cf505d0291\",\"dweb:/ipfs/QmXB2WcScDhYLF1iC2hM72AvN2FpCaNEU8BdinaDYvG4LM\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.8.0;\ninterface IVotingRegistry {\n    /**\n     * @dev Returns the total number of votes held by users. For voting tokens\n     * this is often equal to {totalSupply} but not always.\n     */\n    function totalVotes() external view returns (uint256);\n\n    /**\n     * @dev Returns the number of votes allocated to the indicated account.\n     * For voting tokens this may be equal to {balanceOf} but is often\n     * a combination of balance, delegated votes, and other conditions.\n     */\n    function getCurrentVotes(address account) external view returns (uint256);\n\n    /**\n     * @dev Returns the number of votes allocated to the indicated account\n     * at the indicated block, which must be before the current block.\n     */\n    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256);\n\n    /**\n     * @dev Returns the \"level\" of the account, for systems using tiered representation.\n     */\n    function getCurrentLevel(address account) external view returns (uint256);\n\n    /**\n     * @dev Returns the \"level\" of the account at the indicated block, which must\n     * be before the current block.\n     */\n    function getPriorLevel(address account, uint256 blockNumber) external view returns (uint256);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingRegistry.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingRegistry.sol",
+    "exportedSymbols": {
+      "IVotingRegistry": [
+        312
+      ]
+    },
+    "id": 313,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 269,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:8"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 312,
+        "linearizedBaseContracts": [
+          312
+        ],
+        "name": "IVotingRegistry",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 270,
+              "nodeType": "StructuredDocumentation",
+              "src": "56:150:8",
+              "text": " @dev Returns the total number of votes held by users. For voting tokens\n this is often equal to {totalSupply} but not always."
+            },
+            "functionSelector": "0d15fd77",
+            "id": 275,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "totalVotes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 271,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "230:2:8"
+            },
+            "returnParameters": {
+              "id": 274,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 273,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 275,
+                  "src": "256:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 272,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "256:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "255:9:8"
+            },
+            "scope": 312,
+            "src": "211:54:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 276,
+              "nodeType": "StructuredDocumentation",
+              "src": "271:230:8",
+              "text": " @dev Returns the number of votes allocated to the indicated account.\n For voting tokens this may be equal to {balanceOf} but is often\n a combination of balance, delegated votes, and other conditions."
+            },
+            "functionSelector": "b4b5ea57",
+            "id": 283,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCurrentVotes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 279,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 278,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 283,
+                  "src": "531:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 277,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "531:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "530:17:8"
+            },
+            "returnParameters": {
+              "id": 282,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 281,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 283,
+                  "src": "571:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 280,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "571:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "570:9:8"
+            },
+            "scope": 312,
+            "src": "506:74:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 284,
+              "nodeType": "StructuredDocumentation",
+              "src": "586:157:8",
+              "text": " @dev Returns the number of votes allocated to the indicated account\n at the indicated block, which must be before the current block."
+            },
+            "functionSelector": "782d6fe1",
+            "id": 293,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getPriorVotes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 289,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 286,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "771:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 285,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "771:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 288,
+                  "mutability": "mutable",
+                  "name": "blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "788:19:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 287,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "788:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "770:38:8"
+            },
+            "returnParameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 291,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "832:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 290,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "832:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "831:9:8"
+            },
+            "scope": 312,
+            "src": "748:93:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 294,
+              "nodeType": "StructuredDocumentation",
+              "src": "847:100:8",
+              "text": " @dev Returns the \"level\" of the account, for systems using tiered representation."
+            },
+            "functionSelector": "d9087025",
+            "id": 301,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCurrentLevel",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 297,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 296,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 301,
+                  "src": "977:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 295,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "977:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "976:17:8"
+            },
+            "returnParameters": {
+              "id": 300,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 299,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 301,
+                  "src": "1017:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 298,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1017:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1016:9:8"
+            },
+            "scope": 312,
+            "src": "952:74:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 302,
+              "nodeType": "StructuredDocumentation",
+              "src": "1032:129:8",
+              "text": " @dev Returns the \"level\" of the account at the indicated block, which must\n be before the current block."
+            },
+            "functionSelector": "2206327c",
+            "id": 311,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getPriorLevel",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 307,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 304,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 311,
+                  "src": "1189:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 303,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1189:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 306,
+                  "mutability": "mutable",
+                  "name": "blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 311,
+                  "src": "1206:19:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 305,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1206:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1188:38:8"
+            },
+            "returnParameters": {
+              "id": 310,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 309,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 311,
+                  "src": "1250:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 308,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1250:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1249:9:8"
+            },
+            "scope": 312,
+            "src": "1166:93:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 313,
+        "src": "24:1237:8"
+      }
+    ],
+    "src": "0:1262:8"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingRegistry.sol",
+    "exportedSymbols": {
+      "IVotingRegistry": [
+        312
+      ]
+    },
+    "id": 313,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 269,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:8"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 312,
+        "linearizedBaseContracts": [
+          312
+        ],
+        "name": "IVotingRegistry",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 270,
+              "nodeType": "StructuredDocumentation",
+              "src": "56:150:8",
+              "text": " @dev Returns the total number of votes held by users. For voting tokens\n this is often equal to {totalSupply} but not always."
+            },
+            "functionSelector": "0d15fd77",
+            "id": 275,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "totalVotes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 271,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "230:2:8"
+            },
+            "returnParameters": {
+              "id": 274,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 273,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 275,
+                  "src": "256:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 272,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "256:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "255:9:8"
+            },
+            "scope": 312,
+            "src": "211:54:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 276,
+              "nodeType": "StructuredDocumentation",
+              "src": "271:230:8",
+              "text": " @dev Returns the number of votes allocated to the indicated account.\n For voting tokens this may be equal to {balanceOf} but is often\n a combination of balance, delegated votes, and other conditions."
+            },
+            "functionSelector": "b4b5ea57",
+            "id": 283,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCurrentVotes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 279,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 278,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 283,
+                  "src": "531:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 277,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "531:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "530:17:8"
+            },
+            "returnParameters": {
+              "id": 282,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 281,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 283,
+                  "src": "571:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 280,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "571:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "570:9:8"
+            },
+            "scope": 312,
+            "src": "506:74:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 284,
+              "nodeType": "StructuredDocumentation",
+              "src": "586:157:8",
+              "text": " @dev Returns the number of votes allocated to the indicated account\n at the indicated block, which must be before the current block."
+            },
+            "functionSelector": "782d6fe1",
+            "id": 293,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getPriorVotes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 289,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 286,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "771:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 285,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "771:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 288,
+                  "mutability": "mutable",
+                  "name": "blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "788:19:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 287,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "788:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "770:38:8"
+            },
+            "returnParameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 291,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "832:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 290,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "832:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "831:9:8"
+            },
+            "scope": 312,
+            "src": "748:93:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 294,
+              "nodeType": "StructuredDocumentation",
+              "src": "847:100:8",
+              "text": " @dev Returns the \"level\" of the account, for systems using tiered representation."
+            },
+            "functionSelector": "d9087025",
+            "id": 301,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCurrentLevel",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 297,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 296,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 301,
+                  "src": "977:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 295,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "977:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "976:17:8"
+            },
+            "returnParameters": {
+              "id": 300,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 299,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 301,
+                  "src": "1017:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 298,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1017:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1016:9:8"
+            },
+            "scope": 312,
+            "src": "952:74:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 302,
+              "nodeType": "StructuredDocumentation",
+              "src": "1032:129:8",
+              "text": " @dev Returns the \"level\" of the account at the indicated block, which must\n be before the current block."
+            },
+            "functionSelector": "2206327c",
+            "id": 311,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getPriorLevel",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 307,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 304,
+                  "mutability": "mutable",
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 311,
+                  "src": "1189:15:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 303,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1189:7:8",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 306,
+                  "mutability": "mutable",
+                  "name": "blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 311,
+                  "src": "1206:19:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 305,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1206:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1188:38:8"
+            },
+            "returnParameters": {
+              "id": 310,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 309,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 311,
+                  "src": "1250:7:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 308,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1250:7:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1249:9:8"
+            },
+            "scope": 312,
+            "src": "1166:93:8",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 313,
+        "src": "24:1237:8"
+      }
+    ],
+    "src": "0:1262:8"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-07-14T20:50:06.077Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "getCurrentLevel(address)": {
+        "details": "Returns the \"level\" of the account, for systems using tiered representation."
+      },
+      "getCurrentVotes(address)": {
+        "details": "Returns the number of votes allocated to the indicated account. For voting tokens this may be equal to {balanceOf} but is often a combination of balance, delegated votes, and other conditions."
+      },
+      "getPriorLevel(address,uint256)": {
+        "details": "Returns the \"level\" of the account at the indicated block, which must be before the current block."
+      },
+      "getPriorVotes(address,uint256)": {
+        "details": "Returns the number of votes allocated to the indicated account at the indicated block, which must be before the current block."
+      },
+      "totalVotes()": {
+        "details": "Returns the total number of votes held by users. For voting tokens this is often equal to {totalSupply} but not always."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
