@@ -108,7 +108,8 @@ module.exports = exports = ({ network, web3 }) => {
     const roles = values['roles'] = values['role'] = {
       manager: web3.utils.soliditySha3('MANAGER_ROLE'),
       minter: web3.utils.soliditySha3('MINTER_ROLE'),
-      pauser: web3.utils.soliditySha3('PAUSER_ROLE')
+      pauser: web3.utils.soliditySha3('PAUSER_ROLE'),
+      lender: web3.utils.soliditySha3('LENDER_ROLE'),
     }
   }
 
