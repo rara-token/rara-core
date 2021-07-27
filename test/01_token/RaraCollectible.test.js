@@ -106,18 +106,18 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
       const erc165 = await MockERC165.new();
       await expectRevert(
         this.collectible.setTokenCollectionListener(erc165.address, { from:alice }),
-        "ERC721ValuableCollectibleToken: address must be zero or implement ITokenCollectionListener"
+        "ERC721ValuableCollectibleToken: address must be zero or implement ITokenListener"
       );
 
       const mock = await MockContract.new();
       await expectRevert(
         this.collectible.setTokenCollectionListener(mock.address, { from:manager }),
-        "ERC721ValuableCollectibleToken: address must be zero or implement ITokenCollectionListener"
+        "ERC721ValuableCollectibleToken: address must be zero or implement ITokenListener"
       );
 
       await expectRevert(
         this.collectible.setTokenCollectionListener(alice, { from:manager }),
-        "ERC721ValuableCollectibleToken: address must be zero or implement ITokenCollectionListener"
+        "ERC721ValuableCollectibleToken: address must be zero or implement ITokenListener"
       );
     });
 
@@ -175,6 +175,7 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           assert.equal(await collectible.totalSupplyByType(0), '1');
           assert.equal(await collectible.totalSupplyByType(1), '0');
           assert.equal(await collectible.ownerTypes(alice), '1');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 0), '0');
           assert.equal(await collectible.ownerValue(alice), '0');
           assert.equal(await collectible.balanceOf(alice), '1');
 
@@ -204,9 +205,16 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           assert.equal(await collectible.totalSupplyByType(4), '2');
           assert.equal(await collectible.totalSupplyByType(5), '1');
           assert.equal(await collectible.ownerTypes(alice), '3');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 1), '3');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 2), '4');
           assert.equal(await collectible.ownerValue(alice), '50');
           assert.equal(await collectible.balanceOf(alice), '4');
           assert.equal(await collectible.ownerTypes(bob), '4');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 1), '1');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 2), '4');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 3), '5');
           assert.equal(await collectible.ownerValue(bob), '130');
           assert.equal(await collectible.balanceOf(bob), '5');
 
@@ -321,6 +329,7 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           assert.equal(await collectible.totalSupplyByType(0), '1');
           assert.equal(await collectible.totalSupplyByType(1), '0');
           assert.equal(await collectible.ownerTypes(alice), '1');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 0), '0');
           assert.equal(await collectible.ownerValue(alice), '0');
           assert.equal(await collectible.balanceOf(alice), '1');
 
@@ -345,12 +354,18 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           assert.equal(await collectible.totalSupplyByType(4), '2');
           assert.equal(await collectible.totalSupplyByType(5), '1');
           assert.equal(await collectible.ownerTypes(alice), '3');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 1), '3');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 2), '4');
           assert.equal(await collectible.ownerValue(alice), '50');
           assert.equal(await collectible.balanceOf(alice), '4');
           assert.equal(await collectible.ownerTypes(bob), '4');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 1), '1');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 2), '4');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 3), '5');
           assert.equal(await collectible.ownerValue(bob), '130');
           assert.equal(await collectible.balanceOf(bob), '5');
-
           assert.equal(await collectible.balanceOfOwnerByType(alice, 0), '1');
           assert.equal(await collectible.balanceOfOwnerByType(alice, 1), '0');
           assert.equal(await collectible.balanceOfOwnerByType(alice, 2), '0');
@@ -432,12 +447,22 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           assert.equal(await collectible.totalSupplyByType(4), '3');
           assert.equal(await collectible.totalSupplyByType(5), '3');
           assert.equal(await collectible.ownerTypes(alice), '3');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 1), '3');
+          assert.equal(await collectible.ownerTypeByIndex(alice, 2), '4');
           assert.equal(await collectible.ownerValue(alice), '50');
           assert.equal(await collectible.balanceOf(alice), '4');
           assert.equal(await collectible.ownerTypes(bob), '4');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 1), '1');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 2), '4');
+          assert.equal(await collectible.ownerTypeByIndex(bob, 3), '5');
           assert.equal(await collectible.ownerValue(bob), '130');
           assert.equal(await collectible.balanceOf(bob), '5');
           assert.equal(await collectible.ownerTypes(carol), '3');
+          assert.equal(await collectible.ownerTypeByIndex(carol, 0), '0');
+          assert.equal(await collectible.ownerTypeByIndex(carol, 1), '4');
+          assert.equal(await collectible.ownerTypeByIndex(carol, 2), '5');
           assert.equal(await collectible.ownerValue(carol), '230');
           assert.equal(await collectible.balanceOf(carol), '6');
 
@@ -512,12 +537,12 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           it('strangers cannot burn tokens', async () => {
             await expectRevert(
               this.collectible.burnFrom(alice, 0, { from:bob }),
-              "ERC721ValuableCollectibleToken: burnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: burnFrom caller is not owner, burner, nor approved",
             );
 
             await expectRevert(
               this.collectible.burnFrom(alice, 1, { from:manager }),
-              "ERC721ValuableCollectibleToken: burnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: burnFrom caller is not owner, burner, nor approved",
             );
 
             await this.collectible.approve(minter, 5, { from:bob });
@@ -525,12 +550,12 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
 
             await expectRevert(
               this.collectible.burnFrom(bob, 5, { from:alice }),
-              "ERC721ValuableCollectibleToken: burnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: burnFrom caller is not owner, burner, nor approved",
             );
 
             await expectRevert(
               this.collectible.burnFrom(bob, 6, { from:minter }),
-              "ERC721ValuableCollectibleToken: burnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: burnFrom caller is not owner, burner, nor approved",
             );
           });
 
@@ -583,12 +608,20 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
             assert.equal(await collectible.totalSupplyByType(4), '2');
             assert.equal(await collectible.totalSupplyByType(5), '2');
             assert.equal(await collectible.ownerTypes(alice), '2');
+            assert.equal(await collectible.ownerTypeByIndex(alice, 0), '4');
+            assert.equal(await collectible.ownerTypeByIndex(alice, 1), '3');
             assert.equal(await collectible.ownerValue(alice), '40');
             assert.equal(await collectible.balanceOf(alice), '2');
             assert.equal(await collectible.ownerTypes(bob), '3');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 0), '0');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 1), '1');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 2), '5');
             assert.equal(await collectible.ownerValue(bob), '100');
             assert.equal(await collectible.balanceOf(bob), '3');
             assert.equal(await collectible.ownerTypes(carol), '3');
+            assert.equal(await collectible.ownerTypeByIndex(carol, 0), '0');
+            assert.equal(await collectible.ownerTypeByIndex(carol, 1), '4');
+            assert.equal(await collectible.ownerTypeByIndex(carol, 2), '5');
             assert.equal(await collectible.ownerValue(carol), '130');
             assert.equal(await collectible.balanceOf(carol), '4');
 
@@ -642,6 +675,32 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
             assert.equal(await collectible.tokenType(14), '5');
           });
 
+          it('burn rearranges ownerTypes', async () => {
+            const { collectible } = this;
+            // alice: burn own tokens
+            // await collectible.burnFrom(alice, 0, { from:alice });
+            // await collectible.burnFrom(alice, 2, { from:alice });
+
+            // bob: burned by dave, who has blanket approval
+            await collectible.setApprovalForAll(dave, true, { from:bob });
+            await collectible.burnFrom(bob, 4, { from:dave });
+            assert.equal(await collectible.ownerTypes(bob), '3');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 0), '5');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 1), '1');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 2), '4');
+
+            await collectible.burnFrom(bob, 5, { from:dave });
+            assert.equal(await collectible.ownerTypes(bob), '3');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 0), '5');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 1), '1');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 2), '4');
+
+            await collectible.burnFrom(bob, 6, { from:dave });
+            assert.equal(await collectible.ownerTypes(bob), '2');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 0), '5');
+            assert.equal(await collectible.ownerTypeByIndex(bob, 1), '4');
+          });
+
           it('burnFrom updates the listener', async () => {
             const { collectible } = this;
             const listener = await MockTokenCollectionListener.new();
@@ -674,12 +733,12 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           it('strangers cannot massBurn tokens', async () => {
             await expectRevert(
               this.collectible.massBurnFrom(alice, [0], { from:bob }),
-              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner, burner, nor approved",
             );
 
             await expectRevert(
               this.collectible.massBurnFrom(alice, [1], { from:manager }),
-              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner, burner, nor approved",
             );
 
             await this.collectible.approve(minter, 5, { from:bob });
@@ -687,12 +746,12 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
 
             await expectRevert(
               this.collectible.massBurnFrom(bob, [5, 6], { from:alice }),
-              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner, burner, nor approved",
             );
 
             await expectRevert(
               this.collectible.massBurnFrom(bob, [5, 6], { from:minter }),
-              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: massBurnFrom caller is not owner, burner, nor approved",
             );
           });
 
@@ -1654,7 +1713,7 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
           it('stranger with minting rights cannot exchange tokens', async () => {
             await expectRevert(
               this.collectible.exchange(alice, [0], [0, 1, 2, 3, 4, 5], { from:minter }),
-              "ERC721ValuableCollectibleToken: exchange caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: exchange caller is not owner, burner, nor approved",
             );
 
             await this.collectible.approve(minter, 5, { from:bob });
@@ -1662,12 +1721,12 @@ contract('RaraCollectible', ([alice, bob, carol, dave, edith, manager, minter, p
 
             await expectRevert(
               this.collectible.exchange(bob, [5, 6], [0], { from:alice }),
-              "ERC721ValuableCollectibleToken: exchange caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: exchange caller is not owner, burner, nor approved",
             );
 
             await expectRevert(
               this.collectible.exchange(bob, [5, 6], [0], { from:minter }),
-              "ERC721ValuableCollectibleToken: exchange caller is not owner nor approved",
+              "ERC721ValuableCollectibleToken: exchange caller is not owner, burner, nor approved",
             );
           });
 
