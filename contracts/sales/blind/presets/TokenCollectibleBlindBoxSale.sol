@@ -45,8 +45,8 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     address public recipient;
 
     // active blocks
-    uint32 public startBlock;
-    uint32 public endBlock;
+    uint32 public startTime;
+    uint32 public endTime;
 
     // draws
     DrawInfo[] public drawInfo;
@@ -78,7 +78,7 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     // in case prices fluctuate.
     function purchaseDraws(address _to, uint256 _draws, uint256 _maximumCost) external override {
         require(
-            startBlock <= block.number && (endBlock == 0 || block.number < endBlock),
+            startTime <= block.timestamp && (endTime == 0 || block.timestamp < endTime),
             "TokenCollectibleBlindBoxSale: not active"
         );
         require(_draws <= availableSupply, "TokenCollectibleBlindBoxSale: not enough supply");
@@ -184,10 +184,10 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
         recipient = _recipient;
     }
 
-    function setBlocks(uint32 _startBlock, uint32 _endBlock) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to setBlocks");
-        startBlock = _startBlock;
-        endBlock = _endBlock;
+    function setTimes(uint32 _startTime, uint32 _endTime) public {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes");
+        startTime = _startTime;
+        endTime = _endTime;
     }
 
     // TODO controls for changing price, start/stop times, prizes and supplies.

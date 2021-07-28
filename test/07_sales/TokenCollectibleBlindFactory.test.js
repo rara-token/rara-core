@@ -68,8 +68,8 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
     assert.equal(await sale.purchaseToken(), token.address);
     assert.equal(await sale.drawPrice(), '100');
     assert.equal(await sale.recipient(), bob);
-    assert.equal(await sale.startBlock(), '0');
-    assert.equal(await sale.endBlock(), '0');
+    assert.equal(await sale.startTime(), '0');
+    assert.equal(await sale.endTime(), '0');
     assert.equal(await sale.drawCountBy(alice), '0');
     assert.equal(await sale.drawCountBy(carol), '0');
     assert.equal(await sale.totalDraws(), '0');
@@ -88,8 +88,8 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
     assert.equal(await sale.purchaseToken(), token.address);
     assert.equal(await sale.drawPrice(), '7');
     assert.equal(await sale.recipient(), ZERO_ADDRESS);
-    assert.equal(await sale.startBlock(), '50');
-    assert.equal(await sale.endBlock(), '110');
+    assert.equal(await sale.startTime(), '50');
+    assert.equal(await sale.endTime(), '110');
     assert.equal(await sale.drawCountBy(alice), '0');
     assert.equal(await sale.drawCountBy(carol), '0');
     assert.equal(await sale.totalDraws(), '0');
@@ -112,42 +112,42 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
       await factory.createSaleWithPrizes("Test Sale 3", false, 50, 110, 7, ZERO_ADDRESS, [1, 5], [100, 10], { from:manager });
     });
 
-    it('setSaleBlocks should revert for not managed by caller', async () => {
+    it('setSaleTimes should revert for not managed by caller', async () => {
       const { token, collectible, factory } = this;
 
       await expectRevert(
-        factory.setSaleBlocks(0, 100, 10000, { from:bob }),
+        factory.setSaleTimes(0, 100, 10000, { from:bob }),
         "TokenCollectibleBlindBoxFactory: not authorized"
       );
 
       await expectRevert(
-        factory.setSaleBlocks(1, 100, 10000, { from:creator }),
+        factory.setSaleTimes(1, 100, 10000, { from:creator }),
         "TokenCollectibleBlindBoxFactory: not authorized"
       );
 
       await expectRevert(
-        factory.setSaleBlocks(2, 100, 10000, { from:manager }),
+        factory.setSaleTimes(2, 100, 10000, { from:manager }),
         "TokenCollectibleBlindBoxFactory: not authorized"
       );
 
       await expectRevert(
-        factory.setSaleBlocks(3, 100, 10000, { from:manager }),
+        factory.setSaleTimes(3, 100, 10000, { from:manager }),
         "TokenCollectibleBlindBoxFactory: invalid saleId"
       );
     });
 
-    it('setSaleBlocks should work as expected if sale managed by caller', async () => {
+    it('setSaleTimes should work as expected if sale managed by caller', async () => {
       const { token, collectible, factory } = this;
 
-      await factory.setSaleBlocks(0, 100, 10000, { from:creator });
+      await factory.setSaleTimes(0, 100, 10000, { from:creator });
       let sale = await TokenCollectibleBlindBoxSale.at(await factory.sales(0));
-      assert.equal(await sale.startBlock(), '100');
-      assert.equal(await sale.endBlock(), '10000');
+      assert.equal(await sale.startTime(), '100');
+      assert.equal(await sale.endTime(), '10000');
 
-      await factory.setSaleBlocks(1, 7, 70, { from:manager });
+      await factory.setSaleTimes(1, 7, 70, { from:manager });
       sale = await TokenCollectibleBlindBoxSale.at(await factory.sales(1));
-      assert.equal(await sale.startBlock(), '7');
-      assert.equal(await sale.endBlock(), '70');
+      assert.equal(await sale.startTime(), '7');
+      assert.equal(await sale.endTime(), '70');
     });
   });
 });

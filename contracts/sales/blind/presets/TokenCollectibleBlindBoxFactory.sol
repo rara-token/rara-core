@@ -36,7 +36,7 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
 
     bytes32 internal _seed;
 
-    event SaleCreation(uint256 indexed saleId, address indexed creator, address indexed sale, string name, bool managed, uint32 startBlock, uint32 endBlock);
+    event SaleCreation(uint256 indexed saleId, address indexed creator, address indexed sale, string name, bool managed, uint32 startTime, uint32 endTime);
 
     constructor(address _prizeToken, address _purchaseToken) {
         prizeToken = _prizeToken;
@@ -73,21 +73,21 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
     function createSale(
         string calldata _name,
         bool _managed,
-        uint32 _startBlock,
-        uint32 _endBlock,
+        uint32 _startTime,
+        uint32 _endTime,
         uint256 _drawPrice,
         address _recipient
     ) external returns (address sale) {
         address creator = _msgSender();
         require(hasRole(MANAGER_ROLE, creator) || hasRole(CREATOR_ROLE, creator), "TokenCollectibleBlindBoxFactory: must have MANAGER or CREATOR role to create sale");
-        sale = _createSale(creator, _name, _managed, _startBlock, _endBlock, _drawPrice, _recipient);
+        sale = _createSale(creator, _name, _managed, _startTime, _endTime, _drawPrice, _recipient);
     }
 
     function createSaleWithPrizes(
         string calldata _name,
         bool _managed,
-        uint32 _startBlock,
-        uint32 _endBlock,
+        uint32 _startTime,
+        uint32 _endTime,
         uint256 _drawPrice,
         address _recipient,
         uint256[] calldata _tokenTypes,
@@ -96,7 +96,7 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         address creator = _msgSender();
         require(hasRole(MANAGER_ROLE, creator) || hasRole(CREATOR_ROLE, creator), "TokenCollectibleBlindBoxFactory: must have MANAGER or CREATOR role to create sale");
         require(_tokenTypes.length == _prizeSupplies.length, "TokenCollectibleBlindBoxFactory: prize type and supply arrays must match length");
-        sale = _createSale(creator, _name, _managed, _startBlock, _endBlock, _drawPrice, _recipient);
+        sale = _createSale(creator, _name, _managed, _startTime, _endTime, _drawPrice, _recipient);
         for (uint256 i = 0; i < _tokenTypes.length; i++) {
             TokenCollectibleBlindBoxSale(sale).createPrize(_tokenTypes[i], _prizeSupplies[i]);
         }
@@ -130,8 +130,8 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         TokenCollectibleBlindBoxSale(sales[_saleId]).setDrawPrice(_drawPrice);
     }
 
-    function setSaleBlocks(uint256 _saleId, uint32 _startBlock, uint32 _endBlock) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).setBlocks(_startBlock, _endBlock);
+    function setSaleTimes(uint256 _saleId, uint32 _startTime, uint32 _endTime) external onlyManagedBySender(_saleId) {
+        TokenCollectibleBlindBoxSale(sales[_saleId]).setTimes(_startTime, _endTime);
     }
 
     function createSalePrize(uint256 _saleId, uint256 _tokenType, uint256 _supply) external onlyManagedBySender(_saleId) {
@@ -166,15 +166,15 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         address _creator,
         string calldata _name,
         bool _managed,
-        uint32 _startBlock,
-        uint32 _endBlock,
+        uint32 _startTime,
+        uint32 _endTime,
         uint256 _drawPrice,
         address _recipient
     ) internal returns (address) {
         TokenCollectibleBlindBoxSale sale = new TokenCollectibleBlindBoxSale(prizeToken, purchaseToken, _drawPrice, _recipient);
         _seed = keccak256(abi.encodePacked(_seed, blockhash(block.number - 1), block.coinbase));
         sale.setSalt(_seed);
-        sale.setBlocks(_startBlock, _endBlock);
+        sale.setTimes(_startTime, _endTime);
 
         // we are the admin, manager, and salter of the token sale. Make the creator
         // that as well, so they can make direct alterations as needed.
@@ -192,7 +192,7 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         }));
 
         // event
-        emit SaleCreation(saleId, _creator, address(sale), _name, _managed, _startBlock, _endBlock);
+        emit SaleCreation(saleId, _creator, address(sale), _name, _managed, _startTime, _endTime);
         return address(sale);
     }
 }

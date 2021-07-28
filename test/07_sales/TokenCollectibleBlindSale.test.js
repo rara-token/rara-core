@@ -43,8 +43,8 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
     assert.equal(await sale.recipient(), ZERO_ADDRESS);
 
-    assert.equal(await sale.startBlock(), '0');
-    assert.equal(await sale.endBlock(), '0');
+    assert.equal(await sale.startTime(), '0');
+    assert.equal(await sale.endTime(), '0');
 
     assert.equal(await sale.drawCountBy(alice), '0');
     assert.equal(await sale.drawCountBy(carol), '0');
@@ -53,39 +53,39 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
     assert.equal(await sale.prizeCount(), '0');
   });
 
-  it('setBlocks should revert for non-managers', async () => {
+  it('setTimes should revert for non-managers', async () => {
     const { token, collectible, sale } = this;
 
     await expectRevert(
-      sale.setBlocks(100, 10000, { from:bob }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setBlocks"
+      sale.setTimes(100, 10000, { from:bob }),
+      "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes"
     );
 
     await expectRevert(
-      sale.setBlocks(12345, 0, { from:carol }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setBlocks"
+      sale.setTimes(12345, 0, { from:carol }),
+      "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes"
     );
 
     await expectRevert(
-      sale.setBlocks(0, 7777, { from:salter }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setBlocks"
+      sale.setTimes(0, 7777, { from:salter }),
+      "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes"
     );
   });
 
-  it('setBlocks should adjust startBlock and endBlock', async () => {
+  it('setTimes should adjust startTime and endTime', async () => {
     const { token, collectible, sale } = this;
 
-    await sale.setBlocks(100, 10000, { from:alice });
-    assert.equal(await sale.startBlock(), '100');
-    assert.equal(await sale.endBlock(), '10000');
+    await sale.setTimes(100, 10000, { from:alice });
+    assert.equal(await sale.startTime(), '100');
+    assert.equal(await sale.endTime(), '10000');
 
-    await sale.setBlocks(12345, 0, { from:manager });
-    assert.equal(await sale.startBlock(), '12345');
-    assert.equal(await sale.endBlock(), '0');
+    await sale.setTimes(12345, 0, { from:manager });
+    assert.equal(await sale.startTime(), '12345');
+    assert.equal(await sale.endTime(), '0');
 
-    await sale.setBlocks(0, 7777, { from:manager });
-    assert.equal(await sale.startBlock(), '0');
-    assert.equal(await sale.endBlock(), '7777');
+    await sale.setTimes(0, 7777, { from:manager });
+    assert.equal(await sale.startTime(), '0');
+    assert.equal(await sale.endTime(), '7777');
   });
 
   it('setRecipient should revert for non-managers', async () => {

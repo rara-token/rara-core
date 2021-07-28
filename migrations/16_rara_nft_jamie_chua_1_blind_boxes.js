@@ -28,9 +28,10 @@ module.exports = function (deployer, network, accounts) {
         const prizeTokenTypes = bb.prizes.map(p => p.tokenType);
         const prizeSupplies = bb.prizes.map(p => p.supply);
         console.log(`Creating sale ${saleId}: ${bb.name}`);
-        console.log(`  with types ${prizeTokenTypes} supplies ${prizeSupplies} price ${bb.drawPrice} block range ${bb.startBlock}-${bb.endBlock}`);
+        console.log(`  with types ${prizeTokenTypes} supplies ${prizeSupplies}`);
+        console.log(`  charging ${bb.drawPrice} from ${new Date(bb.startTime * 1000)} to ${new Date(bb.endTime * 1000)}}`);
         await factory.createSaleWithPrizes(
-          bb.name, true, bb.startBlock, bb.endBlock,
+          bb.name, true, bb.startTime, bb.endTime,
           bb.drawPrice, "0x0000000000000000000000000000000000000000",
           prizeTokenTypes, prizeSupplies
         );
