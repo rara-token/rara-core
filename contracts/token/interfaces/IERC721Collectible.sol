@@ -55,9 +55,9 @@ interface IERC721Collectible is IERC721 {
 
   /**
    * @dev Returns the `index`tn tokenType owned by the user, for indexes
-   * ranging from 0 to {ownerTypes}.
+   * ranging from 0 to {ownerTypes}
    */
-  function ownerTypeByIndex(address owner, uint256 index) external view returns  (uint256);
+  function ownerTypeByIndex(address owner, uint256 index) external view returns (uint256);
 
   /**
    * @dev Returns the number of tokens of type ``type`` in ``owner``'s account.

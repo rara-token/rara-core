@@ -56,10 +56,10 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
     // @param _maximumCost The maximum price to pay for the draws (in total),
     // in case prices fluctuate.
     function convert(uint256 _recipeId, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) external override returns (uint256[] memory tokenIdsOut) {
-        require(_recipeId < recipeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent recipe");
+        require(_recipeId < recipeInfo.length, "BasicCollectibleConverter: nonexistent recipe");
         RecipeInfo storage recipe = recipeInfo[_recipeId];
-        require(active && recipe.available, "TokenCollectibleBlindBoxSale: unavailable");
-        require(_supportsParameters(recipe, _maximumCost, _tokenIdsIn), "TokenCollectibleBlindBoxSale: invalid parameters");
+        require(active && recipe.available, "BasicCollectibleConverter: unavailable");
+        require(_supportsParameters(recipe, _maximumCost, _tokenIdsIn), "BasicCollectibleConverter: invalid parameters");
 
         address buyer = _msgSender();
 
@@ -80,7 +80,7 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
     // Does not perform ownership checks or whether the caller has the funds to
     // pay their `_maximumCost`, just whether the input parameters look good.
     function canConvert(uint256 _recipeId, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) external view override returns (bool) {
-        require(_recipeId < recipeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent recipe");
+        require(_recipeId < recipeInfo.length, "BasicCollectibleConverter: nonexistent recipe");
         RecipeInfo storage recipe = recipeInfo[_recipeId];
         return active && recipe.available && _supportsParameters(recipe, _maximumCost, _tokenIdsIn);
     }
@@ -119,20 +119,20 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
 
 
     function setActive(bool _active) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to setActive");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BasicCollectibleConverter: must have MANAGER role to setActive");
         active = _active;
         // TODO emit?
     }
 
     function claimAllProceeds(address _to) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to claimAllProceeds");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BasicCollectibleConverter: must have MANAGER role to claimAllProceeds");
         uint256 amount = IERC20(purchaseToken).balanceOf(address(this));
         IERC20(purchaseToken).transfer(_to, amount);
         // TODO emit?
     }
 
     function claimProceeds(address _to, uint256 _amount) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to claimProceeds");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BasicCollectibleConverter: must have MANAGER role to claimProceeds");
         IERC20(purchaseToken).transfer(_to, _amount);
         // TODO emit?
     }
@@ -198,13 +198,14 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
         }
 
         // create
+        uint256 _recipeId = recipeInfo.length;
         recipeInfo.push(RecipeInfo({
             price: _price,
             available: _available,
             tokenTypesIn: new uint[](_tokenTypesIn.length),
             tokenTypesOut: new uint[](_tokenTypesOut.length)
         }));
-        RecipeInfo storage recipe = recipeInfo[recipeInfo.length - 1];
+        RecipeInfo storage recipe = recipeInfo[_recipeId];
         for (uint256 i = 0; i < _tokenTypesIn.length; i++) {
             recipe.tokenTypesIn[i] = _tokenTypesIn[i];
         }
@@ -212,13 +213,13 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
             recipe.tokenTypesOut[i] = _tokenTypesOut[i];
         }
 
-        emit RecipeCreation(recipeInfo.length - 1, _price, _available, _tokenTypesIn, _tokenTypesOut);
+        emit RecipeCreation(_recipeId, _price, _available, _tokenTypesIn, _tokenTypesOut);
     }
 
     function setRecipe(uint256 _recipeId, uint256 _price, bool _available) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "BasicCollectibleConverter: must have MANAGER role to setRecipe");
-        require(_recipeId < recipeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent recipe");
-        RecipeInfo storage recipe = recipeInfo[recipeInfo.length - 1];
+        require(_recipeId < recipeInfo.length, "BasicCollectibleConverter: nonexistent recipe");
+        RecipeInfo storage recipe = recipeInfo[_recipeId];
         recipe.price = _price;
         recipe.available = _available;
 
