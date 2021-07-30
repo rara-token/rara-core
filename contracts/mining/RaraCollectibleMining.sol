@@ -13,7 +13,7 @@ import "../utils/boring-solidity/BoringBatchable.sol";
 
 interface RCMToken {
   function balanceOf(address user) external view returns (uint256);
-  function valueOf(address user) external view returns (uint256);
+  function ownerValue(address user) external view returns (uint256);
 }
 
 interface RCMRegistry {
@@ -284,9 +284,9 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// be transferred here (e.g. 0x0).
     /// @param overwrite True if the _burnAddress should be set. Otherwise, `_burnAddress` is ignored.
     function _setBurnRate(uint256 _numerator, uint256 _denominator, address _burnAddress, bool overwrite) internal {
-        require(_denominator > 0, "RaraMiningPool: burn rate denominator must be non-zero");
-        require(_numerator <= _denominator, "RaraMiningPool: burn rate numerator must be <= denominator");
-        require(_numerator <= PRECISION &&  _denominator <= PRECISION, "RaraMiningPool: burn rate precision too high");
+        require(_denominator > 0, "RaraCollectibleMining: burn rate denominator must be non-zero");
+        require(_numerator <= _denominator, "RaraCollectibleMining: burn rate numerator must be <= denominator");
+        require(_numerator <= PRECISION &&  _denominator <= PRECISION, "RaraCollectibleMining: burn rate precision too high");
 
         burnNumerator = _numerator;
         burnDenominator = _denominator;
@@ -298,8 +298,8 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// current unlockBlock.
     /// @param _block The block at which to unlock harvesting.
     function setUnlockBlock(uint256 _block) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraMiningPool: must have MANAGER role to setUnlockBlock");
-        require(_blockNumber() < unlockBlock, "RaraMiningPool: no setUnlockBlock after unlocked");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setUnlockBlock");
+        require(_blockNumber() < unlockBlock, "RaraCollectibleMining: no setUnlockBlock after unlocked");
         unlockBlock = _block;
     }
 
@@ -368,8 +368,9 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
         }
     }
 
-    function _emissionIncludingSurplus(uint256 _emission) internal view returns (uint256) {
+    function _emissionIncludingSurplus(uint256 _emission, bool _claimed) internal view returns (uint256) {
         uint256 surplus = rara.balanceOf(address(this)) + raraHarvested - raraMined;
+        if (_claimed) surplus = surplus - _emission;
         return _emission + (surplus > _emission ? _emission : surplus);
     }
 
@@ -384,12 +385,12 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// with emitted Rara until exhausted.
     function totalReceived() public view returns (uint256 amount) {
         uint256 owed = emitter.owed(address(this));
-        amount = raraReceived + _emissionIncludingSurplus(owed);
+        amount = raraReceived + _emissionIncludingSurplus(owed, false);
     }
 
     function totalRetained() public view returns (uint256 amount) {
         amount = raraRetained;
-        uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)));
+        uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)), false);
         uint256 burn = (owed * burnNumerator) / burnDenominator;
         amount += owed - burn;
     }
@@ -397,7 +398,7 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     function totalMined() public view returns (uint256 amount) {
         amount = raraMined;
         if (totalStakedAllocPoint != 0) {
-          uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)));
+          uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)), false);
           uint256 burn = (owed * burnNumerator) / burnDenominator;
           amount += ((owed - burn) * totalStakedAllocPoint) / totalAllocPoint;
         }
@@ -408,18 +409,16 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// but can be triggered from outside to square accounts.
     function claimFromEmitter() public {
         if (emitter.owed(address(this)) > 0) {  // no need to check surplus; output is driven by emitter
-            uint256 claimed = _emissionIncludingSurplus(emitter.claim(address(this)));
+            uint256 claimed = _emissionIncludingSurplus(emitter.claim(address(this)), true);
             raraReceived = raraReceived + claimed;
 
             uint256 burned = (claimed * burnNumerator) / burnDenominator;
             uint256 retained = claimed - burned;
             raraRetained = raraRetained + retained;
 
-            // TODO include spillover from bucket
-
             uint256 mined = 0;
             if (totalStakedAllocPoint != 0) {
-              mined = ((claimed - burned) * totalStakedAllocPoint) / totalAllocPoint;
+              mined = (retained * totalStakedAllocPoint) / totalAllocPoint;
               raraMined = raraMined + mined;
             }
 
@@ -511,7 +510,7 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     function _updateUser(uint256 pid, PoolInfo memory pool, PoolSources memory sources, address owner) internal {
         // determine user share amount
         uint256 value = sources.tokenValued
-            ? RCMToken(sources.token).valueOf(owner)
+            ? RCMToken(sources.token).ownerValue(owner)
             : RCMToken(sources.token).balanceOf(owner);
         if (sources.votingRegistry != address(0)) {
             uint256 level = RCMRegistry(sources.votingRegistry).getCurrentLevel(owner);
@@ -527,7 +526,7 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
         if (prevPoolShares == 0 && value > 0) {
             claimFromEmitter();
             totalStakedAllocPoint = totalStakedAllocPoint + pool.allocPoint;
-        } else if (prevPoolShares > 0 && prevPoolShares == user.amount && value == 0) {
+        } else if (prevPoolShares == user.amount && user.amount > 0 && value == 0) {
             claimFromEmitter();
             totalStakedAllocPoint = totalStakedAllocPoint - pool.allocPoint;
         }
@@ -552,7 +551,6 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
         int256 accumulatedRara = int256((user.amount * pool.accRaraPerShare) / PRECISION);
         int256 _pendingSigned = accumulatedRara - user.rewardDebt;
         uint256 _pendingRara = _pendingSigned > 0 ? uint256(_pendingSigned) : 0;
-
 
         // Effects
         user.rewardDebt = accumulatedRara;
