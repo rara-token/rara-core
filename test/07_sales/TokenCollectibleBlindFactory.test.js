@@ -1,12 +1,12 @@
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const MockERC20 = artifacts.require('MockERC20');
 const ERC721ValuableCollectibleToken = artifacts.require('ERC721ValuableCollectibleToken');
-const TokenCollectibleBlindBoxSale = artifacts.require('TokenCollectibleBlindBoxSale');
-const TokenCollectibleBlindBoxFactory = artifacts.require('TokenCollectibleBlindBoxFactory');
+const BlindCollectiblePrizeBag = artifacts.require('BlindCollectiblePrizeBag');
+const BlindCollectiblePrizeBagFactory = artifacts.require('BlindCollectiblePrizeBagFactory');
 
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers').constants;
 
-contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, manager, creator, minter]) => {
+contract('BlindCollectiblePrizeBagFactory', ([alice, bob, carol, dave, edith, manager, creator, minter]) => {
   const MANAGER_ROLE = web3.utils.soliditySha3('MANAGER_ROLE');
   const MINTER_ROLE = web3.utils.soliditySha3('MINTER_ROLE');
   const CREATOR_ROLE =  web3.utils.soliditySha3("CREATOR_ROLE");
@@ -25,7 +25,7 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
         await this.collectible.addTokenType(`Domino ${i}`, `D${i}`, i + 20);
       }
 
-      this.factory = await TokenCollectibleBlindBoxFactory.new(this.collectible.address, this.token.address);
+      this.factory = await BlindCollectiblePrizeBagFactory.new(this.collectible.address, this.token.address);
       this.factory.grantRole(MANAGER_ROLE, manager);
       this.factory.grantRole(CREATOR_ROLE, creator);
   });
@@ -43,12 +43,12 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
 
     await expectRevert(
       factory.createSale("Test Sale", true, 0, 0, 100, ZERO_ADDRESS, { from:bob }),
-      "TokenCollectibleBlindBoxFactory: must have MANAGER or CREATOR role to create sale"
+      "BlindCollectiblePrizeBagFactory: must have MANAGER or CREATOR role to create sale"
     );
 
     await expectRevert(
       factory.createSaleWithPrizes("Test Sale", false, 0, 110, 100, ZERO_ADDRESS, [1], [100], { from:minter }),
-      "TokenCollectibleBlindBoxFactory: must have MANAGER or CREATOR role to create sale"
+      "BlindCollectiblePrizeBagFactory: must have MANAGER or CREATOR role to create sale"
     );
   });
 
@@ -61,7 +61,7 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
     assert.equal(await factory.saleCreator(0), alice);
     assert.equal(await factory.saleManaged(0), true);
 
-    let sale = await TokenCollectibleBlindBoxSale.at(await factory.sales(0));
+    let sale = await BlindCollectiblePrizeBag.at(await factory.sales(0));
     assert.equal(await sale.availableSupply(), '0');
     assert.equal(await sale.totalSupply(), '0');
     assert.equal(await sale.prizeToken(), collectible.address);
@@ -81,7 +81,7 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
     assert.equal(await factory.saleCreator(1), creator);
     assert.equal(await factory.saleManaged(1), false);
 
-    sale = await TokenCollectibleBlindBoxSale.at(await factory.sales(1));
+    sale = await BlindCollectiblePrizeBag.at(await factory.sales(1));
     assert.equal(await sale.availableSupply(), '110');
     assert.equal(await sale.totalSupply(), '110');
     assert.equal(await sale.prizeToken(), collectible.address);
@@ -117,22 +117,22 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
 
       await expectRevert(
         factory.setSaleTimes(0, 100, 10000, { from:bob }),
-        "TokenCollectibleBlindBoxFactory: not authorized"
+        "BlindCollectiblePrizeBagFactory: not authorized"
       );
 
       await expectRevert(
         factory.setSaleTimes(1, 100, 10000, { from:creator }),
-        "TokenCollectibleBlindBoxFactory: not authorized"
+        "BlindCollectiblePrizeBagFactory: not authorized"
       );
 
       await expectRevert(
         factory.setSaleTimes(2, 100, 10000, { from:manager }),
-        "TokenCollectibleBlindBoxFactory: not authorized"
+        "BlindCollectiblePrizeBagFactory: not authorized"
       );
 
       await expectRevert(
         factory.setSaleTimes(3, 100, 10000, { from:manager }),
-        "TokenCollectibleBlindBoxFactory: invalid saleId"
+        "BlindCollectiblePrizeBagFactory: invalid saleId"
       );
     });
 
@@ -140,12 +140,12 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
       const { token, collectible, factory } = this;
 
       await factory.setSaleTimes(0, 100, 10000, { from:creator });
-      let sale = await TokenCollectibleBlindBoxSale.at(await factory.sales(0));
+      let sale = await BlindCollectiblePrizeBag.at(await factory.sales(0));
       assert.equal(await sale.startTime(), '100');
       assert.equal(await sale.endTime(), '10000');
 
       await factory.setSaleTimes(1, 7, 70, { from:manager });
-      sale = await TokenCollectibleBlindBoxSale.at(await factory.sales(1));
+      sale = await BlindCollectiblePrizeBag.at(await factory.sales(1));
       assert.equal(await sale.startTime(), '7');
       assert.equal(await sale.endTime(), '70');
     });

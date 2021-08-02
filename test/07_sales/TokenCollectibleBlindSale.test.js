@@ -1,13 +1,13 @@
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const MockERC20 = artifacts.require('MockERC20');
 const ERC721ValuableCollectibleToken = artifacts.require('ERC721ValuableCollectibleToken');
-const TokenCollectibleBlindBoxSale = artifacts.require('TokenCollectibleBlindBoxSale');
+const BlindCollectiblePrizeBag = artifacts.require('BlindCollectiblePrizeBag');
 const MockERC165 = artifacts.require('MockERC165');
 const MockContract = artifacts.require('MockContract');
 
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers').constants;
 
-contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manager, minter, pauser, salter]) => {
+contract('BlindCollectiblePrizeBag', ([alice, bob, carol, dave, edith, manager, minter, pauser, salter]) => {
   const MANAGER_ROLE = web3.utils.soliditySha3('MANAGER_ROLE');
   const MINTER_ROLE = web3.utils.soliditySha3('MINTER_ROLE');
   const SALTER_ROLE = web3.utils.soliditySha3('SALTER_ROLE');
@@ -26,7 +26,7 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
         await this.collectible.addTokenType(`Domino ${i}`, `D${i}`, i + 20);
       }
 
-      this.sale = await TokenCollectibleBlindBoxSale.new(this.collectible.address, this.token.address, '100', ZERO_ADDRESS);
+      this.sale = await BlindCollectiblePrizeBag.new(this.collectible.address, this.token.address, '100', ZERO_ADDRESS);
       this.collectible.grantRole(MINTER_ROLE, this.sale.address);
       this.sale.grantRole(MANAGER_ROLE, manager);
   });
@@ -58,17 +58,17 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
     await expectRevert(
       sale.setTimes(100, 10000, { from:bob }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes"
+      "BlindCollectiblePrizeBag: must have MANAGER role to setTimes"
     );
 
     await expectRevert(
       sale.setTimes(12345, 0, { from:carol }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes"
+      "BlindCollectiblePrizeBag: must have MANAGER role to setTimes"
     );
 
     await expectRevert(
       sale.setTimes(0, 7777, { from:salter }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes"
+      "BlindCollectiblePrizeBag: must have MANAGER role to setTimes"
     );
   });
 
@@ -93,17 +93,17 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
     await expectRevert(
       sale.setRecipient(bob, { from:bob }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setRecipient"
+      "BlindCollectiblePrizeBag: must have MANAGER role to setRecipient"
     );
 
     await expectRevert(
       sale.setRecipient(dave, { from:carol }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setRecipient"
+      "BlindCollectiblePrizeBag: must have MANAGER role to setRecipient"
     );
 
     await expectRevert(
       sale.setRecipient(ZERO_ADDRESS, { from:dave }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to setRecipient"
+      "BlindCollectiblePrizeBag: must have MANAGER role to setRecipient"
     );
   });
 
@@ -125,12 +125,12 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
     await expectRevert(
       sale.createPrize(15, 1000, { from:bob }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to addPrize"
+      "BlindCollectiblePrizeBag: must have MANAGER role to addPrize"
     );
 
     await expectRevert(
       sale.createPrize(0, 10, { from:salter }),
-      "TokenCollectibleBlindBoxSale: must have MANAGER role to addPrize"
+      "BlindCollectiblePrizeBag: must have MANAGER role to addPrize"
     );
   });
 
@@ -139,12 +139,12 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
     await expectRevert(
       sale.createPrize(150, 1000, { from:alice }),
-      "TokenCollectibleBlindBoxSale: nonexistent tokenType"
+      "BlindCollectiblePrizeBag: nonexistent tokenType"
     );
 
     await expectRevert(
       sale.createPrize(30, 10, { from:manager }),
-      "TokenCollectibleBlindBoxSale: nonexistent tokenType"
+      "BlindCollectiblePrizeBag: nonexistent tokenType"
     );
   });
 
@@ -189,12 +189,12 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
       await expectRevert(
         sale.addSupply(0, 100, { from:bob }),
-        "TokenCollectibleBlindBoxSale: must have MANAGER role to addSupply"
+        "BlindCollectiblePrizeBag: must have MANAGER role to addSupply"
       );
 
       await expectRevert(
         sale.addSupply(1, 0, { from:salter }),
-        "TokenCollectibleBlindBoxSale: must have MANAGER role to addSupply"
+        "BlindCollectiblePrizeBag: must have MANAGER role to addSupply"
       );
     });
 
@@ -203,12 +203,12 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
       await expectRevert(
         sale.addSupply(3, 100, { from:alice }),
-        "TokenCollectibleBlindBoxSale: nonexistent pid"
+        "BlindCollectiblePrizeBag: nonexistent pid"
       );
 
       await expectRevert(
         sale.addSupply(5, 0, { from:manager }),
-        "TokenCollectibleBlindBoxSale: nonexistent pid"
+        "BlindCollectiblePrizeBag: nonexistent pid"
       );
     });
 
@@ -256,12 +256,12 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
       await expectRevert(
         sale.removeSupply(0, 100, false, { from:bob }),
-        "TokenCollectibleBlindBoxSale: must have MANAGER role to removeSupply"
+        "BlindCollectiblePrizeBag: must have MANAGER role to removeSupply"
       );
 
       await expectRevert(
         sale.removeSupply(1, 5, true, { from:salter }),
-        "TokenCollectibleBlindBoxSale: must have MANAGER role to removeSupply"
+        "BlindCollectiblePrizeBag: must have MANAGER role to removeSupply"
       );
     });
 
@@ -270,12 +270,12 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
       await expectRevert(
         sale.removeSupply(3, 100, false, { from:alice }),
-        "TokenCollectibleBlindBoxSale: nonexistent pid"
+        "BlindCollectiblePrizeBag: nonexistent pid"
       );
 
       await expectRevert(
         sale.removeSupply(5, 5, true, { from:manager }),
-        "TokenCollectibleBlindBoxSale: nonexistent pid"
+        "BlindCollectiblePrizeBag: nonexistent pid"
       );
     });
 
@@ -425,7 +425,7 @@ contract('TokenCollectibleBlindBoxSale', ([alice, bob, carol, dave, edith, manag
 
       await expectRevert(
         sale.purchaseDraws(bob, 1, 100, { from:bob }),
-        "TokenCollectibleBlindBoxSale: not enough supply"
+        "BlindCollectiblePrizeBag: not enough supply"
       );
     });
   });

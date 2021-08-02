@@ -1,3 +1,5 @@
+import "./IBlindSale.sol";
+
 /**
  * @dev A blind box sale with limited inventories of each prize.
  * Each purchase, for a fixed price, represents a draw from the box until the
@@ -6,32 +8,7 @@
  * prize packages, etc.).
  */
 pragma solidity ^0.8.0;
-interface IBlindBoxSale {
-    // @dev Returns the token address
-    function purchaseToken() external view returns (address);
-
-    // @dev The current price of a draw from the box (assuming any remain).
-    function drawPrice() external view returns (uint256);
-
-    // @dev Purchase the indicated number of draws, paying a maximum total price
-    // of `_maximumCost`.
-    // @param _to The address to award the prize(s).
-    // @param _draws The number of draws to purchase.
-    // @param _maximumCost The maximum price to pay for the draws (in total),
-    // in case prices fluctuate.
-    function purchaseDraws(address _to, uint256 _draws, uint256 _maximumCost) external;
-
-    // @dev Returns the number of draws by `_user` (thus far).
-    function drawCountBy(address _user) external view returns (uint256);
-
-    // @dev Returns the drawId of the specified draw based on user and index
-    // (from zero to {drawCountBy}).
-    function drawIdBy(address _user, uint256 _index) external view returns (uint256);
-
-    // @dev Returns the number of draws conducted thus far. drawIds will index
-    // from zero to this number.
-    function totalDraws() external view returns (uint256);
-
+interface IBlindSalePrizeBag is IBlindSale {
     // @dev Returns the number of draws currently available from this blind box.
     function availableSupply() external view returns (uint256);
 
@@ -61,6 +38,5 @@ interface IBlindBoxSale {
     // @dev Returns the prize won with the indicated draw (prizeId)
     function drawPrizeId(uint256 _did) external view returns (uint256);
 
-    event DrawPurchase(address indexed buyer, address indexed to, uint256 indexed drawId, uint256 price);
     event Draw(address indexed user, uint256 indexed drawId, uint256 indexed prizeId);
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "./TokenCollectibleBlindBoxSale.sol";
+import "./BlindCollectiblePrizeBag.sol";
 
 // A blind box prize pool factory allowing manager(s) to create and update
 // blind box sales. Be EXTREMELY careful of the manager list of this factory;
@@ -9,7 +9,7 @@ import "./TokenCollectibleBlindBoxSale.sol";
 // created by this factory, even if they were not a manager at the time the
 // box was created.
 pragma solidity ^0.8.0;
-contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
+contract BlindCollectiblePrizeBagFactory is Context, AccessControlEnumerable {
     using SafeERC20 for IERC20;
 
     // Role that can alter any setting on any blind box _ever_ created by this factory.
@@ -54,17 +54,17 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
     }
 
     function saleName(uint256 _saleId) external view returns (string memory name) {
-        require(_saleId < sales.length, "TokenCollectibleBlindBoxFactory: invalid saleId");
+        require(_saleId < sales.length, "BlindCollectiblePrizeBagFactory: invalid saleId");
         name = saleInfo[_saleId].name;
     }
 
     function saleCreator(uint256 _saleId) external view returns (address) {
-        require(_saleId < sales.length, "TokenCollectibleBlindBoxFactory: invalid saleId");
+        require(_saleId < sales.length, "BlindCollectiblePrizeBagFactory: invalid saleId");
         return saleInfo[_saleId].creator;
     }
 
     function saleManaged(uint256 _saleId) external view returns (bool) {
-        require(_saleId < sales.length, "TokenCollectibleBlindBoxFactory: invalid saleId");
+        require(_saleId < sales.length, "BlindCollectiblePrizeBagFactory: invalid saleId");
         return saleInfo[_saleId].managed;
     }
 
@@ -79,7 +79,7 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         address _recipient
     ) external returns (address sale) {
         address creator = _msgSender();
-        require(hasRole(MANAGER_ROLE, creator) || hasRole(CREATOR_ROLE, creator), "TokenCollectibleBlindBoxFactory: must have MANAGER or CREATOR role to create sale");
+        require(hasRole(MANAGER_ROLE, creator) || hasRole(CREATOR_ROLE, creator), "BlindCollectiblePrizeBagFactory: must have MANAGER or CREATOR role to create sale");
         sale = _createSale(creator, _name, _managed, _startTime, _endTime, _drawPrice, _recipient);
     }
 
@@ -94,64 +94,64 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         uint256[] calldata _prizeSupplies
     ) external returns (address sale) {
         address creator = _msgSender();
-        require(hasRole(MANAGER_ROLE, creator) || hasRole(CREATOR_ROLE, creator), "TokenCollectibleBlindBoxFactory: must have MANAGER or CREATOR role to create sale");
-        require(_tokenTypes.length == _prizeSupplies.length, "TokenCollectibleBlindBoxFactory: prize type and supply arrays must match length");
+        require(hasRole(MANAGER_ROLE, creator) || hasRole(CREATOR_ROLE, creator), "BlindCollectiblePrizeBagFactory: must have MANAGER or CREATOR role to create sale");
+        require(_tokenTypes.length == _prizeSupplies.length, "BlindCollectiblePrizeBagFactory: prize type and supply arrays must match length");
         sale = _createSale(creator, _name, _managed, _startTime, _endTime, _drawPrice, _recipient);
         for (uint256 i = 0; i < _tokenTypes.length; i++) {
-            TokenCollectibleBlindBoxSale(sale).createPrize(_tokenTypes[i], _prizeSupplies[i]);
+            BlindCollectiblePrizeBag(sale).createPrize(_tokenTypes[i], _prizeSupplies[i]);
         }
     }
 
     // management
 
     function setSaleManaged(uint256 _saleId, bool _managed) external {
-        require(_saleId < sales.length, "TokenCollectibleBlindBoxFactory: invalid saleId");
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxFactory: must have MANAGER role to setManaged");
+        require(_saleId < sales.length, "BlindCollectiblePrizeBagFactory: invalid saleId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBagFactory: must have MANAGER role to setManaged");
         saleInfo[_saleId].managed = _managed;
     }
 
     // recipient / funding options
 
     function setSaleRecipient(uint256 _saleId, address _recipient) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).setRecipient(_recipient);
+        BlindCollectiblePrizeBag(sales[_saleId]).setRecipient(_recipient);
     }
 
     function claimAllSaleProceeds(uint256 _saleId, address _to) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).claimAllProceeds(_to);
+        BlindCollectiblePrizeBag(sales[_saleId]).claimAllProceeds(_to);
     }
 
     function claimSaleProceeds(uint256 _saleId, address _to, uint256 _amount) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).claimProceeds(_to, _amount);
+        BlindCollectiblePrizeBag(sales[_saleId]).claimProceeds(_to, _amount);
     }
 
     // sale configuration
 
     function setDrawPrice(uint256 _saleId, uint256 _drawPrice) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).setDrawPrice(_drawPrice);
+        BlindCollectiblePrizeBag(sales[_saleId]).setDrawPrice(_drawPrice);
     }
 
     function setSaleTimes(uint256 _saleId, uint32 _startTime, uint32 _endTime) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).setTimes(_startTime, _endTime);
+        BlindCollectiblePrizeBag(sales[_saleId]).setTimes(_startTime, _endTime);
     }
 
     function createSalePrize(uint256 _saleId, uint256 _tokenType, uint256 _supply) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).createPrize(_tokenType, _supply);
+        BlindCollectiblePrizeBag(sales[_saleId]).createPrize(_tokenType, _supply);
     }
 
     function addSaleSupply(uint256 _saleId, uint256 _pid, uint256 _amount) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).addSupply(_pid, _amount);
+        BlindCollectiblePrizeBag(sales[_saleId]).addSupply(_pid, _amount);
     }
 
     function removeSaleSupply(uint256 _saleId, uint256 _pid, uint256 _amount, bool _zeroSafe) external onlyManagedBySender(_saleId) {
-        TokenCollectibleBlindBoxSale(sales[_saleId]).removeSupply(_pid, _amount, _zeroSafe);
+        BlindCollectiblePrizeBag(sales[_saleId]).removeSupply(_pid, _amount, _zeroSafe);
     }
 
     // internal functions
 
     modifier onlyManagedBySender(uint256 _saleId) {
-        require(_saleId < sales.length, "TokenCollectibleBlindBoxFactory: invalid saleId");
+        require(_saleId < sales.length, "BlindCollectiblePrizeBagFactory: invalid saleId");
         SaleInfo storage _saleInfo = saleInfo[_saleId];
-        require(_canManage(_saleInfo, _msgSender()), "TokenCollectibleBlindBoxFactory: not authorized");
+        require(_canManage(_saleInfo, _msgSender()), "BlindCollectiblePrizeBagFactory: not authorized");
         _;
     }
 
@@ -171,7 +171,7 @@ contract TokenCollectibleBlindBoxFactory is Context, AccessControlEnumerable {
         uint256 _drawPrice,
         address _recipient
     ) internal returns (address) {
-        TokenCollectibleBlindBoxSale sale = new TokenCollectibleBlindBoxSale(prizeToken, purchaseToken, _drawPrice, _recipient);
+        BlindCollectiblePrizeBag sale = new BlindCollectiblePrizeBag(prizeToken, purchaseToken, _drawPrice, _recipient);
         _seed = keccak256(abi.encodePacked(_seed, blockhash(block.number - 1), block.coinbase));
         sale.setSalt(_seed);
         sale.setTimes(_startTime, _endTime);

@@ -3,14 +3,15 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../interfaces/IBlindBoxCollectibleSale.sol";
+import "../interfaces/IBlindSalePrizeBag.sol";
+import "../interfaces/IBlindCollectibleSale.sol";
 import "../../../token/interfaces/IERC721TypeExchangeable.sol";
 import "../../../token/interfaces/IERC721Collectible.sol";
 
 // A blind box prize pool where each prize represents the minting of a particular
 // tokenType.
 pragma solidity ^0.8.0;
-contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlindBoxCollectibleSale {
+contract BlindCollectiblePrizeBag is Context, AccessControlEnumerable, IBlindSalePrizeBag, IBlindCollectibleSale {
     using SafeERC20 for IERC20;
 
     // Role that create new sales
@@ -79,14 +80,14 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     function purchaseDraws(address _to, uint256 _draws, uint256 _maximumCost) external override {
         require(
             startTime <= block.timestamp && (endTime == 0 || block.timestamp < endTime),
-            "TokenCollectibleBlindBoxSale: not active"
+            "BlindCollectiblePrizeBag: not active"
         );
-        require(_draws <= availableSupply, "TokenCollectibleBlindBoxSale: not enough supply");
+        require(_draws <= availableSupply, "BlindCollectiblePrizeBag: not enough supply");
 
         // determine payment
         address buyer = _msgSender();
         uint256 amount = _draws * drawPrice;
-        require(amount <= _maximumCost, "TokenCollectibleBlindBoxSale: too expensive");
+        require(amount <= _maximumCost, "BlindCollectiblePrizeBag: too expensive");
 
         // charge payment
         address paymentTo = recipient != address(0) ? recipient : address(this);
@@ -98,25 +99,25 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     }
 
     function setDrawPrice(uint256 _price) external {
-      require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to setDrawPrice");
+      require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to setDrawPrice");
       drawPrice = _price;
     }
 
     function claimAllProceeds(address _to) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to claimAllProceeds");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to claimAllProceeds");
         uint256 amount = IERC20(purchaseToken).balanceOf(address(this));
         IERC20(purchaseToken).transfer(_to, amount);
         // TODO emit
     }
 
     function claimProceeds(address _to, uint256 _amount) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to claimProceeds");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to claimProceeds");
         IERC20(purchaseToken).transfer(_to, _amount);
         // TODO emit
     }
 
     function setSalt(bytes32 salt) external {
-        require(hasRole(SALTER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have SALTER role to setSalt");
+        require(hasRole(SALTER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have SALTER role to setSalt");
         _salt = salt;
     }
 
@@ -141,59 +142,59 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     // @dev The available supply of prize `_pid`. Use {prizeCount} as limit of
     // enumeration.
     function availablePrizeSupply(uint256 _pid) external view override returns (uint256) {
-        require(_pid < prizeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent pid");
+        require(_pid < prizeInfo.length, "BlindCollectiblePrizeBag: nonexistent pid");
         return prizeInfo[_pid].supply;
     }
 
     // @dev The total supply of prize `_pid`, including already drawn. Use
     // {prizeCount} as limit of enumeration.
     function totalPrizeSupply(uint256 _pid) external view override returns (uint256) {
-        require(_pid < prizeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent pid");
+        require(_pid < prizeInfo.length, "BlindCollectiblePrizeBag: nonexistent pid");
         return prizeInfo[_pid].totalSupply;
     }
 
     // @dev The number of times this prize has been drawn (so far).
     function prizeDrawCount(uint256 _pid) external view override returns (uint256) {
-        require(_pid < prizeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent pid");
+        require(_pid < prizeInfo.length, "BlindCollectiblePrizeBag: nonexistent pid");
         return prizeDrawId[_pid].length;
     }
 
-    function prizeTokenType(uint256 _pid) external view override returns (uint256) {
-      require(_pid < prizeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent pid");
+    function prizeTokenType(uint256 _pid) external view returns (uint256) {
+      require(_pid < prizeInfo.length, "BlindCollectiblePrizeBag: nonexistent pid");
       return prizeInfo[_pid].tokenType;
     }
 
     function drawPrizeId(uint256 _did) external view override returns (uint256) {
-        require(_did < drawInfo.length, "TokenCollectibleBlindBoxSale: nonexistent did");
+        require(_did < drawInfo.length, "BlindCollectiblePrizeBag: nonexistent did");
         return drawInfo[_did].prizeId;
     }
 
     function drawTokenId(uint256 _did) external view override returns (uint256) {
-      require(_did < drawInfo.length, "TokenCollectibleBlindBoxSale: nonexistent did");
+      require(_did < drawInfo.length, "BlindCollectiblePrizeBag: nonexistent did");
       return drawInfo[_did].tokenId;
     }
 
     function drawTokenType(uint256 _did) external view override returns (uint256) {
-      require(_did < drawInfo.length, "TokenCollectibleBlindBoxSale: nonexistent did");
+      require(_did < drawInfo.length, "BlindCollectiblePrizeBag: nonexistent did");
       uint256 prizeId = drawInfo[_did].prizeId;
       return prizeInfo[prizeId].tokenType;
     }
 
     function setRecipient(address _recipient) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to setRecipient");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to setRecipient");
         recipient = _recipient;
     }
 
     function setTimes(uint32 _startTime, uint32 _endTime) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to setTimes");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to setTimes");
         startTime = _startTime;
         endTime = _endTime;
     }
 
     // TODO controls for changing price, start/stop times, prizes and supplies.
     function createPrize(uint256 _tokenType, uint256 _supply) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to addPrize");
-        require(_tokenType < IERC721Collectible(prizeToken).totalTypes(), "TokenCollectibleBlindBoxSale: nonexistent tokenType");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to addPrize");
+        require(_tokenType < IERC721Collectible(prizeToken).totalTypes(), "BlindCollectiblePrizeBag: nonexistent tokenType");
         prizeInfo.push(PrizeInfo({
             tokenType: _tokenType,
             supply: _supply,
@@ -206,8 +207,8 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     }
 
     function addSupply(uint256 _pid, uint256 _amount) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to addSupply");
-        require(_pid < prizeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent pid");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to addSupply");
+        require(_pid < prizeInfo.length, "BlindCollectiblePrizeBag: nonexistent pid");
         PrizeInfo storage prize = prizeInfo[_pid];
         prize.supply = prize.supply + _amount;
         prize.totalSupply = prize.totalSupply + _amount;
@@ -218,8 +219,8 @@ contract TokenCollectibleBlindBoxSale is Context, AccessControlEnumerable, IBlin
     }
 
     function removeSupply(uint256 _pid, uint256 _amount, bool _zeroSafe) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "TokenCollectibleBlindBoxSale: must have MANAGER role to removeSupply");
-        require(_pid < prizeInfo.length, "TokenCollectibleBlindBoxSale: nonexistent pid");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectiblePrizeBag: must have MANAGER role to removeSupply");
+        require(_pid < prizeInfo.length, "BlindCollectiblePrizeBag: nonexistent pid");
         PrizeInfo storage prize = prizeInfo[_pid];
         if (_zeroSafe && (prize.supply < _amount || availableSupply < _amount)) {
             _amount = prize.supply < availableSupply ? prize.supply : availableSupply;
