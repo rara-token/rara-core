@@ -38,5 +38,5 @@ interface ICollectibleConverter {
   // These token types will minted when the recipe is processed.
   function recipeOutput(uint256 _recipeId) external view returns (uint256[] memory tokenTypes);
 
-  event Conversion(address indexed owner, uint256 indexed recipeId, uint256 price, uint256[] tokenIdsIn, uint256[] tokenIdsOut);
+  event Conversion(address indexed owner, uint256 indexed recipeId, uint256 price, uint256[] tokenIdsIn, uint256[] tokenTypesIn, uint256[] tokenIdsOut);
 }

@@ -5,7 +5,7 @@ const BasicCollectibleConverter = artifacts.require('BasicCollectibleConverter')
 
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers').constants;
 
-contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, manager, creator, minter]) => {
+contract('BasicCollectibleConverter', ([alice, bob, carol, dave, edith, manager, creator, minter]) => {
   const MANAGER_ROLE = web3.utils.soliditySha3('MANAGER_ROLE');
   const MINTER_ROLE = web3.utils.soliditySha3('MINTER_ROLE');
 
@@ -415,6 +415,119 @@ contract('TokenCollectibleBlindBoxFactory', ([alice, bob, carol, dave, edith, ma
       assert.equal(await collectible.ownerOf(132), carol);
       assert.equal(await collectible.tokenType(132), '4');
       await verifyAmounts();
+    });
+
+    it("conversions emit Conversion event", async () => {
+      const { token, collectible, converter } = this;
+
+      const accounts = [alice, bob, carol];
+      let supply = 0;
+      let typeSupply = {};
+      let userBalance = {};
+      let userTypeSupply = {};
+      for (const account of accounts) {
+        // 0-11 match types
+        await collectible.massMint(account, [0, 1, 2, 3, 4, 5]);
+        await collectible.massMint(account, [6, 7, 8, 9, 10, 11]);
+
+        // pack with zeroes to get to 20
+        await collectible.massMint(account, [0, 0, 0, 0, 0, 0, 0, 0]);
+
+        // 20-31 match types + 20
+        await collectible.massMint(account, [0, 1, 2, 3, 4, 5]);
+        await collectible.massMint(account, [6, 7, 8, 9, 10, 11]);
+
+        // mint 1s to get to 1
+        await collectible.massMint(account, [1, 1, 1, 1, 1, 1, 1, 1]);
+
+        userBalance[account] = 40;
+        supply = supply + 40;
+        const ts = {};
+        ts[0] = ts[1] = 10;
+        for (let i = 2; i < 12; i++) {
+          ts[i] = 2;
+        }
+
+        userTypeSupply[account] = { ...ts };
+        for (let i = 0; i < 12; i++) {
+          typeSupply[i] = (typeSupply[i] || 0) + ts[i];
+        }
+
+        await token.mint(account, 100000, { from:minter });
+        await token.approve(converter.address, 100000, { from:account });
+        await collectible.setApprovalForAll(converter.address, true, { from:account });
+      }
+
+      // do some conversion for alice
+      let res = await converter.convert(0, 10000, [0, 1, 2, 3], { from:alice });   // cost 0
+      await expectEvent.inTransaction(res.tx, converter, "Conversion", {
+          owner: alice,
+          recipeId: '0',
+          price: '0',
+          tokenIdsIn: ['0', '1', '2', '3'],
+          tokenTypesIn: ['0', '1', '2', '3'],
+          tokenIdsOut: ['120']
+      });
+
+      res = await converter.convert(1, 10000, [4, 5, 6, 7], { from:alice });   // cost 0
+      await expectEvent.inTransaction(res.tx, converter, "Conversion", {
+          owner: alice,
+          recipeId: '1',
+          price: '100',
+          tokenIdsIn: ['4', '5', '6', '7'],
+          tokenTypesIn: ['4', '5', '6', '7'],
+          tokenIdsOut: ['121']
+      });
+
+      res = await converter.convert(2, 10000, [20, 24], { from:alice });   // cost 0
+      await expectEvent.inTransaction(res.tx, converter, "Conversion", {
+          owner: alice,
+          recipeId: '2',
+          price: '1500',
+          tokenIdsIn: ['20', '24'],
+          tokenTypesIn: ['0', '4'],
+          tokenIdsOut: ['122', '123', '124', '125']
+      });
+
+      // for bob
+      await expectRevert.unspecified(
+        converter.convert(3, 10000, [41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51], { from:alice })
+      )
+      res = await converter.convert(3, 10000, [41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51], { from:bob });   // cost 0
+      await expectEvent.inTransaction(res.tx, converter, "Conversion", {
+          owner: bob,
+          recipeId: '3',
+          price: '0',
+          tokenIdsIn: ['41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51'],
+          tokenTypesIn: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'],
+          tokenIdsOut: ['126', '127', '128', '129', '130']
+      });
+
+      res = await converter.convert(4, 10000, [126, 127, 128, 129], { from:bob });   // cost 0
+      await expectEvent.inTransaction(res.tx, converter, "Conversion", {
+          owner: bob,
+          recipeId: '4',
+          price: '0',
+          tokenIdsIn: ['126', '127', '128', '129'],
+          tokenTypesIn: ['0', '0', '0', '0'],
+          tokenIdsOut: ['131']
+      });
+
+      // for carol
+      await expectRevert(
+        converter.convert(5, 10000, [80, 81, 82, 83], { from:carol }),
+        "BasicCollectibleConverter: unavailable"
+      );
+
+      res = await converter.convert(6, 10000, [80, 81, 101, 102], { from:carol });
+      await expectEvent.inTransaction(res.tx, converter, "Conversion", {
+          owner: carol,
+          recipeId: '6',
+          price: '0',
+          tokenIdsIn: ['80', '81', '101', '102'],
+          tokenTypesIn: ['0', '1', '1', '2'],
+          tokenIdsOut: ['132']
+      });
     });
   })
 });

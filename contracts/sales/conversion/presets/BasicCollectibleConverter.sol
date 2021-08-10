@@ -55,15 +55,17 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
     // @param _draws The number of draws to purchase.
     // @param _maximumCost The maximum price to pay for the draws (in total),
     // in case prices fluctuate.
-    function convert(uint256 _recipeId, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) external override returns (uint256[] memory tokenIdsOut) {
+    function convert(uint256 _recipeId, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) external override virtual returns (uint256[] memory tokenIdsOut) {
         require(_recipeId < recipeInfo.length, "BasicCollectibleConverter: nonexistent recipe");
         RecipeInfo storage recipe = recipeInfo[_recipeId];
         require(active && recipe.available, "BasicCollectibleConverter: unavailable");
-        require(_supportsParameters(recipe, _maximumCost, _tokenIdsIn), "BasicCollectibleConverter: invalid parameters");
+        (bool supported, uint256[] memory tokenTypesIn) = _supportsParameters(recipe, _maximumCost, _tokenIdsIn);
+        require(supported, "BasicCollectibleConverter: invalid parameters");
 
-        address buyer = _msgSender();
+
 
         // charge payment
+        address buyer = _msgSender();
         if (recipe.price > 0) {
             address paymentTo = recipient != address(0) ? recipient : address(this);
             IERC20(purchaseToken).safeTransferFrom(buyer, paymentTo, recipe.price);
@@ -72,46 +74,48 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
         // note: we haven't checked whether the caller actually owns the tokens
         // indicated; this is verified by the token contract during the exchange call
         tokenIdsOut = IERC721TypeExchangeable(token).exchange(buyer, _tokenIdsIn, recipe.tokenTypesOut);
-        emit Conversion(buyer, _recipeId, recipe.price, _tokenIdsIn, tokenIdsOut);
+        emit Conversion(buyer, _recipeId, recipe.price, _tokenIdsIn, tokenTypesIn, tokenIdsOut);
     }
 
     // @dev a quick check for whether the indicated recipe is supported for
     // the specified `_maximumCost` and `tokenIdsIn`.
     // Does not perform ownership checks or whether the caller has the funds to
     // pay their `_maximumCost`, just whether the input parameters look good.
-    function canConvert(uint256 _recipeId, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) external view override returns (bool) {
+    function canConvert(uint256 _recipeId, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) external view override virtual returns (bool) {
         require(_recipeId < recipeInfo.length, "BasicCollectibleConverter: nonexistent recipe");
         RecipeInfo storage recipe = recipeInfo[_recipeId];
-        return active && recipe.available && _supportsParameters(recipe, _maximumCost, _tokenIdsIn);
+        if (!active || !recipe.available) { return false; }
+
+        (bool supported,) = _supportsParameters(recipe, _maximumCost, _tokenIdsIn);
+        return supported;
     }
 
-    function _supportsParameters(RecipeInfo storage _recipe, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) internal view returns (bool supported) {
-        uint256 length = _recipe.tokenTypesIn.length;
+    function _supportsParameters(RecipeInfo storage _recipe, uint256 _maximumCost, uint256[] calldata _tokenIdsIn) internal view returns (bool supported, uint256[] memory tokenTypes) {
+        uint256 length = _tokenIdsIn.length;
         supported = (
             _recipe.price <= _maximumCost
-            && _tokenIdsIn.length == length
+            && _recipe.tokenTypesIn.length == length
         );
 
         // check token types
-        if (supported) {
-            // collect types
-            uint256[] memory inputTypes = new uint[](length);
-            for (uint256 i = 0; i < length; i++) {
-                inputTypes[i] = IERC721Collectible(token).tokenType(_tokenIdsIn[i]);
-            }
+        // collect types
+        tokenTypes = new uint[](length);
+        uint256[] memory processTypes = new uint[](length);
+        for (uint256 i = 0; i < length; i++) {
+            processTypes[i] = tokenTypes[i] = IERC721Collectible(token).tokenType(_tokenIdsIn[i]);
+        }
 
-            // for each type needed, make sure it's present in the inputs.
-            // replace "used" types from the end of the array.
-            for (uint256 i = 0; i < length && supported; i++) {
-                uint256 tokenType = _recipe.tokenTypesIn[i];
-                uint256 limit = length - i;
-                for (uint256 j = 0; j < limit; j++) {
-                    if (inputTypes[j] == tokenType) {
-                        inputTypes[j] = inputTypes[limit - 1];
-                        break;
-                    } else if (j == limit - 1) {
-                        supported = false;
-                    }
+        // for each type needed, make sure it's present in the inputs.
+        // replace "used" types from the end of the array.
+        for (uint256 i = 0; i < length && supported; i++) {
+            uint256 tokenType = _recipe.tokenTypesIn[i];
+            uint256 limit = length - i;
+            for (uint256 j = 0; j < limit; j++) {
+                if (processTypes[j] == tokenType) {
+                    processTypes[j] = processTypes[limit - 1];
+                    break;
+                } else if (j == limit - 1) {
+                    supported = false;
                 }
             }
         }
@@ -185,7 +189,15 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
     }
 
     // TODO controls for changing price, start/stop times, prizes and supplies.
-    function createRecipe(uint256[] calldata _tokenTypesIn, uint256[] calldata _tokenTypesOut, uint256 _price, bool _available) external {
+    function createRecipe(
+        uint256[] calldata _tokenTypesIn,
+        uint256[] calldata _tokenTypesOut,
+        uint256 _price,
+        bool _available
+    )
+    public
+    virtual
+    returns (uint256 _recipeId) {
         require(hasRole(MANAGER_ROLE, _msgSender()), "BasicCollectibleConverter: must have MANAGER role to createRecipe");
 
         // verify token types exist
@@ -198,7 +210,7 @@ contract BasicCollectibleConverter is Context, AccessControlEnumerable, ICollect
         }
 
         // create
-        uint256 _recipeId = recipeInfo.length;
+        _recipeId = recipeInfo.length;
         recipeInfo.push(RecipeInfo({
             price: _price,
             available: _available,
