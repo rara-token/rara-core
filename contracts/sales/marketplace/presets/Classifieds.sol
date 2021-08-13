@@ -15,7 +15,13 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
  * From https://github.com/HQ20/contracts/blob/master/contracts/classifieds/Classifieds.sol
  */
 contract Classifieds {
-    event TradeStatusChange(uint256 ad, bytes32 status);
+    event TradeStatusChange(
+        uint256 indexed ad,
+        bytes32 status,
+        address indexed poster,
+        uint256 indexed item,
+        uint256 price
+    );
 
     IERC20 currencyToken;
     IERC721 itemToken;
@@ -78,7 +84,13 @@ contract Classifieds {
             status: "Open"
         });
         tradeCounter += 1;
-        emit TradeStatusChange(tradeCounter - 1, "Open");
+        emit TradeStatusChange(
+            tradeCounter - 1,
+            "Open",
+            msg.sender,
+            _item,
+            _price
+        );
     }
 
     /**
@@ -96,7 +108,13 @@ contract Classifieds {
         currencyToken.transferFrom(msg.sender, trade.poster, trade.price);
         itemToken.transferFrom(address(this), msg.sender, trade.item);
         trades[_trade].status = "Executed";
-        emit TradeStatusChange(_trade, "Executed");
+        emit TradeStatusChange(
+            _trade,
+            "Executed",
+            trade.poster,
+            trade.item,
+            trade.price
+        );
     }
 
     /**
@@ -115,6 +133,12 @@ contract Classifieds {
         require(trade.status == "Open", "Trade is not Open.");
         itemToken.transferFrom(address(this), trade.poster, trade.item);
         trades[_trade].status = "Cancelled";
-        emit TradeStatusChange(_trade, "Cancelled");
+        emit TradeStatusChange(
+            _trade,
+            "Cancelled",
+            trade.poster,
+            trade.item,
+            trade.price
+        );
     }
 }
