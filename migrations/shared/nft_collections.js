@@ -160,8 +160,8 @@ module.exports = exports = ({ network, web3 }) => {
   values['collections'] = values['collection'] = collections;
 
   let jcStartTime = {
-    bsc: 1627416000 + ONE_DAY_SECONDS * 2,   // approx 11 AM PDT 7/29
-    bsc_test: 1627416000,  //  approx 11 AM PDD 7/27
+    bsc: 1627912800,   // approx 10 AM EDT 8/2
+    bsc_test: 1627416000,  //  approx 11 AM EDT 7/27
     test: 1627416000
   }[network];
 

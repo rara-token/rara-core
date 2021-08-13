@@ -1,4 +1,4 @@
-const RaraCollectibleBlindBoxFactory = artifacts.require("RaraCollectibleBlindBoxFactory");
+const RaraCollectiblePrizeBagFactory = artifacts.require("RaraCollectiblePrizeBagFactory");
 const RaraCollectible = artifacts.require("RaraCollectible");
 
 const values = require('./shared/values');
@@ -11,16 +11,19 @@ module.exports = function (deployer, network, accounts) {
   const { blindBoxes } = nft_collections({ network, web3 });
 
   deployer.then(async () => {
-    const factory = await RaraCollectibleBlindBoxFactory.deployed();
+    const factory = await RaraCollectiblePrizeBagFactory.deployed();
     const collectible = await RaraCollectible.deployed();
 
     let prevCount = Number((await factory.saleCount()).toString());
-    for (const bb of blindBoxes) {
+    for (let i = startAt; i < blindBoxes.length; i++) {
+      const bb = blindBoxes[i];
       const saleId = bb.saleId;
       if (saleId < startAt) {
         console.log(`Skipping saleId ${saleId}: ${bb.name}. Not yet at startAt.`);
       } else if (saleId < prevCount) {
-        console.log(`Skipping saleId ${saleId}: ${bb.name}. Exists as ${await factory.saleName(saleId)}`);
+        const sale = await factory.saleName(saleId);
+        console.log(`Skipping saleId ${saleId}: ${bb.name}. Exists as ${sale}`);
+        console.log(`  given address ${await factory.sales(saleId)}`);
       } else if (saleId > prevCount) {
         console.log(`ERROR: contract has ${prevCount} sales; couldn't add new sale ${JSON.stringify(bb)}`);
         throw new Error(`Couldn't do it`);

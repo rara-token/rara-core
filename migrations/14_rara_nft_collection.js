@@ -1,5 +1,5 @@
 const RaraCollectible = artifacts.require("RaraCollectible");
-const RaraCollectibleBlindBoxFactory = artifacts.require("RaraCollectibleBlindBoxFactory");
+const RaraCollectiblePrizeBagFactory = artifacts.require("RaraCollectiblePrizeBagFactory");
 const RaraToken = artifacts.require("RaraToken");
 const RaraCollectibleConverter = artifacts.require("RaraCollectibleConverter");
 const RaraCollectibleClassifieds = artifacts.require("RaraCollectibleClassifieds");
@@ -40,7 +40,8 @@ module.exports = function (deployer, network, accounts) {
     await deployer.deploy(RaraCollectible, "https://www.rara.farm/nft/");
     const collectible = await RaraCollectible.deployed();
 
-    await deployer.deploy(RaraCollectibleBlindBoxFactory, collectible.address, rara.address);
+    console.log(`deploying collectible with arguments ${collectible.address}, ${rara.address}`);
+    await deployer.deploy(RaraCollectiblePrizeBagFactory, collectible.address, rara.address);
 
     await deployer.deploy(RaraCollectibleConverter, collectible.address, rara.address, "0x0000000000000000000000000000000000000000");
     const converter = await RaraCollectibleConverter.deployed();
