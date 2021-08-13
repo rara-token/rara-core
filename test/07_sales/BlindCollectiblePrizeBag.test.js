@@ -350,8 +350,6 @@ contract('BlindCollectiblePrizeBag', ([alice, bob, carol, dave, edith, manager, 
       for (let i  = 0; i < 5; i++) {
         let prizeDrawn = Number((await sale.drawPrizeId(i)).toString());
         remainingCounts[prizeDrawn] = remainingCounts[prizeDrawn] - 1;
-
-        console.log(`draw ${i} prize ${await sale.drawPrizeId(i)} token type ${await sale.drawTokenType(i)} drawTokenId ${await sale.drawTokenId(i)}`);
       }
 
       for (let i = 0; i < counts.length; i++) {
@@ -377,8 +375,6 @@ contract('BlindCollectiblePrizeBag', ([alice, bob, carol, dave, edith, manager, 
       for (let i  = 0; i < 5; i++) {
         let prizeDrawn = Number((await sale.drawPrizeId(i)).toString());
         remainingCounts[prizeDrawn] = remainingCounts[prizeDrawn] - 1;
-
-        console.log(`draw ${i} prize ${await sale.drawPrizeId(i)} token type ${await sale.drawTokenType(i)} drawTokenId ${await sale.drawTokenId(i)}`);
       }
 
       for (let i = 0; i < counts.length; i++) {
@@ -471,8 +467,6 @@ contract('BlindCollectiblePrizeBag', ([alice, bob, carol, dave, edith, manager, 
         ownedTypeBalance[prizeType] = ownedTypeBalance[prizeType] + 1;
         prizeTypes.push(prizeType);
         if (!uniquePrizeTypes.includes(prizeType)) uniquePrizeTypes.push(prizeType);
-
-        console.log(`draw ${i} prize ${await sale.drawPrizeId(i)} token type ${await sale.drawTokenType(i)} drawTokenId ${await sale.drawTokenId(i)}`);
       }
 
       for (let i = 0; i < counts.length; i++) {

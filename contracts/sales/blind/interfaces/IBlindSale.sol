@@ -8,12 +8,20 @@
  * -- Blind Box / Prize Bag: a limited supply of various prizes is available, and each drawId
  *    results in the selection of an available prize according to the quantities left.
  * -- Gacha Game: purchase draws in a batch, then "reveal" them. Each "reveal"
- *    step produces a new item from a set of probabilities which may change over time.
+ *    step produces a new item from a set of probabilities which may change over tiem.
  */
 pragma solidity ^0.8.0;
 interface IBlindSale {
     // @dev Returns the token address
     function purchaseToken() external view returns (address);
+
+    // @dev Returns the number of draws currently available from this blind box.
+    // The specifics of what this means differ between implementations -- the
+    // amount available across all customers, the most one customer can purchase,
+    // etc., as well as whether this quantity changes over time or in response
+    // to purchases. The only hard and fast rule is that {purchaseDraws} cannot
+    // be used to buy more draws than this number.
+    function availableSupply() external view returns (uint256);
 
     // @dev The current price of a draw from the box (assuming any remain).
     function drawPrice() external view returns (uint256);

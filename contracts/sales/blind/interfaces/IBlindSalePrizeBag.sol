@@ -9,9 +9,6 @@ import "./IBlindSale.sol";
  */
 pragma solidity ^0.8.0;
 interface IBlindSalePrizeBag is IBlindSale {
-    // @dev Returns the number of draws currently available from this blind box.
-    function availableSupply() external view returns (uint256);
-
     // @dev Returns the total number of draws available from this box, including
     // those already drawn.
     function totalSupply() external view returns (uint256);

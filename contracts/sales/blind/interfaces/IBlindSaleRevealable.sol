@@ -19,4 +19,8 @@ interface IBlindSaleRevealable is IBlindSale {
     // @param _to The address to award the prize(s).
     // @param _drawIds The _drawIds, owned by the sender, to reveal in this transaction.
     function revealDraws(address _to, uint256[] calldata _drawIds) external;
+
+    function drawRevealed(uint256 _drawId) external view returns (bool);
+
+    function drawRevealable(uint256 _drawId) external view returns (bool);
 }
