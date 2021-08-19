@@ -182,7 +182,7 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
             require(drawId < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
 
             DrawInfo storage draw = drawInfo[drawId];
-            require(drawInfo[i].user == _msgSender(), "BlindCollectibleGachaRack: drawId not owned by caller");
+            require(draw.user == _msgSender(), "BlindCollectibleGachaRack: drawId not owned by caller");
 
             uint256 prizeId = prizeIds[i] = _peekReveal(drawId);
             tokenTypes[i] = prizeInfo[draw.gameId][prizeId].tokenType;

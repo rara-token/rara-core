@@ -694,7 +694,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
       await assertAssignments();
     });
 
-    it('purchaseDraws selects a prize and mints a token', async () => {
+    it('revealDraws selects a prize and mints a token', async () => {
       const { token, collectible, sale } = this;
 
       await token.transfer(bob, '1000', { from:minter });
@@ -762,7 +762,98 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
       }
     });
 
-    it('purchaseDraws selects a prize and mints a token when using a non-default game', async () => {
+    it('revealDraws selects a prize and mints a token when multiple users have purchased draws', async () => {
+      const { token, collectible, sale } = this;
+
+      const buyers = [alice, bob];
+
+      const revealBlocks = []
+      for (const buyer of buyers) {
+        await token.transfer(buyer, '1000', { from:minter });
+        await token.approve(sale.address, '1000', { from:buyer });
+
+        for (let i = 0; i < 5; i++) {
+          await sale.purchaseDraws(buyer, 1, 100, { from:buyer });
+          revealBlocks.push(await web3.eth.getBlockNumber() + 15);
+        }
+      }
+
+      assert.equal(await sale.availableSupply(), '40');
+      assert.equal(await sale.drawPrice(), '100');
+      assert.equal(await sale.currentGameFor(alice), '0');
+      assert.equal(await sale.availableSupplyForUser(alice), '40');
+      assert.equal(await sale.currentGame(), '0');
+
+      assert.equal(await sale.totalDraws(), '10');
+      assert.equal(await sale.gameDrawCount(0), '10');
+      assert.equal(await sale.gameDrawCount(1), '0');
+
+      assert.equal(await sale.drawCountBy(alice), '5');
+      assert.equal(await sale.drawCountBy(bob), '5');
+      assert.equal(await sale.drawCountBy(carol), '0');
+      for (let i = 0; i < 10; i++) {
+        const buyer = i < 5 ? alice : bob;
+        const index = i < 5 ? i : i - 5;
+        assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
+        assert.equal(await sale.drawGameId(i), `0`);
+        assert.equal(await sale.drawRevealed(i), false);
+        assert.equal(await sale.drawRevealable(i), false);
+        assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
+
+        await expectRevert(
+          sale.revealDraws(buyer, [i], { from:buyer }),
+          "BlindCollectibleGachaRack: not revealable"
+        );
+      }
+
+      await time.advanceBlockTo(revealBlocks[0] + 15);
+      for (let i = 0; i < 10; i++) {
+        const buyer = i < 5 ? alice : bob;
+        const index = i < 5 ? i : i - 5;
+        assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
+        assert.equal(await sale.drawGameId(i), `0`);
+        assert.equal(await sale.drawRevealed(i), false);
+        assert.equal(await sale.drawRevealable(i), true);
+        assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
+      }
+
+      assert.equal(await collectible.totalSupply(), '0');
+      assert.equal(await collectible.balanceOf(alice), '0');
+      assert.equal(await collectible.balanceOf(bob), '0');
+
+      await expectRevert(
+        sale.revealDraws(bob, [0], { from:bob }),
+        "BlindCollectibleGachaRack: drawId not owned by caller"
+      );
+
+      await expectRevert(
+        sale.revealDraws(alice, [5], { from:alice }),
+        "BlindCollectibleGachaRack: drawId not owned by caller"
+      );
+
+      await sale.revealDraws(alice, [0, 1, 2, 3, 4], { from:alice });
+      assert.equal(await collectible.totalSupply(), '5');
+      assert.equal(await collectible.balanceOf(alice), '5');
+      assert.equal(await collectible.balanceOf(bob), '0');
+      await sale.revealDraws(bob, [5, 6, 7, 8, 9], { from:bob });
+      assert.equal(await collectible.totalSupply(), '10');
+      assert.equal(await collectible.balanceOf(alice), '5');
+      assert.equal(await collectible.balanceOf(bob), '5');
+      for (let i = 0; i < 10; i++) {
+        const buyer = i < 5 ? alice : bob;
+        const index = i < 5 ? i : i - 5;
+        assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
+        assert.equal(await sale.drawGameId(i), `0`);
+        assert.equal(await sale.drawRevealed(i), true);
+        assert.equal(await sale.drawRevealable(i), true);
+        assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
+        const tokenId = await collectible.tokenOfOwnerByIndex(buyer, index);
+        assert.equal(await sale.drawTokenId(i), tokenId.toString());
+        assert.equal(await sale.drawTokenType(i), (await collectible.tokenType(tokenId)).toString());
+      }
+    });
+
+    it('revealDraws selects a prize and mints a token when using a non-default game', async () => {
       const { token, collectible, sale } = this;
 
       await token.transfer(bob, '1000', { from:minter });
