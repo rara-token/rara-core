@@ -748,13 +748,17 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
       assert.equal(await collectible.totalSupply(), '0');
       assert.equal(await collectible.balanceOf(bob), '0');
       await sale.revealDraws(bob, [0, 1, 2, 3, 4], { from:bob });
+      await expectRevert(
+        sale.revealDraws(bob, [0, 1, 2, 3, 4], { from:bob }),
+        "BlindCollectibleGachaRack: drawId already revealed"
+      );
       assert.equal(await collectible.totalSupply(), '5');
       assert.equal(await collectible.balanceOf(bob), '5');
       for (let i = 0; i < 5; i++) {
         assert.equal(await sale.drawIdBy(bob, i), `${i}`);
         assert.equal(await sale.drawGameId(i), `0`);
         assert.equal(await sale.drawRevealed(i), true);
-        assert.equal(await sale.drawRevealable(i), true);
+        assert.equal(await sale.drawRevealable(i), false);
         assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
         const tokenId = await collectible.tokenOfOwnerByIndex(bob, i);
         assert.equal(await sale.drawTokenId(i), tokenId.toString());
@@ -835,17 +839,25 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
       assert.equal(await collectible.totalSupply(), '5');
       assert.equal(await collectible.balanceOf(alice), '5');
       assert.equal(await collectible.balanceOf(bob), '0');
+      await expectRevert(
+        sale.revealDraws(bob, [0, 1, 2, 3, 4], { from:alice }),
+        "BlindCollectibleGachaRack: drawId already revealed"
+      );
       await sale.revealDraws(bob, [5, 6, 7, 8, 9], { from:bob });
       assert.equal(await collectible.totalSupply(), '10');
       assert.equal(await collectible.balanceOf(alice), '5');
       assert.equal(await collectible.balanceOf(bob), '5');
+      await expectRevert(
+        sale.revealDraws(bob, [5, 6, 7, 8, 9], { from:bob }),
+        "BlindCollectibleGachaRack: drawId already revealed"
+      );
       for (let i = 0; i < 10; i++) {
         const buyer = i < 5 ? alice : bob;
         const index = i < 5 ? i : i - 5;
         assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
         assert.equal(await sale.drawGameId(i), `0`);
         assert.equal(await sale.drawRevealed(i), true);
-        assert.equal(await sale.drawRevealable(i), true);
+        assert.equal(await sale.drawRevealable(i), false);
         assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
         const tokenId = await collectible.tokenOfOwnerByIndex(buyer, index);
         assert.equal(await sale.drawTokenId(i), tokenId.toString());
@@ -916,7 +928,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
         assert.equal(await sale.drawIdBy(bob, i), `${i}`);
         assert.equal(await sale.drawGameId(i), `1`);
         assert.equal(await sale.drawRevealed(i), true);
-        assert.equal(await sale.drawRevealable(i), true);
+        assert.equal(await sale.drawRevealable(i), false);
         assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
         const tokenId = await collectible.tokenOfOwnerByIndex(bob, i);
         assert.equal(await sale.drawTokenId(i), tokenId.toString());

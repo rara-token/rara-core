@@ -176,31 +176,30 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
         uint256[] memory prizeIds = new uint[](_drawIds.length);
         uint256[] memory tokenTypes = new uint[](_drawIds.length);
 
-        // verify and reveal prizes
+        // verify and reveal prizes; update everything except tokenId
         for (uint256 i = 0; i < length; i++) {
             uint256 drawId = _drawIds[i];
             require(drawId < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
 
             DrawInfo storage draw = drawInfo[drawId];
             require(draw.user == _msgSender(), "BlindCollectibleGachaRack: drawId not owned by caller");
+            require(!draw.revealed, "BlindCollectibleGachaRack: drawId already revealed");
 
             uint256 prizeId = prizeIds[i] = _peekReveal(drawId);
             tokenTypes[i] = prizeInfo[draw.gameId][prizeId].tokenType;
-        }
 
-        // mint and write
-        uint256[] memory tokenIds = IERC721TypeExchangeable(prizeToken).massMint(_to, tokenTypes);
-        for (uint256 i = 0; i < length; i++) {
-            uint256 drawId  = _drawIds[i];
+            draw.prizeId = prizeId;
+            draw.revealed = true; // update here so we don't allow duplicates
 
-            DrawInfo storage draw = drawInfo[drawId];
-            draw.prizeId = prizeIds[i];
-            draw.tokenId = tokenIds[i];
-            draw.revealed = true;
-
-            prizeDrawId[draw.gameId][prizeIds[i]].push(drawId);
+            prizeDrawId[draw.gameId][prizeId].push(drawId);
 
             emit Draw(_to, drawId, draw.gameId, draw.prizeId);
+        }
+
+        // mint, write tokenIds, emit Events
+        uint256[] memory tokenIds = IERC721TypeExchangeable(prizeToken).massMint(_to, tokenTypes);
+        for (uint256 i = 0; i < length; i++) {
+            drawInfo[_drawIds[i]].tokenId = tokenIds[i];
         }
     }
 
@@ -360,7 +359,7 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
 
     function drawRevealable(uint256 _did) external view override returns (bool) {
         require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
-        return drawInfo[_did].revealBlock <= block.number;
+        return drawInfo[_did].revealBlock <= block.number && !drawInfo[_did].revealed;
     }
 
     function drawRevealableBlock(uint256 _did) external view returns (uint256) {
