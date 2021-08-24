@@ -1,14 +1,14 @@
 const { expectRevert, expectEvent, time } = require('@openzeppelin/test-helpers');
 const MockERC20 = artifacts.require('MockERC20');
 const ERC721ValuableCollectibleToken = artifacts.require('ERC721ValuableCollectibleToken');
-const BlindCollectibleManagedGachaRack = artifacts.require('BlindCollectibleManagedGachaRack');
+const BlindCollectibleManagedFlowGachaRack = artifacts.require('BlindCollectibleManagedFlowGachaRack');
 const MockERC165 = artifacts.require('MockERC165');
 const MockContract = artifacts.require('MockContract');
 const EIP210 = artifacts.require('EIP210');
 
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers').constants;
 
-contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, fred, manager, minter, salter]) => {
+contract('BlindCollectibleManagedFlowGachaRack', ([alice, bob, carol, dave, edith, fred, manager, minter, salter]) => {
   const MANAGER_ROLE = web3.utils.soliditySha3('MANAGER_ROLE');
   const MINTER_ROLE = web3.utils.soliditySha3('MINTER_ROLE');
   const SALTER_ROLE = web3.utils.soliditySha3('SALTER_ROLE');
@@ -33,7 +33,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
       }
 
       this.eip210 = await EIP210.new();
-      this.sale = await BlindCollectibleManagedGachaRack.new(this.collectible.address, this.token.address, this.eip210.address, ZERO_ADDRESS);
+      this.sale = await BlindCollectibleManagedFlowGachaRack.new(this.collectible.address, this.token.address, this.eip210.address, ZERO_ADDRESS);
       this.collectible.grantRole(MINTER_ROLE, this.sale.address);
       this.sale.grantRole(MANAGER_ROLE, manager);
       this.sale.grantRole(SALTER_ROLE, salter);
@@ -101,7 +101,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
         [],
         { from:bob }
       ),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to create game"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to create game"
     );
 
     await expectRevert(
@@ -116,7 +116,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
         [],
         { from:salter }
       ),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to create game"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to create game"
     );
   });
 
@@ -135,12 +135,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
     await expectRevert(
       sale.createUnactivatedGame(100, 15, 50, 0, 1, 0, [0], [], { from:alice }),
-      "BlindCollectibleManagedGachaRack: prize types and weights must match length"
+      "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length"
     );
 
     await expectRevert(
       sale.createUnactivatedGame(100, 15, 50, 0, 1, 0, [0, 1], [10, 10, 30], { from:manager }),
-      "BlindCollectibleManagedGachaRack: prize types and weights must match length"
+      "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length"
     );
 
     await expectRevert(
@@ -215,7 +215,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
         [],
         { from:bob }
       ),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to create game"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to create game"
     );
 
     await expectRevert(
@@ -231,7 +231,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
         [],
         { from:salter }
       ),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to create game"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to create game"
     );
   });
 
@@ -250,12 +250,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
     await expectRevert(
       sale.createActivatedGame(false, 100, 15, 50, 0, 1, 0, [0], [], { from:alice }),
-      "BlindCollectibleManagedGachaRack: prize types and weights must match length"
+      "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length"
     );
 
     await expectRevert(
       sale.createActivatedGame(true, 100, 15, 50, 0, 1, 0, [0, 1], [10, 10, 30], { from:manager }),
-      "BlindCollectibleManagedGachaRack: prize types and weights must match length"
+      "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length"
     );
 
     await expectRevert(
@@ -321,12 +321,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
     await expectRevert(
       sale.createPrizes(0, [8], [10], { from:bob }),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to createPrizes"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to createPrizes"
     );
 
     await expectRevert(
       sale.createPrizes(0, [8], [10], { from:salter }),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to createPrizes"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to createPrizes"
     );
   });
 
@@ -335,24 +335,24 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
     await expectRevert(
       sale.createPrizes(0, [8], [10], { from:alice }),
-      "BlindCollectibleManagedGachaRack: invalid gameId"
+      "BlindCollectibleManagedFlowGachaRack: invalid gameId"
     );
 
     await sale.createUnactivatedGame(100, 15, 50, 0, 1, 0, [2, 3], [10, 30], { from:alice });
 
     await expectRevert(
       sale.createPrizes(1, [8], [10], { from:manager }),
-      "BlindCollectibleManagedGachaRack: invalid gameId"
+      "BlindCollectibleManagedFlowGachaRack: invalid gameId"
     );
 
     await expectRevert(
       sale.createPrizes(0, [8], [10, 20], { from:alice }),
-      "BlindCollectibleManagedGachaRack: prize types and weights must match length"
+      "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length"
     );
 
     await expectRevert(
       sale.createPrizes(0, [8], [], { from:manager }),
-      "BlindCollectibleManagedGachaRack: prize types and weights must match length"
+      "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length"
     );
 
     await expectRevert(
@@ -443,12 +443,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
     await expectRevert(
       sale.activateGame(0, false, { from:bob }),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to activate game"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to activate game"
     );
 
     await expectRevert(
       sale.activateGame(1, true, { from:salter }),
-      "BlindCollectibleManagedGachaRack: must have MANAGER role to activate game"
+      "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to activate game"
     );
   });
 
@@ -461,12 +461,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
     await expectRevert(
       sale.activateGame(2, false, { from:alice }),
-      "BlindCollectibleManagedGachaRack: invalid gameId"
+      "BlindCollectibleManagedFlowGachaRack: invalid gameId"
     );
 
     await expectRevert(
       sale.activateGame(3, true, { from:manager }),
-      "BlindCollectibleManagedGachaRack: invalid gameId"
+      "BlindCollectibleManagedFlowGachaRack: invalid gameId"
     );
   });
 
@@ -544,12 +544,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
       await expectRevert(
         sale.assignGame(0, [alice, bob], { from:bob }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to assignGame"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to assignGame"
       );
 
       await expectRevert(
         sale.assignGame(2, [carol], { from:salter }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to assignGame"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to assignGame"
       );
     });
 
@@ -558,7 +558,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
       await expectRevert(
         sale.assignGame(2, [alice, bob], { from:alice }),
-        "BlindCollectibleManagedGachaRack: invalid gameId"
+        "BlindCollectibleManagedFlowGachaRack: invalid gameId"
       );
 
       const blockNumber = await web3.eth.getBlockNumber();
@@ -566,7 +566,7 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
       await expectRevert(
         sale.assignGame(3, [carol], { from:manager }),
-        "BlindCollectibleManagedGachaRack: invalid gameId"
+        "BlindCollectibleManagedFlowGachaRack: invalid gameId"
       );
     });
 
@@ -631,12 +631,12 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
       await expectRevert(
         sale.clearAssignedGame([alice, bob], { from:bob }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to clearAssignedGame"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to clearAssignedGame"
       );
 
       await expectRevert(
         sale.clearAssignedGame([carol], { from:salter }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to clearAssignedGame"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to clearAssignedGame"
       );
     });
 
@@ -1117,17 +1117,17 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
 
       await expectRevert(
         sale.setGameDrawFlowAndSupply(0, 100, 0, 1, 0, { from:bob }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to alter game draw flow"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to alter game draw flow"
       );
 
       await expectRevert(
         sale.setGameSupply(1, 1000, { from:carol }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to alter game draw flow"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to alter game draw flow"
       );
 
       await expectRevert(
         sale.setGameDrawFlow(2, 14, 2, blockNumber + 100, { from:bob }),
-        "BlindCollectibleManagedGachaRack: must have MANAGER role to alter game draw flow"
+        "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to alter game draw flow"
       );
     });
 
@@ -1137,17 +1137,17 @@ contract('BlindCollectibleManagedGachaRack', ([alice, bob, carol, dave, edith, f
       // game id
       await expectRevert(
         sale.setGameDrawFlowAndSupply(3, 100, 0, 1, 0, { from:alice }),
-        "BlindCollectibleManagedGachaRack: nonexistent gameId"
+        "BlindCollectibleManagedFlowGachaRack: nonexistent gameId"
       );
 
       await expectRevert(
         sale.setGameSupply(4, 1000, { from:manager }),
-        "BlindCollectibleManagedGachaRack: nonexistent gameId"
+        "BlindCollectibleManagedFlowGachaRack: nonexistent gameId"
       );
 
       await expectRevert(
         sale.setGameDrawFlow(5, 14, 2, blockNumber + 100, { from:manager }),
-        "BlindCollectibleManagedGachaRack: nonexistent gameId"
+        "BlindCollectibleManagedFlowGachaRack: nonexistent gameId"
       );
 
       // _denominator

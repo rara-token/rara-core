@@ -165,6 +165,15 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
         // purchases will lock-in the result they would reveal. Cost is approx.
         // linear with number of draws.
         advancePNG(_draws);
+
+        // note for subcontracts
+        _afterPurchase(_buyer, _gameId, _to, _draws, amount);
+    }
+
+    // @dev note the purchase of `_draws` new draws, which have already been pushed
+    // to the top of `drawInfo` by the time this call is made.
+    function _afterPurchase(address _buyer, uint256 _gameId, address _to, uint256 _draws, uint256 _cost) internal virtual {
+
     }
 
     // @dev Purchase the indicated number of draws, paying a maximum total price
