@@ -34,6 +34,7 @@ module.exports = exports = ({ network, web3 }) => {
   const five = expandToDecimals(5, decimals).toString();
   const thirty = expandToDecimals(30, decimals).toString();
   const hundred = expandToDecimals(100, decimals).toString();
+  const twentyFive = expandToDecimals(25, decimals).toString();
 
   const tokens = [];
   const collections = values['collections'] = values['collection'] = [];
@@ -89,11 +90,13 @@ module.exports = exports = ({ network, web3 }) => {
   // That's
   games.push({
     name: "Public Animal Gacha Game 1",
-    drawPrice: hundred,
+    drawPrice: twentyFive,
     revealBlocks: 15,
-    prizeFlowNumerator: 3460,
-    prizeFlowDenominator: 28800,
-    prizeFlowStartBlock: gachaStartBlock,
+    prizeSupply: 3460,
+    prizePeriodDuration: 86400,   // one day
+    prizePeriodAnchorTime: 0,     // TODO: desired time of day (might match openTime)
+    saleOpenTime: 0,              // TODO: open time
+    saleCloseTime: 0,
     prizes: [
       { token: findToken("AN_F_001_POSSUM"), weight:61750 },
       { token: findToken("AN_F_002_SHIBA"), weight:7200 },
@@ -113,11 +116,13 @@ module.exports = exports = ({ network, web3 }) => {
 
   games.push({
     name: "Internal Animal Gacha Game 1",
-    drawPrice: hundred,
+    drawPrice: twentyFive,
     revealBlocks: 15,
-    prizeFlowNumerator: 1540,
-    prizeFlowDenominator: 28800,
-    prizeFlowStartBlock: gachaStartBlock,
+    prizeSupply: 1540,
+    prizePeriodDuration: 86400,   // one day
+    prizePeriodAnchorTime: 0,     // TODO: desired time of day (might match openTime)
+    saleOpenTime: 0,              // TODO: open time
+    saleCloseTime: 0,
     prizes: [
       { token: findToken("AN_F_001_POSSUM"), weight:3250 },
       { token: findToken("AN_F_002_SHIBA"), weight:16800 },

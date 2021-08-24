@@ -32,8 +32,9 @@ module.exports = function (deployer, network, accounts) {
         console.log(`  with types ${prizeTokenTypes} weights ${prizeWeights}`);
         console.log(`  charging ${g.drawPrice} with reveal blocks ${g.revealBlocks}}`);
         await gachaRack.createActivatedGame(i == 0,
-          g.drawPrice, g.revealBlocks, 0,
-          g.prizeFlowNumerator, g.prizeFlowDenominator, g.prizeFlowStartBlock,
+          g.drawPrice, g.revealBlocks,
+          g.prizeSupply, g.prizePeriodDuration, g.prizePeriodAnchorTime,
+          g.saleOpenTime, g.saleCloseTime,
           prizeTokenTypes, prizeWeights
         );
         console.log(`  created game`);
