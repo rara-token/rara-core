@@ -93,7 +93,9 @@ contract FlowSupplementEmitter is Context, AccessControlEnumerable, ITokenEmitte
         }
         uint256 balance = token.balanceOf(address(this));
         amount = amount + balance;
-        token.transfer(recipient, balance);
+        if (balance > 0) {
+            token.transfer(recipient, balance);
+        }
         claimed += amount;
     }
 
@@ -131,7 +133,9 @@ contract FlowSupplementEmitter is Context, AccessControlEnumerable, ITokenEmitte
     function _emit(address _to) internal returns (uint256 amount) {
         uint256 emission = ITokenEmitter(emitter).claim(_to);
         uint256 supplement = _supplementAmount(emission);
-        token.transfer(_to, supplement);
+        if (supplement > 0) {
+            token.transfer(_to, supplement);
+        }
         amount = emission + supplement;
         claimed += amount;
     }
