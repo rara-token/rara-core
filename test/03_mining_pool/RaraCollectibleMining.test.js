@@ -1,13 +1,13 @@
 const { expectRevert, time } = require('@openzeppelin/test-helpers');
 const MockERC20 = artifacts.require('MockERC20');
-const MockERC721Valuable = artifacts.require('MockERC721Valuable');
+const ERC721ValuableCollectibleToken = artifacts.require('ERC721ValuableCollectibleToken');
 const MockTokenEmitter = artifacts.require('MockTokenEmitter');
 const MockVotingRegistry = artifacts.require('MockVotingRegistry');
 const RaraCollectibleMining = artifacts.require('RaraCollectibleMining');
 
 const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers').constants;
 
-contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, pauser, minter, dev]) => {
+contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, minter, dev]) => {
   const MANAGER_ROLE = web3.utils.soliditySha3('MANAGER_ROLE');
   const PAUSER_ROLE = web3.utils.soliditySha3('PAUSER_ROLE');
 
@@ -16,9 +16,20 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, pau
     this.emitter = await MockTokenEmitter.new(this.reward.address, { from: alice });
     this.pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, 0, { from: alice });
     await this.pool.grantRole(MANAGER_ROLE, manager, { from:alice });
-    await this.pool.grantRole(PAUSER_ROLE, pauser, { from:alice });
     await this.reward.transfer(this.emitter.address, '1000000000', { from: alice });
   });
+
+  async function nextPeriod(pool) {
+    const periods = Number((await pool.periodLength()).toString());
+    const start = Number((await pool.currentPeriodStartTime()).toString());
+    const nextStart = start + Number((await pool.periodDuration()).toString());
+
+    await time.increaseTo(nextStart - 1);
+    await pool.updatePeriod();
+    while (time.latest() < start || Number((await pool.periodLength()).toString()) == periods) {
+      await pool.updatePeriod();
+    }
+  }
 
   it('should set correct state variables', async () => {
     const reward = await this.pool.rara();
@@ -30,1807 +41,2276 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, pau
     assert.equal((await this.pool.burnDenominator()).valueOf().toString(), '100');
     assert.equal((await this.pool.burnAddress()).valueOf(), ZERO_ADDRESS);
 
+    assert.equal((await this.pool.periodDuration()).valueOf().toString(), '86400');
+
     assert.equal((await this.pool.hasRole(MANAGER_ROLE, alice)).toString(), 'true');
     assert.equal((await this.pool.hasRole(MANAGER_ROLE, manager)).toString(), 'true');
-    assert.equal((await this.pool.hasRole(PAUSER_ROLE, alice)).toString(), 'true');
-    assert.equal((await this.pool.hasRole(PAUSER_ROLE, pauser)).toString(), 'true');
+  });
+
+  it('periodStartTime should calculate period boundaries as expected', async () => {
+    const { pool } = this;
+    const tests = [];
+    tests.push({ duration:86400, anchor:0, time:0, result:0 });
+    tests.push({ duration:86400, anchor:0, time:10000, result:0 });
+    tests.push({ duration:86400, anchor:0, time:86399, result:0 });
+    tests.push({ duration:86400, anchor:0, time:86400, result:86400 });
+    tests.push({ duration:86400, anchor:0, time:100000, result:86400 });
+    tests.push({ duration:86400, anchor:100, time:100000, result:86500 });
+    tests.push({ duration:86400, anchor:1000, time:100000, result:87400 });
+    tests.push({ duration:86400, anchor:10000, time:100000, result:96400 });
+    tests.push({ duration:86400, anchor:100000, time:100000, result:100000 });
+    tests.push({ duration:86400, anchor:110000, time:100000, result:23600 });
+    tests.push({ duration:86400, anchor:100000, time:110000, result:100000 });
+
+    tests.push({ duration:1001, anchor:0, time:500, result:0 });
+    tests.push({ duration:1001, anchor:50, time:500, result:50 });
+    tests.push({ duration:1001, anchor:50, time:1000, result:50 });
+    tests.push({ duration:1001, anchor:50, time:1500, result:1051 });
+    tests.push({ duration:1001, anchor:50, time:2000, result:1051 });
+    tests.push({ duration:1001, anchor:50, time:2500, result:2052 });
+    tests.push({ duration:1001, anchor:50, time:5532000, result:5531576 });
+
+    for (const t of tests) {
+      assert.equal(
+        (await this.pool.periodStartTime(t.time, t.duration, t.anchor)).valueOf().toString(),
+        `${t.result}`
+      );
+    }
+  });
+
+  it('setUnlockBlock reverts for non-manager', async () => {
+    let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
+
+    const pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
+    await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+
+    await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:bob }), "RaraCollectibleMining: must have MANAGER role to setUnlockBlock");
+    await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:carol }), "RaraCollectibleMining: must have MANAGER role to setUnlockBlock");
+  });
+
+  it('setUnlockBlock reverts if already unlocked', async () => {
+    let unlockBlock = (await web3.eth.getBlockNumber()) - 1;
+
+    const pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
+    await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+
+    await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:alice }), "RaraCollectibleMining: no setUnlockBlock after unlocked");
+    await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:manager }), "RaraCollectibleMining: no setUnlockBlock after unlocked");
+  });
+
+  it('setUnlockBlock succeeds when expected', async () => {
+    let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
+
+    const pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
+    await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+
+    await pool.setUnlockBlock(unlockBlock + 10, { from:alice });
+    assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock + 10}`);
+
+    await pool.setUnlockBlock(unlockBlock + 50, { from:manager });
+    assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock + 50}`);
+
+    await pool.setUnlockBlock(unlockBlock - 30, { from:alice });
+    assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock - 30}`);
+
+    await expectRevert(pool.setUnlockBlock(unlockBlock + 100, { from:manager }), "RaraCollectibleMining: no setUnlockBlock after unlocked");
+  });
+
+  it('setRegistry reverts for non-manager', async () => {
+    const { pool } = this;
+    const registry = await MockVotingRegistry.new();
+    await expectRevert(pool.setRegistry(registry.address, { from:bob }), "RaraCollectibleMining: must have MANAGER role to setRegistry");
+    await expectRevert(pool.setRegistry(registry.address, { from:carol }), "RaraCollectibleMining: must have MANAGER role to setRegistry");
+  });
+
+  it('setRegistry updates internal state', async () => {
+    const { pool } = this;
+    const registry = await MockVotingRegistry.new();
+    await pool.setRegistry(registry.address, { from:alice });
+    assert.equal(await pool.registry(), registry.address);
+
+    await pool.setRegistry(ZERO_ADDRESS, { from:manager });
+    assert.equal(await pool.registry(), ZERO_ADDRESS);
+  });
+
+  it('setPeriod reverts for non-manager', async () => {
+    const { pool } = this;
+    await expectRevert(pool.setPeriod(3600, 100, { from:bob }), "RaraCollectibleMining: must have MANAGER role to setPeriod");
+    await expectRevert(pool.setPeriod(3600, 0, { from:carol }), "RaraCollectibleMining: must have MANAGER role to setPeriod");
+  });
+
+  it('setPeriod reverts duration 0', async () => {
+    const { pool } = this;
+    await expectRevert(pool.setPeriod(0, 100, { from:alice }), "RaraCollectibleMining: duration must be nonzero");
+    await expectRevert(pool.setPeriod(0, 0, { from:manager }), "RaraCollectibleMining: duration must be nonzero");
+  });
+
+  it('setPeriod succeeds when expected', async () => {
+    const { pool } = this;
+    await pool.setPeriod(1000, 50, { from:alice });
+    assert.equal(await pool.periodDuration(), '1000');
+    assert.equal(await pool.periodAnchorTime(), '50');
+
+    await pool.setPeriod(14400, 1001, { from:manager });
+    assert.equal(await pool.periodDuration(), '14400');
+    assert.equal(await pool.periodAnchorTime(), '1001');
   });
 
   context('With mining tokens added to the field', () => {
     beforeEach(async () => {
-      this.token = await MockERC20.new('Token', 'T', '0', { from: minter });
-      this.token2 = await MockERC20.new('Token2', 'T2', '0', { from: minter });
-      this.collectible = await MockERC721Valuable.new('Collectible', 'C', { from:minter });
+      this.collectible = await ERC721ValuableCollectibleToken.new('Collectible', 'C', 'http://c/', { from:minter });
+      this.collectible2 = await ERC721ValuableCollectibleToken.new('Collectible2', 'C2', 'http://c2/',{ from:minter });
+      this.food = await ERC721ValuableCollectibleToken.new('Food', 'F', 'http://f/',{ from:minter });
       this.registry = await MockVotingRegistry.new();
-    });
-
-    it('manager can add token pools', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.add('0', this.collectible.address, true, ZERO_ADDRESS, { from:manager });
     });
 
     it('should revert if non-manager adds a pool', async () => {
-      await expectRevert.unspecified(this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:bob }));
-      await expectRevert.unspecified(this.pool.add('50', this.token2.address, false, this.registry.address, { from:pauser }));
-      await expectRevert.unspecified(this.pool.add('0', this.collectible.address, true, ZERO_ADDRESS, { from:minter }));
+      await expectRevert(
+        this.pool.addPool(this.collectible.address, '100', false, 0, { from:bob }),
+        "RaraCollectibleMining: must have MANAGER role to addPool"
+      );
+      await expectRevert(
+        this.pool.addPool(this.collectible.address, '1000', true, 10, { from:carol }),
+        "RaraCollectibleMining: must have MANAGER role to addPool"
+      );
+      await expectRevert(
+        this.pool.addPool(this.collectible2.address, '1', false, 0, { from:minter }),
+        "RaraCollectibleMining: must have MANAGER role to addPool"
+      );
     });
 
-    it('setUnlockBlock reverts for non-manager', async () => {
-      let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
-
-      const pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
-      await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
-
-      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:bob }), "RaraCollectibleMining: must have MANAGER role to setUnlockBlock");
-      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:carol }), "RaraCollectibleMining: must have MANAGER role to setUnlockBlock");
+    it('manager can add token pools', async () => {
+      await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+      await this.pool.addPool(this.collectible.address, '1000', true, 10, { from:manager });
+      await this.pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
     });
 
-    it('setUnlockBlock reverts if already unlocked', async () => {
-      let unlockBlock = (await web3.eth.getBlockNumber()) - 1;
+    it('(internal) addPool updates internal state', async () => {
+      const { pool, collectible, collectible2 } = this;
+      assert.equal(await pool.poolLength(), '0');
 
-      const pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
-      await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
+      await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+      assert.equal(await pool.poolLength(), '1');
+      let info = await pool.poolInfo(0);
+      assert.equal(info.token, collectible.address);
+      assert.equal(info.tokenPower, '100');
+      assert.equal(info.stakeIsTyped, false);
+      assert.equal(info.stakeTokenType, 0);
+      // check activation info at the end
 
-      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:alice }), "RaraCollectibleMining: no setUnlockBlock after unlocked");
-      await expectRevert(pool.setUnlockBlock(unlockBlock + 10, { from:manager }), "RaraCollectibleMining: no setUnlockBlock after unlocked");
+      await pool.addPool(this.collectible.address, '1000', true, 10, { from:manager });
+      assert.equal(await pool.poolLength(), '2');
+      info = await pool.poolInfo(1);
+      assert.equal(info.token, collectible.address);
+      assert.equal(info.tokenPower, '1000');
+      assert.equal(info.stakeIsTyped, true);
+      assert.equal(info.stakeTokenType, 10);
+      // check activation info at the end
+
+      await pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
+      assert.equal(await pool.poolLength(), '3');
+      info = await pool.poolInfo(2);
+      assert.equal(info.token, collectible2.address);
+      assert.equal(info.tokenPower, '1');
+      assert.equal(info.stakeIsTyped, false);
+      assert.equal(info.stakeTokenType, 0);
+      // check activation info at the end
+
+      for (let i = 0; i < 3; i++) {
+        info = await pool.poolInfo(i);
+        assert.equal(info.activationToken, ZERO_ADDRESS);
+        assert.equal(info.activationAmount, '0');
+        assert.equal(info.activationIsTyped, false);
+        assert.equal(info.activationTokenType, 0);
+      }
     });
 
-    it('setUnlockBlock succeeds when expected', async () => {
-      let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
+    it('setPoolPower reverts if called by non-manager', async () => {
+      const { pool, collectible, collectible2 } = this;
+      await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+      await this.pool.addPool(this.collectible.address, '1000', true, 10, { from:manager });
+      await this.pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
 
-      const pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
-      await pool.grantRole(MANAGER_ROLE, manager, { from:alice });
-
-      await pool.setUnlockBlock(unlockBlock + 10, { from:alice });
-      assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock + 10}`);
-
-      await pool.setUnlockBlock(unlockBlock + 50, { from:manager });
-      assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock + 50}`);
-
-      await pool.setUnlockBlock(unlockBlock - 30, { from:alice });
-      assert.equal((await pool.unlockBlock()).valueOf(), `${unlockBlock - 30}`);
-
-      await expectRevert(pool.setUnlockBlock(unlockBlock + 100, { from:manager }), "RaraCollectibleMining: no setUnlockBlock after unlocked");
+      await expectRevert(
+        this.pool.setPoolPower(0, '1', { from:bob }),
+        "RaraCollectibleMining: must have MANAGER role to setPoolPower"
+      );
+      await expectRevert(
+        this.pool.setPoolPower(1, '0', { from:carol }),
+        "RaraCollectibleMining: must have MANAGER role to setPoolPower"
+      );
+      await expectRevert(
+        this.pool.setPoolPower(2, '100', { from:minter }),
+        "RaraCollectibleMining: must have MANAGER role to setPoolPower"
+      );
     });
 
-    it('update() should read token balance and set total shares and user amounts', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+    it('(internal) setPoolPower updates internal state', async () => {
+      const { pool, collectible, collectible2 } = this;
+      await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+      await this.pool.addPool(this.collectible.address, '1000', true, 10, { from:manager });
+      await this.pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
 
-      await this.token.mint(alice, '155');
-      await this.token.mint(bob, '45');
-      await this.token.mint(carol, '200');
+      await pool.setPoolPower(0, '1', { from:alice });
+      let info = await pool.poolInfo(0);
+      assert.equal(info.token, collectible.address);
+      assert.equal(info.tokenPower, '1');
 
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+      await pool.setPoolPower(1, '0', { from:manager });
+      info = await pool.poolInfo(1);
+      assert.equal(info.token, collectible.address);
+      assert.equal(info.tokenPower, '0');
 
-      await this.pool.update(0, alice);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '155');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, bob);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '200');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '45');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, carol);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '400');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '45');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '200');
-
-      await this.pool.update(0, carol);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '400');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '45');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '200');
+      await pool.setPoolPower(2, '100', { from:manager });
+      info = await pool.poolInfo(2);
+      assert.equal(info.token, collectible2.address);
+      assert.equal(info.tokenPower, '100');
     });
 
-    it('update() should read collectible value and set total shares and user amounts', async () => {
-      await this.pool.add('100', this.collectible.address, true, ZERO_ADDRESS, { from:alice });
+    it('setPoolActivation reverts if called by non-manager', async () => {
+      await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+      await this.pool.addPool(this.collectible.address, '1000', true, 10, { from:manager });
+      await this.pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
 
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.collectible.mint(alice, '5');
-      await this.collectible.mint(bob, '100');
-      await this.collectible.mint(bob, '20');
-      await this.collectible.mint(carol, '5');
-      await this.collectible.mint(carol, '100');
-      await this.collectible.mint(carol, '100');
-
-      assert.equal(await this.collectible.balanceOf(alice), '1');
-      assert.equal(await this.collectible.balanceOf(bob), '2');
-      assert.equal(await this.collectible.balanceOf(carol), '3');
-
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, alice);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '5');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '5');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, bob);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '125');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '5');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, carol);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '330');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '5');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '205');
-
-      await this.pool.update(0, carol);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '330');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '5');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '205');
-
-      await this.collectible.mint(alice, 200);
-      await this.collectible.mint(bob, 20);
-      await this.collectible.mint(carol, 2);
-      assert.equal(await this.collectible.balanceOf(alice), '2');
-      assert.equal(await this.collectible.balanceOf(bob), '3');
-      assert.equal(await this.collectible.balanceOf(carol), '4');
-      await this.pool.update(0, alice);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '530');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '205');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '205');
+      await expectRevert(
+        this.pool.setPoolActivation(0, '1', this.collectible.address, '1', false, 0, { from:bob }),
+        "RaraCollectibleMining: must have MANAGER role to setPoolActivation"
+      );
+      await expectRevert(
+        this.pool.setPoolActivation(1, '0', this.collectible2.address, '10', true, 10, { from:carol }),
+        "RaraCollectibleMining: must have MANAGER role to setPoolActivation"
+      );
+      await expectRevert(
+        this.pool.setPoolActivation(2, '10', this.collectible.address, '2', true, 2, { from:minter }),
+        "RaraCollectibleMining: must have MANAGER role to setPoolActivation"
+      );
     });
 
-    it('update() should read token balance, apply level multiplier, and set total shares and user amounts', async () => {
-      await this.pool.add('100', this.token.address, false, this.registry.address, { from:alice });
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+    it('(internal) setPoolActivation updates internal state', async () => {
+      const { pool, collectible, collectible2 } = this;
+      await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+      await this.pool.addPool(this.collectible.address, '1000', true, 10, { from:manager });
+      await this.pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
 
-      await this.token.mint(alice, '155');
-      await this.token.mint(bob, '45');
-      await this.token.mint(carol, '200');
-      await this.registry.set(alice, 1000, 0);  // x1
-      await this.registry.set(bob, 1500, 1);    // x2
-      await this.registry.set(carol, 10000, 2); // x4
+      await pool.setPoolActivation(0, '1', this.collectible.address, '1', false, 0, { from:alice });
+      let info = await pool.poolInfo(0);
+      assert.equal(info.token, collectible.address);
+      assert.equal(info.tokenPower, '1');
+      assert.equal(info.stakeIsTyped, false);
+      assert.equal(info.stakeTokenType, 0);
+      assert.equal(info.activationToken, collectible.address);
+      assert.equal(info.activationAmount, '1');
+      assert.equal(info.activationIsTyped, false);
+      assert.equal(info.activationTokenType, 0);
 
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+      await pool.setPoolActivation(1, '0', this.collectible2.address, '10', true, 10, { from:manager });
+      info = await pool.poolInfo(1);
+      assert.equal(info.token, collectible.address);
+      assert.equal(info.tokenPower, '0');
+      assert.equal(info.stakeIsTyped, true);
+      assert.equal(info.stakeTokenType, 10);
+      assert.equal(info.activationToken, collectible2.address);
+      assert.equal(info.activationAmount, '10');
+      assert.equal(info.activationIsTyped, true);
+      assert.equal(info.activationTokenType, 10);
 
-      await this.pool.update(0, alice);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '155');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, bob);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '245');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '90');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.update(0, carol);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '1045');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '90');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '800');
-
-      await this.pool.update(0, carol);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '1045');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '90');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '800');
-
-      await this.registry.set(bob, 15000, 3); // x6
-      await this.pool.update(0, bob);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '1225');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '270');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '800');
+      await pool.setPoolActivation(2, '10', this.collectible.address, '2', true, 2, { from:manager });
+      info = await pool.poolInfo(2);
+      assert.equal(info.token, collectible2.address);
+      assert.equal(info.tokenPower, '10');
+      assert.equal(info.stakeIsTyped, false);
+      assert.equal(info.stakeTokenType, 0);
+      assert.equal(info.activationToken, collectible.address);
+      assert.equal(info.activationAmount, '2');
+      assert.equal(info.activationIsTyped, true);
+      assert.equal(info.activationTokenType, 2);
     });
 
-    it('updateUsers() should read token balance and set total shares and user amounts', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.token.mint(alice, '155');
-      await this.token.mint(bob, '45');
-      await this.token.mint(carol, '200');
-
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.updateUsers(0, [alice, bob]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '200');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '45');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.token.mint(alice, '20');
-      await this.token.mint(bob, '10');
-      await this.pool.updateUsers(0, [alice, bob, carol]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '430');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '175');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '55');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '200');
+    it('updatePeriod reverts if not initialized', async () => {
+      await expectRevert(
+        this.pool.updatePeriod(),
+        "RaraCollectibleMining: not initialized"
+      );
     });
 
-    it('updateUsers() should read collectible value and set total shares and user amounts', async () => {
-      await this.pool.add('100', this.collectible.address, true, ZERO_ADDRESS, { from:alice });
+    it('(internal) initalize starts a new period when called by manager', async () => {
+      const { pool, collectible, collectible2 } = this;
+      await expectRevert(pool.initialize({ from:bob }), "RaraCollectibleMining: must have MANAGER role to initialize");
+      await expectRevert(pool.initialize({ from:minter }), "RaraCollectibleMining: must have MANAGER role to initialize");
 
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+      await pool.setPeriod('10070', '555', { from:alice });
+      await pool.initialize({ from:alice });
+      const initBlockNumber = await web3.eth.getBlockNumber();
+      const initBlock = await web3.eth.getBlock(initBlockNumber);
+      const initTimestamp = Number(initBlock.timestamp.toString());
+      const stepMargin = initTimestamp % 10070;
+      const startTimestamp = stepMargin >= 555
+        ? initTimestamp - (stepMargin - 555)
+        : initTimestamp - (stepMargin + 10070) + 555;
 
-      await this.collectible.mint(alice, '5');
-      await this.collectible.mint(bob, '100');
-      await this.collectible.mint(bob, '20');
-      await this.collectible.mint(carol, '5');
-      await this.collectible.mint(carol, '100');
-      await this.collectible.mint(carol, '100');
+      assert.equal(await pool.periodLength(), '2');
+      assert.equal(await pool.currentPeriod(), '1');
+      assert.equal(await pool.currentPeriodStartTime(), `${startTimestamp}`);
+      let info = await pool.periodInfo(0);
+      assert.equal(info.power, '0');
+      assert.equal(info.reward, '0');
+      assert.equal(info.startBlock, `${initBlockNumber}`);
+      assert.equal(info.endBlock, `${initBlockNumber}`);
+      assert.equal(info.initTime, `${initTimestamp}`);
+      assert.equal(info.startTime, `${startTimestamp - 10070}`);
+      assert.equal(info.endTime, `${startTimestamp}`);
 
-      assert.equal(await this.collectible.balanceOf(alice), '1');
-      assert.equal(await this.collectible.balanceOf(bob), '2');
-      assert.equal(await this.collectible.balanceOf(carol), '3');
+      info = await pool.periodInfo(1);
+      assert.equal(info.power, '0');
+      assert.equal(info.reward, '0');
+      assert.equal(info.startBlock, `${initBlockNumber}`);
+      assert.equal(info.endBlock, '0');
+      assert.equal(info.initTime, `${initTimestamp}`);
+      assert.equal(info.startTime, `${startTimestamp}`);
+      assert.equal(info.endTime, '0');
 
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.updateUsers(0, [alice, bob]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '125');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '5');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
-
-      await this.pool.updateUsers(0, [carol]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '330');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '5');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '205');
-
-      await this.collectible.mint(alice, 200);
-      await this.collectible.mint(bob, 20);
-      await this.collectible.mint(carol, 2);
-      assert.equal(await this.collectible.balanceOf(alice), '2');
-      assert.equal(await this.collectible.balanceOf(bob), '3');
-      assert.equal(await this.collectible.balanceOf(carol), '4');
-      await this.pool.updateUsers(0, [alice]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '530');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '205');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '120');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '205');
+      await expectRevert(pool.initialize({ from:bob }), "RaraCollectibleMining: must have MANAGER role to initialize");
+      await expectRevert(pool.initialize({ from:manager }), "RaraCollectibleMining: already initialized");
     });
 
-    it('updateUsers() should read token balance, apply level multiplier, and set total shares and user amounts', async () => {
-      await this.pool.add('100', this.token.address, false, this.registry.address, { from:alice });
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+    it('(internal) updatePeriod starts a new period when appropriate', async () => {
+      const { pool, collectible, collectible2 } = this;
 
-      await this.token.mint(alice, '155');
-      await this.token.mint(bob, '45');
-      await this.token.mint(carol, '200');
-      await this.registry.set(alice, 1000, 0);  // x1
-      await this.registry.set(bob, 1500, 1);    // x2
-      await this.registry.set(carol, 10000, 2); // x4
+      const stats = [];
+      async function pushStats() {
+        const initBlockNumber = await web3.eth.getBlockNumber();
+        const initBlock = await web3.eth.getBlock(initBlockNumber);
+        const initTimestamp = Number(initBlock.timestamp.toString());
+        const stepMargin = initTimestamp % 10070;
+        const startTimestamp = stepMargin >= 555
+          ? initTimestamp - (stepMargin - 555)
+          : initTimestamp - (stepMargin + 10070) + 555;
 
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '0');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '0');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+        stats.push({
+          initBlock: initBlockNumber,
+          initTime: initTimestamp,
+          startTime: startTimestamp,
+          endTime: startTimestamp + 10070
+        });
+      }
 
-      await this.pool.updateUsers(0, [alice, bob]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '245');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '90');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '0');
+      async function checkStats(i) {
+        const s = stats[i];
+        const n = i + 1 < stats.length ? stats[i+1] : null;
+        const info = await pool.periodInfo(i);
+        assert.equal(info.power, '0');
+        assert.equal(info.reward, '0');
+        assert.equal(info.startBlock, `${s.initBlock}`);
+        assert.equal(info.endBlock, `${n ? n.initBlock : 0}`);
+        assert.equal(info.initTime, `${s.initTime}`);
+        assert.equal(info.startTime, `${s.startTime}`);
+        assert.equal(info.endTime, `${n ? s.endTime : 0}`);
+      }
 
-      await this.pool.updateUsers(0, [alice, bob, carol]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '1045');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '90');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '800');
+      await pool.setPeriod('10070', '555', { from:alice });
+      await pool.initialize({ from:alice });
+      await pushStats();
+      await pushStats();
+      stats[0].startTime -= 10070;
+      stats[0].endTime -= 10070;
 
-      await this.registry.set(bob, 15000, 3); // x6
-      await this.pool.updateUsers(0, [bob]);
-      assert.equal((await this.pool.poolShares(0)).valueOf(), '1225');
-      assert.equal((await this.pool.userInfo(0, alice)).valueOf().amount, '155');
-      assert.equal((await this.pool.userInfo(0, bob)).valueOf().amount, '270');
-      assert.equal((await this.pool.userInfo(0, carol)).valueOf().amount, '800');
+      // advance to next period
+      await time.increaseTo(stats[1].startTime + 12000);
+      await pool.updatePeriod();
+      await pushStats();
+
+      // check periods 0, 1 and 2
+      assert.equal(await pool.periodLength(), '3');
+      assert.equal(await pool.currentPeriod(), '2');
+      assert.equal(await pool.currentPeriodStartTime(), `${stats[1].startTime + 10070}`);
+      await checkStats(0);
+      await checkStats(1);
+      await checkStats(2);
+
+      // advance between periods; should not alter anything
+      await time.increaseTo(stats[1].startTime + 18000);
+      await pool.updatePeriod();
+      assert.equal(await pool.periodLength(), '3');
+      assert.equal(await pool.currentPeriod(), '2');
+      assert.equal(await pool.currentPeriodStartTime(), `${stats[1].startTime + 10070}`);
+      await checkStats(0);
+      await checkStats(1);
+      await checkStats(2);
+
+      // advance to _exactly_ the start of the next period (as best we can...)
+      await time.increaseTo(stats[1].startTime + 20140);
+      await pool.updatePeriod();
+      await pushStats();
+      assert.equal(await pool.periodLength(), '4');
+      assert.equal(await pool.currentPeriod(), '3');
+      assert.equal(await pool.currentPeriodStartTime(), `${stats[1].startTime + 20140}`);
+      await checkStats(0);
+      await checkStats(1);
+      await checkStats(2);
+      await checkStats(3);
     });
 
-    it('harvest retrieves Rara', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.setBurnRate(0, 1, dev, true, { from:alice });
+    context('testing deposit', () => {
+      beforeEach(async () => {
+        const { pool, collectible, collectible2 } = this;
 
-      await this.token.mint(bob, 10);
-      await this.pool.update(0, bob);
-      await this.emitter.setOwed(this.pool.address, '100');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '100');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
+        await collectible.addTokenType(`Type 0`, `T0`, 0, { from:minter });
+        await collectible.addTokenType(`Type 1`, `T1`, 0, { from:minter });
+        await collectible.addTokenType(`Type 2`, `T2`, 0, { from:minter });
 
-      await this.pool.harvest(0, dave, { from:alice });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '100');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
+        await collectible2.addTokenType(`Domino 0`, `D0`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 1`, `D1`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 2`, `D2`, 0, { from:minter });
+      });
 
-      await this.pool.harvest(0, dave, { from:bob });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '100');
+      it('reverts for invalid pid', async () => {
+        await expectRevert(this.pool.deposit(0, alice, [], { from:alice }), "RaraCollectibleMining: invalid pid");
+
+        await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+        await this.pool.addPool(this.collectible.address, '1000', true, 2, { from:manager });
+        await this.pool.addPool(this.collectible2.address, '1', false, 0, { from:manager });
+
+        await expectRevert(this.pool.deposit(3, alice, [], { from:alice }), "RaraCollectibleMining: invalid pid");
+      });
+
+      it('reverts for uninitialized contract', async () => {
+        await this.pool.addPool(this.collectible.address, '100', false, 0, { from:alice });
+        await expectRevert(
+          this.pool.deposit(0, alice, [], { from:alice }),
+          "RaraCollectibleMining: not initialized"
+        );
+      });
+
+      it('reverts for invalid token type', async () => {
+        const { pool, collectible } = this;
+        await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+        await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+
+        await pool.initialize({ from:manager });
+
+        await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await expectRevert(
+          this.pool.deposit(1, bob, [0], { from:bob }),
+          "RaraCollectibleMining: invalid tokenType"
+        );
+
+        await expectRevert(
+          this.pool.deposit(1, bob, [1], { from:bob }),
+          "RaraCollectibleMining: invalid tokenType"
+        );
+
+        await expectRevert(
+          this.pool.deposit(1, bob, [3], { from:bob }),
+          "RaraCollectibleMining: invalid tokenType"
+        );
+
+        await expectRevert(
+          this.pool.deposit(1, bob, [4, 0, 5], { from:bob }),
+          "RaraCollectibleMining: invalid tokenType"
+        );
+      });
+
+      context('with functioning setup', () => {
+        beforeEach(async () => {
+          const { pool, collectible, collectible2 } = this;
+          await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+          await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+          await pool.addPool(collectible2.address, '1', false, 0, { from:manager });
+
+          await pool.setPeriod('10070', '555', { from:alice });
+          await pool.initialize({ from:manager });
+
+          const initBlockNumber = await web3.eth.getBlockNumber();
+          const initBlock = await web3.eth.getBlock(initBlockNumber);
+          const initTimestamp = Number(initBlock.timestamp.toString());
+          const stepMargin = initTimestamp % 10070;
+          const startTimestamp = stepMargin >= 555
+            ? initTimestamp - (stepMargin - 555)
+            : initTimestamp - (stepMargin + 10070) + 555;
+
+          await time.increaseTo(startTimestamp + 12000);
+
+          await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+          await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
+
+          await collectible2.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+          await collectible2.setApprovalForAll(this.pool.address, true, { from:bob });
+        });
+
+        it('deposited tokens are transferred', async () => {
+          const { pool, collectible, collectible2 } = this;
+
+          await pool.updatePeriod();
+
+          await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+          assert.equal(await collectible.ownerOf(0), pool.address);
+          assert.equal(await collectible.ownerOf(1), bob);
+          assert.equal(await collectible.ownerOf(2), pool.address);
+          assert.equal(await collectible.ownerOf(3), bob);
+          assert.equal(await collectible.ownerOf(4), pool.address);
+          assert.equal(await collectible.ownerOf(5), bob);
+
+          await pool.deposit(1, edith, [5], { from:bob });
+          assert.equal(await collectible.ownerOf(0), pool.address);
+          assert.equal(await collectible.ownerOf(1), bob);
+          assert.equal(await collectible.ownerOf(2), pool.address);
+          assert.equal(await collectible.ownerOf(3), bob);
+          assert.equal(await collectible.ownerOf(4), pool.address);
+          assert.equal(await collectible.ownerOf(5), pool.address);
+
+          await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+          assert.equal(await collectible2.ownerOf(0), bob);
+          assert.equal(await collectible2.ownerOf(1), pool.address);
+          assert.equal(await collectible2.ownerOf(2), pool.address);
+          assert.equal(await collectible2.ownerOf(3), pool.address);
+          assert.equal(await collectible2.ownerOf(4), bob);
+          assert.equal(await collectible2.ownerOf(5), bob);
+        });
+
+        it('deposited tokens must be owned by caller', async () => {
+          const { pool, collectible, collectible2 } = this;
+
+          await pool.updatePeriod();
+
+          await expectRevert.unspecified(pool.deposit(0, bob, [0, 2, 4], { from:carol }));
+          await expectRevert.unspecified(pool.deposit(1, bob, [5], { from:edith }));
+          await expectRevert.unspecified(pool.deposit(2, bob, [1, 2, 3], { from:dave }));
+        });
+
+        it('deposited tokens must match pool type (if any)', async () => {
+          const { pool, collectible, collectible2 } = this;
+
+          await pool.updatePeriod();
+          await expectRevert(pool.deposit(1, edith, [3], { from:bob }), "RaraCollectibleMining: invalid tokenType");
+        });
+
+        it('deposited tokens update poolUserTokenIndex', async () => {
+          const { pool, collectible, collectible2 } = this;
+
+          await pool.updatePeriod();
+
+          await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+          await pool.deposit(1, edith, [5], { from:bob });
+          await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+
+          assert.equal(await pool.poolUserTokenCount(0, bob), '0');
+          assert.equal(await pool.poolUserTokenCount(0, carol), '3');
+          assert.equal(await pool.poolUserTokenCount(0, dave), '0');
+          assert.equal(await pool.poolUserTokenCount(0, edith), '0');
+
+          assert.equal(await pool.poolUserTokenCount(1, bob), '0');
+          assert.equal(await pool.poolUserTokenCount(1, carol), '0');
+          assert.equal(await pool.poolUserTokenCount(1, dave), '0');
+          assert.equal(await pool.poolUserTokenCount(1, edith), '1');
+
+          assert.equal(await pool.poolUserTokenCount(2, bob), '0');
+          assert.equal(await pool.poolUserTokenCount(2, carol), '0');
+          assert.equal(await pool.poolUserTokenCount(2, dave), '3');
+          assert.equal(await pool.poolUserTokenCount(2, edith), '0');
+
+          assert.equal(await pool.poolUserTokenIndex(0, carol, 0), '0');
+          assert.equal(await pool.poolUserTokenIndex(0, carol, 1), '2');
+          assert.equal(await pool.poolUserTokenIndex(0, carol, 2), '4');
+
+          assert.equal(await pool.poolUserTokenIndex(1, edith, 0), '5');
+
+          assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '1');
+          assert.equal(await pool.poolUserTokenIndex(2, dave, 1), '2');
+          assert.equal(await pool.poolUserTokenIndex(2, dave, 2), '3');
+        });
+
+        it('(internal) deposited tokens update tokenInfo', async () => {
+          const { pool, collectible, collectible2 } = this;
+
+          const registry = await MockVotingRegistry.new();
+          await pool.setRegistry(registry.address, { from:manager });
+
+          await registry.set(carol, 100, 1);  // x2
+          await registry.set(edith, 200, 3);  // x6
+          await registry.set(dave, 300, 10);  // x20
+
+          await pool.updatePeriod();
+
+          await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+          await pool.deposit(1, edith, [5], { from:bob });
+          await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+
+          async function checkTokenInfo(opts) {
+            const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+            const info = await pool.tokenInfo(address, tokenId);
+            assert.equal(info.poolId, `${poolId}`);
+            assert.equal(info.owner, owner);
+            assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+            assert.equal(info.staked, staked);
+            assert.equal(info.activatedPower, `${activatedPower}`);
+            assert.equal(info.activationPeriod, `${activationPeriod}`);
+          }
+
+          const poolInfo = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 200, activationPeriod: 2 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 6000, activationPeriod: 2 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 20, activationPeriod: 2 }
+          ]
+
+          await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:0, ...poolInfo[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:1, ...poolInfo[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:2, ...poolInfo[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:5, ownerTokenIndex:0, ...poolInfo[1] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:0, ...poolInfo[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:1, ...poolInfo[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:3, ownerTokenIndex:2, ...poolInfo[2] });
+        });
+
+        it('(internal) deposited tokens update userInfo', async () => {
+          const { pool, collectible, collectible2 } = this;
+
+          const registry = await MockVotingRegistry.new();
+          await pool.setRegistry(registry.address, { from:manager });
+
+          await registry.set(carol, 100, 1);  // x2
+          await registry.set(edith, 200, 3);  // x6
+          await registry.set(dave, 300, 10);  // x20
+
+          await pool.updatePeriod();
+
+          await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+          await pool.deposit(1, edith, [5], { from:bob });
+          await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+
+          async function checkUserInfo(address, power) {
+            const info = await pool.userInfo(address);
+            assert.equal(info.activatedPower, `${power}`);
+            assert.equal(info.activationPeriod, '2');
+            assert.equal(info.accumulatedRewardPrec, '0');
+            assert.equal(info.harvestedReward, '0');
+          }
+
+          await checkUserInfo(carol, 600);
+          await checkUserInfo(edith, 6000);
+          await checkUserInfo(dave, 60);
+        });
+      });
     });
 
-    it('should not mine RARA if no one deposits', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(5, 100, dev, true, { from:alice });
+    context('testing withdraw', () => {
+      beforeEach(async () => {
+        const { pool, collectible, collectible2 } = this;
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1425');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
+        await collectible.addTokenType(`Type 0`, `T0`, 0, { from:minter });
+        await collectible.addTokenType(`Type 1`, `T1`, 0, { from:minter });
+        await collectible.addTokenType(`Type 2`, `T2`, 0, { from:minter });
 
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1425');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '75');
+        await collectible2.addTokenType(`Domino 0`, `D0`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 1`, `D1`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 2`, `D2`, 0, { from:minter });
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      await this.token.mint(alice, 10);
-      await this.pool.update(0, alice);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2850');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
+        await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+        await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+        await pool.addPool(collectible2.address, '1', false, 0, { from:manager });
+        await pool.addPool(collectible2.address, '2', false, 0, { from:manager });
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4275');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
+        await pool.setPeriod('10070', '555', { from:alice });
+        await pool.initialize({ from:manager });
 
-      await this.pool.harvest(0, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4275');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '225');
+        const initBlockNumber = await web3.eth.getBlockNumber();
+        const initBlock = await web3.eth.getBlock(initBlockNumber);
+        const initTimestamp = Number(initBlock.timestamp.toString());
+        const stepMargin = initTimestamp % 10070;
+        const startTimestamp = stepMargin >= 555
+          ? initTimestamp - (stepMargin - 555)
+          : initTimestamp - (stepMargin + 10070) + 555;
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await time.increaseTo(startTimestamp + 12000);
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '7500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '7125');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '2850');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
 
-      await this.pool.harvest(0, bob, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '7500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '7125');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '2850');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '950');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '375');
+        await collectible2.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await pool.updatePeriod();
+
+        await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+        await pool.deposit(1, edith, [5], { from:bob });
+        await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+      });
+
+      it('withdraw tokens are transferred out', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol })
+        assert.equal(await collectible.ownerOf(0), alice);
+        assert.equal(await collectible.ownerOf(1), bob);
+        assert.equal(await collectible.ownerOf(2), pool.address);
+        assert.equal(await collectible.ownerOf(3), bob);
+        assert.equal(await collectible.ownerOf(4), alice);
+        assert.equal(await collectible.ownerOf(5), pool.address);
+
+        await pool.withdraw(1, alice, [5], { from:edith });
+        assert.equal(await collectible.ownerOf(0), alice);
+        assert.equal(await collectible.ownerOf(1), bob);
+        assert.equal(await collectible.ownerOf(2), pool.address);
+        assert.equal(await collectible.ownerOf(3), bob);
+        assert.equal(await collectible.ownerOf(4), alice);
+        assert.equal(await collectible.ownerOf(5), alice);
+
+        await pool.withdraw(2, alice, [1, 2, 3], { from:dave });
+        assert.equal(await collectible2.ownerOf(0), bob);
+        assert.equal(await collectible2.ownerOf(1), alice);
+        assert.equal(await collectible2.ownerOf(2), alice);
+        assert.equal(await collectible2.ownerOf(3), alice);
+        assert.equal(await collectible2.ownerOf(4), bob);
+        assert.equal(await collectible2.ownerOf(5), bob);
+      });
+
+      it('withdraw reverts unstaked token', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await expectRevert(
+          pool.withdraw(0, alice, [0, 3], { from:carol }),
+          "RaraCollectibleMining: token not staked"
+        );
+
+        await expectRevert(
+          pool.withdraw(1, alice, [1], { from:edith }),
+          "RaraCollectibleMining: token not staked"
+        );
+
+        await expectRevert(
+          pool.withdraw(2, alice, [0, 1, 2, 3], { from:dave }),
+          "RaraCollectibleMining: token not staked"
+        );
+      });
+
+      it('withdraw reverts for wrong pid', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await expectRevert(
+          pool.withdraw(1, alice, [0, 4], { from:carol }),
+          "RaraCollectibleMining: token not in pool"
+        );
+
+        await expectRevert(
+          pool.withdraw(0, alice, [5], { from:edith }),
+          "RaraCollectibleMining: token not in pool"
+        );
+
+        await expectRevert(
+          pool.withdraw(3, alice, [1, 2, 3], { from:dave }),
+          "RaraCollectibleMining: token not in pool"
+        );
+      });
+
+      it('withdraw reverts token owned by another', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await expectRevert(
+          pool.withdraw(0, alice, [0, 4], { from:edith }),
+          "RaraCollectibleMining: token not staked by caller"
+        );
+
+        await expectRevert(
+          pool.withdraw(1, alice, [5], { from:dave }),
+          "RaraCollectibleMining: token not staked by caller"
+        );
+
+        await expectRevert(
+          pool.withdraw(2, alice, [1, 2, 3], { from:bob }),
+          "RaraCollectibleMining: token not staked by caller"
+        );
+      });
+
+      it('withdrawn tokens update poolUserTokenIndex', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol });
+        await pool.withdraw(1, alice, [5], { from:edith });
+
+        assert.equal(await pool.poolUserTokenCount(0, alice), '0');
+        assert.equal(await pool.poolUserTokenCount(0, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(0, carol), '1');
+        assert.equal(await pool.poolUserTokenCount(0, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(0, edith), '0');
+
+        assert.equal(await pool.poolUserTokenCount(1, alice), '0');
+        assert.equal(await pool.poolUserTokenCount(1, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(1, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(1, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(1, edith), '0');
+
+        assert.equal(await pool.poolUserTokenCount(2, alice), '0');
+        assert.equal(await pool.poolUserTokenCount(2, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(2, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(2, dave), '3');
+        assert.equal(await pool.poolUserTokenCount(2, edith), '0');
+
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 0), '2');
+
+        await pool.withdraw(2, alice, [1], { from:dave });
+        assert.equal(await pool.poolUserTokenCount(2, dave), '2');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '3');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 1), '2');
+
+        await pool.withdraw(2, alice, [2], { from:dave });
+        assert.equal(await pool.poolUserTokenCount(2, dave), '1');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '3');
+
+        await pool.withdraw(2, alice, [3], { from:dave });
+        assert.equal(await pool.poolUserTokenCount(2, dave), '0');
+      });
+
+      it('(internal) withdrawn tokens update tokenInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        const registry = await MockVotingRegistry.new();
+        await pool.setRegistry(registry.address, { from:manager });
+
+        // should have no effect; values already assessed
+        await registry.set(carol, 100, 1);  // x2
+        await registry.set(edith, 200, 3);  // x6
+        await registry.set(dave, 300, 10);  // x20
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol });
+        await pool.withdraw(1, alice, [5], { from:edith });
+        await pool.withdraw(2, alice, [1], { from:dave });
+
+        async function checkTokenInfo(opts) {
+          const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+          const info = await pool.tokenInfo(address, tokenId);
+          assert.equal(info.poolId, `${poolId}`);
+          assert.equal(info.owner, owner);
+          assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+          assert.equal(info.staked, staked);
+          assert.equal(info.activatedPower, `${activatedPower}`);
+          assert.equal(info.activationPeriod, `${activationPeriod}`);
+        }
+
+        const poolInfo = [
+          { poolId: 0, owner: carol, staked:true, activatedPower: 100, activationPeriod: 2 },
+          { poolId: 1, owner: edith, staked:true, activatedPower: 1000, activationPeriod: 2 },
+          { poolId: 2, owner: dave, staked:true, activatedPower: 1, activationPeriod: 2 }
+        ]
+
+        const unpoolInfo = [
+          { poolId: 0, owner: ZERO_ADDRESS, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 1, owner: ZERO_ADDRESS, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 2, owner: ZERO_ADDRESS, staked:true, activatedPower: 0, activationPeriod: 0 }
+        ]
+
+        await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:0, ...poolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:0, ...unpoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:0, ...unpoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:5, ownerTokenIndex:0, ...unpoolInfo[1] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:0, ...unpoolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:1, ...poolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:3, ownerTokenIndex:0, ...poolInfo[2] });
+      });
+
+      it('(internal) withdrawn tokens update userInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        const registry = await MockVotingRegistry.new();
+        await pool.setRegistry(registry.address, { from:manager });
+
+        // should have no effect; values already assessed
+        await registry.set(carol, 100, 1);  // x2
+        await registry.set(edith, 200, 3);  // x6
+        await registry.set(dave, 300, 10);  // x20
+
+        async function checkUserInfo(address, power) {
+          const info = await pool.userInfo(address);
+          assert.equal(info.activatedPower, `${power}`);
+          assert.equal(info.activationPeriod, '2');
+          assert.equal(info.accumulatedRewardPrec, '0');
+          assert.equal(info.harvestedReward, '0');
+        }
+
+        await checkUserInfo(carol, 300);
+        await checkUserInfo(edith, 1000);
+        await checkUserInfo(dave, 3);
+      });
+
+      it('deposited after withdrawal tokens update poolUserTokenIndex', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await collectible.setApprovalForAll(this.pool.address, true, { from:carol });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:edith });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:dave });
+
+        await pool.withdraw(0, carol, [0, 4], { from:carol });
+        await pool.withdraw(1, edith, [5], { from:edith });
+        await pool.withdraw(2, dave, [1, 2], { from:dave });
+
+        await pool.deposit(0, carol, [0, 4], { from:carol });
+        await pool.deposit(1, edith, [5], { from:edith });
+        await pool.deposit(2, dave, [1, 2], { from:dave });
+
+        assert.equal(await pool.poolUserTokenCount(0, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(0, carol), '3');
+        assert.equal(await pool.poolUserTokenCount(0, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(0, edith), '0');
+
+        assert.equal(await pool.poolUserTokenCount(1, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(1, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(1, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(1, edith), '1');
+
+        assert.equal(await pool.poolUserTokenCount(2, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(2, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(2, dave), '3');
+        assert.equal(await pool.poolUserTokenCount(2, edith), '0');
+
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 0), '2');
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 1), '0');
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 2), '4');
+
+        assert.equal(await pool.poolUserTokenIndex(1, edith, 0), '5');
+
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '3');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 1), '1');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 2), '2');
+      });
+
+      it('(internal) deposited after withdrawal tokens update tokenInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await collectible.setApprovalForAll(this.pool.address, true, { from:carol });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:edith });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:dave });
+
+        await pool.withdraw(0, carol, [0, 4], { from:carol });
+        await pool.withdraw(1, edith, [5], { from:edith });
+        await pool.withdraw(2, dave, [1, 2], { from:dave });
+
+        await pool.deposit(0, carol, [0, 4], { from:carol });
+        await pool.deposit(1, edith, [5], { from:edith });
+        await pool.deposit(2, dave, [1, 2], { from:dave });
+
+        async function checkTokenInfo(opts) {
+          const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+          const info = await pool.tokenInfo(address, tokenId);
+          assert.equal(info.poolId, `${poolId}`);
+          assert.equal(info.owner, owner);
+          assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+          assert.equal(info.staked, staked);
+          assert.equal(info.activatedPower, `${activatedPower}`);
+          assert.equal(info.activationPeriod, `${activationPeriod}`);
+        }
+
+        const poolInfo = [
+          { poolId: 0, owner: carol, staked:true, activatedPower: 100, activationPeriod: 2 },
+          { poolId: 1, owner: edith, staked:true, activatedPower: 1000, activationPeriod: 2 },
+          { poolId: 2, owner: dave, staked:true, activatedPower: 1, activationPeriod: 2 }
+        ]
+
+        const repoolInfo = [
+          { poolId: 0, owner: carol, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 1, owner: edith, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 2, owner: dave, staked:true, activatedPower: 0, activationPeriod: 0 }
+        ]
+
+        await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:0, ...poolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:1, ...repoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:2, ...repoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:5, ownerTokenIndex:0, ...repoolInfo[1] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:3, ownerTokenIndex:0, ...poolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:1, ...repoolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:2, ...repoolInfo[2] });
+      });
+
+      it('(internal) deposited after withdrawal tokens update userInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await collectible.setApprovalForAll(this.pool.address, true, { from:carol });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:edith });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:dave });
+
+        await pool.withdraw(0, carol, [0, 4], { from:carol });
+        await pool.withdraw(1, edith, [5], { from:edith });
+        await pool.withdraw(2, dave, [1, 2], { from:dave });
+
+        await pool.deposit(0, carol, [0, 4], { from:carol });
+        await pool.deposit(1, edith, [5], { from:edith });
+        await pool.deposit(2, dave, [1, 2], { from:dave });
+
+        async function checkUserInfo(address, power) {
+          const info = await pool.userInfo(address);
+          assert.equal(info.activatedPower, `${power}`);
+          assert.equal(info.activationPeriod, '2');
+          assert.equal(info.accumulatedRewardPrec, '0');
+          assert.equal(info.harvestedReward, '0');
+        }
+
+        await checkUserInfo(carol, 100);
+        await checkUserInfo(edith, 0);
+        await checkUserInfo(dave, 1);
+      });
     });
 
-    it('should distribute RARA properly for each staker', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(10, 100, dev, true, { from:alice });
+    context('testing withdraw with registry levels', () => {
+      beforeEach(async () => {
+        const { pool, collectible, collectible2 } = this;
+        const registry = await MockVotingRegistry.new();
+        await pool.setRegistry(registry.address, { from:manager });
 
-      await this.token.mint(alice, 5);
-      await this.token.mint(bob, 4);
-      await this.token.mint(carol, 1);
-      await this.pool.updateUsers(0, [alice, bob, carol]);
+        await registry.set(carol, 100, 1);  // x2
+        await registry.set(edith, 200, 2);  // x4
+        await registry.set(dave, 100, 5);  // x10
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
+        await collectible.addTokenType(`Type 0`, `T0`, 0, { from:minter });
+        await collectible.addTokenType(`Type 1`, `T1`, 0, { from:minter });
+        await collectible.addTokenType(`Type 2`, `T2`, 0, { from:minter });
 
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
+        await collectible2.addTokenType(`Domino 0`, `D0`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 1`, `D1`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 2`, `D2`, 0, { from:minter });
 
-      await this.pool.harvest(0, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
+        await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+        await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+        await pool.addPool(collectible2.address, '1', false, 0, { from:manager });
+        await pool.addPool(collectible2.address, '2', false, 0, { from:manager });
 
-      await this.emitter.setOwed(this.pool.address, '1500');
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1350');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await pool.setPeriod('10070', '555', { from:alice });
+        await pool.initialize({ from:manager });
 
-      await this.pool.harvest(0, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '630');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        const initBlockNumber = await web3.eth.getBlockNumber();
+        const initBlock = await web3.eth.getBlock(initBlockNumber);
+        const initTimestamp = Number(initBlock.timestamp.toString());
+        const stepMargin = initTimestamp % 10070;
+        const startTimestamp = stepMargin >= 555
+          ? initTimestamp - (stepMargin - 555)
+          : initTimestamp - (stepMargin + 10070) + 555;
 
-      await this.pool.harvest(0, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '180');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await time.increaseTo(startTimestamp + 12000);
 
-      await this.pool.harvest(0, carol, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '180');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
 
-      await this.pool.harvest(0, carol, { from:carol });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '180');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await collectible2.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await pool.updatePeriod();
+
+        await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+        await pool.deposit(1, edith, [5], { from:bob });
+        await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+      });
+
+      it('withdraw tokens are transferred out', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol })
+        assert.equal(await collectible.ownerOf(0), alice);
+        assert.equal(await collectible.ownerOf(1), bob);
+        assert.equal(await collectible.ownerOf(2), pool.address);
+        assert.equal(await collectible.ownerOf(3), bob);
+        assert.equal(await collectible.ownerOf(4), alice);
+        assert.equal(await collectible.ownerOf(5), pool.address);
+
+        await pool.withdraw(1, alice, [5], { from:edith });
+        assert.equal(await collectible.ownerOf(0), alice);
+        assert.equal(await collectible.ownerOf(1), bob);
+        assert.equal(await collectible.ownerOf(2), pool.address);
+        assert.equal(await collectible.ownerOf(3), bob);
+        assert.equal(await collectible.ownerOf(4), alice);
+        assert.equal(await collectible.ownerOf(5), alice);
+
+        await pool.withdraw(2, alice, [1, 2, 3], { from:dave });
+        assert.equal(await collectible2.ownerOf(0), bob);
+        assert.equal(await collectible2.ownerOf(1), alice);
+        assert.equal(await collectible2.ownerOf(2), alice);
+        assert.equal(await collectible2.ownerOf(3), alice);
+        assert.equal(await collectible2.ownerOf(4), bob);
+        assert.equal(await collectible2.ownerOf(5), bob);
+      });
+
+      it('withdraw reverts unstaked token', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await expectRevert(
+          pool.withdraw(0, alice, [0, 3], { from:carol }),
+          "RaraCollectibleMining: token not staked"
+        );
+
+        await expectRevert(
+          pool.withdraw(1, alice, [1], { from:edith }),
+          "RaraCollectibleMining: token not staked"
+        );
+
+        await expectRevert(
+          pool.withdraw(2, alice, [0, 1, 2, 3], { from:dave }),
+          "RaraCollectibleMining: token not staked"
+        );
+      });
+
+      it('withdraw reverts for wrong pid', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await expectRevert(
+          pool.withdraw(1, alice, [0, 4], { from:carol }),
+          "RaraCollectibleMining: token not in pool"
+        );
+
+        await expectRevert(
+          pool.withdraw(0, alice, [5], { from:edith }),
+          "RaraCollectibleMining: token not in pool"
+        );
+
+        await expectRevert(
+          pool.withdraw(3, alice, [1, 2, 3], { from:dave }),
+          "RaraCollectibleMining: token not in pool"
+        );
+      });
+
+      it('withdraw reverts token owned by another', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await expectRevert(
+          pool.withdraw(0, alice, [0, 4], { from:edith }),
+          "RaraCollectibleMining: token not staked by caller"
+        );
+
+        await expectRevert(
+          pool.withdraw(1, alice, [5], { from:dave }),
+          "RaraCollectibleMining: token not staked by caller"
+        );
+
+        await expectRevert(
+          pool.withdraw(2, alice, [1, 2, 3], { from:bob }),
+          "RaraCollectibleMining: token not staked by caller"
+        );
+      });
+
+      it('withdrawn tokens update poolUserTokenIndex', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol });
+        await pool.withdraw(1, alice, [5], { from:edith });
+
+        assert.equal(await pool.poolUserTokenCount(0, alice), '0');
+        assert.equal(await pool.poolUserTokenCount(0, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(0, carol), '1');
+        assert.equal(await pool.poolUserTokenCount(0, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(0, edith), '0');
+
+        assert.equal(await pool.poolUserTokenCount(1, alice), '0');
+        assert.equal(await pool.poolUserTokenCount(1, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(1, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(1, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(1, edith), '0');
+
+        assert.equal(await pool.poolUserTokenCount(2, alice), '0');
+        assert.equal(await pool.poolUserTokenCount(2, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(2, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(2, dave), '3');
+        assert.equal(await pool.poolUserTokenCount(2, edith), '0');
+
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 0), '2');
+
+        await pool.withdraw(2, alice, [1], { from:dave });
+        assert.equal(await pool.poolUserTokenCount(2, dave), '2');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '3');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 1), '2');
+
+        await pool.withdraw(2, alice, [2], { from:dave });
+        assert.equal(await pool.poolUserTokenCount(2, dave), '1');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '3');
+
+        await pool.withdraw(2, alice, [3], { from:dave });
+        assert.equal(await pool.poolUserTokenCount(2, dave), '0');
+      });
+
+      it('(internal) withdrawn tokens update tokenInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        const registry = await MockVotingRegistry.at(await pool.registry());
+
+        // should have no effect; values already assessed
+        await registry.set(carol, 0, 0);
+        await registry.set(edith, 100, 30);
+        await registry.set(dave, 700, 9999);
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol });
+        await pool.withdraw(1, alice, [5], { from:edith });
+        await pool.withdraw(2, alice, [1], { from:dave });
+
+        async function checkTokenInfo(opts) {
+          const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+          const info = await pool.tokenInfo(address, tokenId);
+          assert.equal(info.poolId, `${poolId}`);
+          assert.equal(info.owner, owner);
+          assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+          assert.equal(info.staked, staked);
+          assert.equal(info.activatedPower, `${activatedPower}`);
+          assert.equal(info.activationPeriod, `${activationPeriod}`);
+        }
+
+        const poolInfo = [
+          { poolId: 0, owner: carol, staked:true, activatedPower: 200, activationPeriod: 2 },
+          { poolId: 1, owner: edith, staked:true, activatedPower: 4000, activationPeriod: 2 },
+          { poolId: 2, owner: dave, staked:true, activatedPower: 10, activationPeriod: 2 }
+        ]
+
+        const unpoolInfo = [
+          { poolId: 0, owner: ZERO_ADDRESS, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 1, owner: ZERO_ADDRESS, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 2, owner: ZERO_ADDRESS, staked:true, activatedPower: 0, activationPeriod: 0 }
+        ]
+
+        await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:0, ...poolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:0, ...unpoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:0, ...unpoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:5, ownerTokenIndex:0, ...unpoolInfo[1] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:0, ...unpoolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:1, ...poolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:3, ownerTokenIndex:0, ...poolInfo[2] });
+      });
+
+      it('(internal) withdrawn tokens update userInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        const registry = await MockVotingRegistry.at(await pool.registry());
+
+        // should have no effect; values already assessed
+        await registry.set(carol, 0, 0);
+        await registry.set(edith, 100, 30);
+        await registry.set(dave, 700, 9999);
+
+        async function checkUserInfo(address, power) {
+          const info = await pool.userInfo(address);
+          assert.equal(info.activatedPower, `${power}`);
+          assert.equal(info.activationPeriod, '2');
+          assert.equal(info.accumulatedRewardPrec, '0');
+          assert.equal(info.harvestedReward, '0');
+        }
+
+        await checkUserInfo(carol, 600);
+        await checkUserInfo(edith, 4000);
+        await checkUserInfo(dave, 30);
+
+        await pool.withdraw(0, alice, [0, 4], { from:carol });
+        await pool.withdraw(1, alice, [5], { from:edith });
+        await pool.withdraw(2, alice, [1], { from:dave });
+
+        await checkUserInfo(carol, 200);
+        await checkUserInfo(edith, 0);
+        await checkUserInfo(dave, 20);
+      });
+
+      it('deposited after withdrawal tokens update poolUserTokenIndex', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await collectible.setApprovalForAll(this.pool.address, true, { from:carol });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:edith });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:dave });
+
+        await pool.withdraw(0, carol, [0, 4], { from:carol });
+        await pool.withdraw(1, edith, [5], { from:edith });
+        await pool.withdraw(2, dave, [1, 2], { from:dave });
+
+        await pool.deposit(0, carol, [0, 4], { from:carol });
+        await pool.deposit(1, edith, [5], { from:edith });
+        await pool.deposit(2, dave, [1, 2], { from:dave });
+
+        assert.equal(await pool.poolUserTokenCount(0, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(0, carol), '3');
+        assert.equal(await pool.poolUserTokenCount(0, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(0, edith), '0');
+
+        assert.equal(await pool.poolUserTokenCount(1, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(1, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(1, dave), '0');
+        assert.equal(await pool.poolUserTokenCount(1, edith), '1');
+
+        assert.equal(await pool.poolUserTokenCount(2, bob), '0');
+        assert.equal(await pool.poolUserTokenCount(2, carol), '0');
+        assert.equal(await pool.poolUserTokenCount(2, dave), '3');
+        assert.equal(await pool.poolUserTokenCount(2, edith), '0');
+
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 0), '2');
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 1), '0');
+        assert.equal(await pool.poolUserTokenIndex(0, carol, 2), '4');
+
+        assert.equal(await pool.poolUserTokenIndex(1, edith, 0), '5');
+
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 0), '3');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 1), '1');
+        assert.equal(await pool.poolUserTokenIndex(2, dave, 2), '2');
+      });
+
+      it('(internal) deposited after withdrawal tokens update tokenInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await collectible.setApprovalForAll(this.pool.address, true, { from:carol });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:edith });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:dave });
+
+        await pool.withdraw(0, carol, [0, 4], { from:carol });
+        await pool.withdraw(1, edith, [5], { from:edith });
+        await pool.withdraw(2, dave, [1, 2], { from:dave });
+
+        await pool.deposit(0, carol, [0, 4], { from:carol });
+        await pool.deposit(1, edith, [5], { from:edith });
+        await pool.deposit(2, dave, [1, 2], { from:dave });
+
+        async function checkTokenInfo(opts) {
+          const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+          const info = await pool.tokenInfo(address, tokenId);
+          assert.equal(info.poolId, `${poolId}`);
+          assert.equal(info.owner, owner);
+          assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+          assert.equal(info.staked, staked);
+          assert.equal(info.activatedPower, `${activatedPower}`);
+          assert.equal(info.activationPeriod, `${activationPeriod}`);
+        }
+
+        const poolInfo = [
+          { poolId: 0, owner: carol, staked:true, activatedPower: 200, activationPeriod: 2 },
+          { poolId: 1, owner: edith, staked:true, activatedPower: 4000, activationPeriod: 2 },
+          { poolId: 2, owner: dave, staked:true, activatedPower: 10, activationPeriod: 2 }
+        ]
+
+        const repoolInfo = [
+          { poolId: 0, owner: carol, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 1, owner: edith, staked:true, activatedPower: 0, activationPeriod: 0 },
+          { poolId: 2, owner: dave, staked:true, activatedPower: 0, activationPeriod: 0 }
+        ]
+
+        await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:0, ...poolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:1, ...repoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:2, ...repoolInfo[0] });
+        await checkTokenInfo({ address:collectible.address, tokenId:5, ownerTokenIndex:0, ...repoolInfo[1] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:3, ownerTokenIndex:0, ...poolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:1, ...repoolInfo[2] });
+        await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:2, ...repoolInfo[2] });
+      });
+
+      it('(internal) deposited after withdrawal tokens update userInfo', async () => {
+        const { pool, collectible, collectible2 } = this;
+
+        await collectible.setApprovalForAll(this.pool.address, true, { from:carol });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:edith });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:dave });
+
+        await pool.withdraw(0, carol, [0, 4], { from:carol });
+        await pool.withdraw(1, edith, [5], { from:edith });
+        await pool.withdraw(2, dave, [1, 2], { from:dave });
+
+        await pool.deposit(0, carol, [0, 4], { from:carol });
+        await pool.deposit(1, edith, [5], { from:edith });
+        await pool.deposit(2, dave, [1, 2], { from:dave });
+
+        async function checkUserInfo(address, power) {
+          const info = await pool.userInfo(address);
+          assert.equal(info.activatedPower, `${power}`);
+          assert.equal(info.activationPeriod, '2');
+          assert.equal(info.accumulatedRewardPrec, '0');
+          assert.equal(info.harvestedReward, '0');
+        }
+
+        await checkUserInfo(carol, 200);
+        await checkUserInfo(edith, 0);
+        await checkUserInfo(dave, 10);
+      });
     });
 
-    it('should distribute RARA properly for each staker as stakes change', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(1, 10, dev, true, { from:alice });
+    context('testing activate', () => {
+      beforeEach(async () => {
+        const { pool, collectible, collectible2, food } = this;
 
-      await this.token.mint(alice, 5);
-      await this.pool.update(0, alice);
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
+        await collectible.addTokenType(`Type 0`, `T0`, 0, { from:minter });
+        await collectible.addTokenType(`Type 1`, `T1`, 0, { from:minter });
+        await collectible.addTokenType(`Type 2`, `T2`, 0, { from:minter });
 
-      await this.token.mint(bob, 4);
-      await this.pool.update(0, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
+        await collectible2.addTokenType(`Domino 0`, `D0`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 1`, `D1`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 2`, `D2`, 0, { from:minter });
 
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
+        await food.addTokenType(`Food 0`, `F0`, 0, { from:minter });
+        await food.addTokenType(`Food 1`, `F1`, 0, { from:minter });
+        await food.addTokenType(`Food 2`, `F2`, 0, { from:minter });
 
-      await this.token2.mint(bob, 10);
-      await this.pool.update(1, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+        await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+        await pool.addPool(collectible2.address, '1', false, 0, { from:manager });
+        await pool.addPool(collectible2.address, '2', false, 0, { from:manager });
 
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4050');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3150');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // 1400 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '800');      // 400 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '450');        // 0 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await pool.setPoolActivation(0, '100', ZERO_ADDRESS, 0, false, 0, { from:alice });
+        await pool.setPoolActivation(1, '1000', food.address, 2, true, 0, { from:alice });
+        await pool.setPoolActivation(2, '1', food.address, 3, false, 0, { from:alice });
+        await pool.setPoolActivation(3, '1', food.address, 3, false, 0, { from:alice });
 
-      await this.token.burn(5, { from:alice });
-      await this.pool.update(0, alice);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4050');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3150');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // 1400 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '800');      // 400 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '450');        // 0 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await pool.setPeriod('10070', '555', { from:alice });
+        await pool.initialize({ from:manager });
 
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // no change
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '1700');     // 800 + 900
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        const initBlockNumber = await web3.eth.getBlockNumber();
+        const initBlock = await web3.eth.getBlock(initBlockNumber);
+        const initTimestamp = Number(initBlock.timestamp.toString());
+        const stepMargin = initTimestamp % 10070;
+        const startTimestamp = stepMargin >= 555
+          ? initTimestamp - (stepMargin - 555)
+          : initTimestamp - (stepMargin + 10070) + 555;
 
-      await this.pool.harvest(0, bob, { from:bob });    // no claim needed
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // no change
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // harvest!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
+        await time.increaseTo(startTimestamp + 12000);
 
-      await this.pool.harvest(0, alice, { from:alice });    // triggers a claim; can't cover reward otherwise
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');      // harvest!
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // no change!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '600');
+        await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
 
-      await this.token2.burn(10, { from:bob });
-      await this.pool.update(1, bob);
-      await this.pool.harvest(1, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');      // harvest!
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // no change!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '2600');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '600');
+        await collectible2.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await food.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await food.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await food.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await pool.updatePeriod();
+
+        await pool.deposit(0, carol, [0, 1, 2], { from:bob });
+        await pool.deposit(1, edith, [4], { from:bob });
+        await pool.deposit(2, dave, [0, 1, 2], { from:bob });
+      });
+
+      it('activate reverts for unstaked token', async () => {
+        const { pool, collectible, collectible2, food } = this;
+
+        await expectRevert(
+          pool.activate(0, [3], [], { from:bob }),
+          "RaraCollectibleMining: token not staked"
+        );
+
+        await expectRevert(
+          pool.activate(1, [5], [4, 5], { from:bob }),
+          "RaraCollectibleMining: token not staked"
+        );
+
+        await expectRevert(
+          pool.activate(2, [3, 4], [0, 1, 2, 3, 4, 5], { from:bob }),
+          "RaraCollectibleMining: token not staked"
+        );
+      });
+
+      it('activate reverts for already activated token', async () => {
+        const { pool, collectible, collectible2, food } = this;
+
+        await expectRevert(
+          pool.activate(0, [0], [], { from:bob }),
+          "RaraCollectibleMining: token already activated"
+        );
+
+        await expectRevert(
+          pool.activate(1, [4], [4, 5], { from:bob }),
+          "RaraCollectibleMining: token already activated"
+        );
+
+        await expectRevert(
+          pool.activate(2, [0], [0, 1, 2], { from:bob }),
+          "RaraCollectibleMining: token already activated"
+        );
+      });
+
+      it('activate reverts for token not in pool', async () => {
+        const { pool, collectible, collectible2, food } = this;
+
+        await expectRevert(
+          pool.activate(1, [0], [4, 5], { from:bob }),
+          "RaraCollectibleMining: token not in pool"
+        );
+
+        await expectRevert(
+          pool.activate(0, [4], [], { from:bob }),
+          "RaraCollectibleMining: token not in pool"
+        );
+
+        await expectRevert(
+          pool.activate(3, [1, 2], [0, 1, 2, 3, 4, 5], { from:bob }),
+          "RaraCollectibleMining: token not in pool"
+        );
+      });
+
+      context('with tokens unactivated via withdrawal and redeposit', () => {
+        beforeEach(async () => {
+          const { pool } = this;
+
+          await pool.withdraw(0, bob, [0, 1, 2], { from:carol });
+          await pool.withdraw(1, bob, [4], { from:edith });
+          await pool.withdraw(2, bob, [0, 1, 2], { from:dave });
+
+          await pool.deposit(0, carol, [0, 1, 2], { from:bob });
+          await pool.deposit(1, edith, [4], { from:bob });
+          await pool.deposit(2, dave, [0, 1, 2], { from:bob });
+        });
+
+        it('activate reverts for any unstaked token', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(0, [0, 1, 2, 3], [], { from:bob }),
+            "RaraCollectibleMining: token not staked"
+          );
+
+          await expectRevert(
+            pool.activate(1, [5, 4], [4, 5, 10, 11], { from:bob }),
+            "RaraCollectibleMining: token not staked"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0, 3, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8], { from:bob }),
+            "RaraCollectibleMining: token not staked"
+          );
+        });
+
+        it('activate reverts for any token not in pool', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(1, [0, 4], [4, 5, 6, 7], { from:bob }),
+            "RaraCollectibleMining: token not in pool"
+          );
+
+          await expectRevert(
+            pool.activate(0, [1, 4, 2], [], { from:bob }),
+            "RaraCollectibleMining: token not in pool"
+          );
+
+          await expectRevert(
+            pool.activate(3, [1, 2], [0, 1, 2, 3, 4, 5], { from:bob }),
+            "RaraCollectibleMining: token not in pool"
+          );
+        });
+
+        it('activate reverts for already manually activated token', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await pool.activate(0, [0], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [2], [3, 4, 5], { from:bob });
+
+          await expectRevert(
+            pool.activate(0, [0, 1, 2], [], { from:bob }),
+            "RaraCollectibleMining: token already activated"
+          );
+
+          await expectRevert(
+            pool.activate(1, [4], [10, 11], { from:bob }),
+            "RaraCollectibleMining: token already activated"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0, 1, 2], [4, 5, 6, 7, 8, 9, 10, 11, 12], { from:bob }),
+            "RaraCollectibleMining: token already activated"
+          );
+        });
+
+        it('activate reverts for incorrect activation token quantity', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(0, [0], [0], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(0, [0], [0, 1, 2], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(1, [4], [4, 5, 10, 11], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [0], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [0, 1], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+        });
+
+        it('activate reverts for invalid activation tokenType', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(1, [4], [1, 2], { from:bob }),
+            "RaraCollectibleMining: invalid tokenType"
+          );
+
+          await expectRevert(
+            pool.activate(1, [4], [2, 1], { from:bob }),
+            "RaraCollectibleMining: invalid tokenType"
+          );
+        });
+
+        it('activate destroys activation tokens', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '12');
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '12');
+
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '10');
+          await expectRevert.unspecified(food.ownerOf(0));
+          await expectRevert.unspecified(food.ownerOf(1));
+          assert.equal(await food.ownerOf(2), bob);
+          assert.equal(await food.ownerOf(3), bob);
+
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '4');
+          await expectRevert.unspecified(food.ownerOf(0));
+          await expectRevert.unspecified(food.ownerOf(1));
+          await expectRevert.unspecified(food.ownerOf(2));
+          await expectRevert.unspecified(food.ownerOf(3));
+          await expectRevert.unspecified(food.ownerOf(4));
+          await expectRevert.unspecified(food.ownerOf(5));
+          await expectRevert.unspecified(food.ownerOf(6));
+          await expectRevert.unspecified(food.ownerOf(7));
+          assert.equal(await food.ownerOf(8), bob);
+          assert.equal(await food.ownerOf(9), bob);
+        });
+
+        it('(internal) activate updates tokenInfo', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+
+          async function checkTokenInfo(opts) {
+            const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+            const info = await pool.tokenInfo(address, tokenId);
+            assert.equal(info.poolId, `${poolId}`);
+            assert.equal(info.owner, owner);
+            assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+            assert.equal(info.staked, staked);
+            assert.equal(info.activatedPower, `${activatedPower}`);
+            assert.equal(info.activationPeriod, `${activationPeriod}`);
+          }
+
+          const act = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 100, activationPeriod: 2 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 1000, activationPeriod: 2 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 1, activationPeriod: 2 }
+          ];
+
+          const unact = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 0, activationPeriod: 0 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 0, activationPeriod: 0 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 0, activationPeriod: 0 }
+          ];
+
+          await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:0, ...act[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:1, ownerTokenIndex:1, ...unact[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:2, ...act[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:0, ...act[1] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:0, ownerTokenIndex:0, ...unact[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:1, ...act[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:2, ...act[2] });
+        });
+
+        it('(internal) activate updates userInfo', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          async function checkUserInfo(address, period, power) {
+            const info = await pool.userInfo(address);
+            assert.equal(info.activatedPower, `${power}`);
+            assert.equal(info.activationPeriod, `${period}`);
+            assert.equal(info.accumulatedRewardPrec, '0');
+            assert.equal(info.harvestedReward, '0');
+          }
+
+          await checkUserInfo(carol, 2, 0);
+          await checkUserInfo(edith, 2, 0);
+          await checkUserInfo(dave, 2, 0);
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+
+          await checkUserInfo(carol, 2, 200);
+          await checkUserInfo(edith, 2, 1000);
+          await checkUserInfo(dave, 2, 2);
+        });
+      });
+
+      context('with tokens unactivated via period transition', () => {
+        beforeEach(async () => {
+          const { pool } = this;
+          await nextPeriod(pool);
+        });
+
+        it('activate reverts for any unstaked token', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(0, [0, 1, 2, 3], [], { from:bob }),
+            "RaraCollectibleMining: token not staked"
+          );
+
+          await expectRevert(
+            pool.activate(1, [5, 4], [4, 5, 10, 11], { from:bob }),
+            "RaraCollectibleMining: token not staked"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0, 3, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8], { from:bob }),
+            "RaraCollectibleMining: token not staked"
+          );
+        });
+
+        it('activate reverts for any token not in pool', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(1, [0, 4], [4, 5, 6, 7], { from:bob }),
+            "RaraCollectibleMining: token not in pool"
+          );
+
+          await expectRevert(
+            pool.activate(0, [1, 4, 2], [], { from:bob }),
+            "RaraCollectibleMining: token not in pool"
+          );
+
+          await expectRevert(
+            pool.activate(3, [1, 2], [0, 1, 2, 3, 4, 5], { from:bob }),
+            "RaraCollectibleMining: token not in pool"
+          );
+        });
+
+        it('activate reverts for already manually activated token', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await pool.activate(0, [0], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [0], [2, 3, 4], { from:bob });
+
+          await expectRevert(
+            pool.activate(0, [0], [], { from:bob }),
+            "RaraCollectibleMining: token already activated"
+          );
+
+          await expectRevert(
+            pool.activate(1, [4], [6, 7], { from:bob }),
+            "RaraCollectibleMining: token already activated"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [6, 7, 8], { from:bob }),
+            "RaraCollectibleMining: token already activated"
+          );
+        });
+
+        it('activate reverts for incorrect activation token quantity', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(0, [0], [0], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(0, [0], [0, 1, 2], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(1, [4], [4, 5, 10, 11], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [0], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+
+          await expectRevert(
+            pool.activate(2, [0], [0, 1], { from:bob }),
+            "RaraCollectibleMining: invalid activation token quantity"
+          );
+        });
+
+        it('activate reverts for invalid activation tokenType', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await expectRevert(
+            pool.activate(1, [4], [1, 2], { from:bob }),
+            "RaraCollectibleMining: invalid tokenType"
+          );
+
+          await expectRevert(
+            pool.activate(1, [4], [2, 1], { from:bob }),
+            "RaraCollectibleMining: invalid tokenType"
+          );
+        });
+
+        it('activate destroys activation tokens', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '12');
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '12');
+
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '10');
+          await expectRevert.unspecified(food.ownerOf(0));
+          await expectRevert.unspecified(food.ownerOf(1));
+          assert.equal(await food.ownerOf(2), bob);
+          assert.equal(await food.ownerOf(3), bob);
+
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+          assert.equal(await collectible.totalSupply(), '6');
+          assert.equal(await collectible2.totalSupply(), '6');
+          assert.equal(await food.totalSupply(), '4');
+          await expectRevert.unspecified(food.ownerOf(0));
+          await expectRevert.unspecified(food.ownerOf(1));
+          await expectRevert.unspecified(food.ownerOf(2));
+          await expectRevert.unspecified(food.ownerOf(3));
+          await expectRevert.unspecified(food.ownerOf(4));
+          await expectRevert.unspecified(food.ownerOf(5));
+          await expectRevert.unspecified(food.ownerOf(6));
+          await expectRevert.unspecified(food.ownerOf(7));
+          assert.equal(await food.ownerOf(8), bob);
+          assert.equal(await food.ownerOf(9), bob);
+        });
+
+        it('(internal) activate updates tokenInfo', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+
+          async function checkTokenInfo(opts) {
+            const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+            const info = await pool.tokenInfo(address, tokenId);
+            assert.equal(info.poolId, `${poolId}`);
+            assert.equal(info.owner, owner);
+            assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+            assert.equal(info.staked, staked);
+            assert.equal(info.activatedPower, `${activatedPower}`);
+            assert.equal(info.activationPeriod, `${activationPeriod}`);
+          }
+
+          const act = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 100, activationPeriod: 3 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 1000, activationPeriod: 3 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 1, activationPeriod: 3 }
+          ];
+
+          const unact = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 100, activationPeriod: 2 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 1000, activationPeriod: 2 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 1, activationPeriod: 2 }
+          ];
+
+          await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:0, ...act[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:1, ownerTokenIndex:1, ...unact[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:2, ...act[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:0, ...act[1] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:0, ownerTokenIndex:0, ...unact[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:1, ...act[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:2, ...act[2] });
+        });
+
+        it('(internal) activate updates userInfo', async () => {
+          const { pool, collectible, collectible2, food } = this;
+
+          async function checkUserInfo(address, period, power) {
+            const info = await pool.userInfo(address);
+            assert.equal(info.activatedPower, `${power}`);
+            assert.equal(info.activationPeriod, `${period}`);
+            assert.equal(info.accumulatedRewardPrec, '0');
+            assert.equal(info.harvestedReward, '0');
+          }
+
+          await checkUserInfo(carol, 2, 300);
+          await checkUserInfo(edith, 2, 1000);
+          await checkUserInfo(dave, 2, 3);
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+
+          await checkUserInfo(carol, 3, 200);
+          await checkUserInfo(edith, 3, 1000);
+          await checkUserInfo(dave, 3, 2);
+        });
+
+        it('(internal) activate updates tokenInfo when registry provides multiplier', async () => {
+          const { pool, collectible, collectible2, food } = this;
+          const registry = await MockVotingRegistry.new();
+          await pool.setRegistry(registry.address, { from:manager });
+
+          await registry.set(carol, 100, 1);  // x2
+          await registry.set(edith, 200, 3);  // x6
+          await registry.set(dave, 300, 10);  // x20
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+
+          async function checkTokenInfo(opts) {
+            const { address, tokenId, poolId, owner, ownerTokenIndex, staked, activatedPower, activationPeriod } = opts;
+            const info = await pool.tokenInfo(address, tokenId);
+            assert.equal(info.poolId, `${poolId}`);
+            assert.equal(info.owner, owner);
+            assert.equal(info.ownerTokenIndex, `${ownerTokenIndex}`);
+            assert.equal(info.staked, staked);
+            assert.equal(info.activatedPower, `${activatedPower}`);
+            assert.equal(info.activationPeriod, `${activationPeriod}`);
+          }
+
+          const act = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 200, activationPeriod: 3 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 6000, activationPeriod: 3 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 20, activationPeriod: 3 }
+          ];
+
+          const unact = [
+            { poolId: 0, owner: carol, staked:true, activatedPower: 100, activationPeriod: 2 },
+            { poolId: 1, owner: edith, staked:true, activatedPower: 1000, activationPeriod: 2 },
+            { poolId: 2, owner: dave, staked:true, activatedPower: 1, activationPeriod: 2 }
+          ];
+
+          await checkTokenInfo({ address:collectible.address, tokenId:0, ownerTokenIndex:0, ...act[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:1, ownerTokenIndex:1, ...unact[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:2, ownerTokenIndex:2, ...act[0] });
+          await checkTokenInfo({ address:collectible.address, tokenId:4, ownerTokenIndex:0, ...act[1] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:0, ownerTokenIndex:0, ...unact[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:1, ownerTokenIndex:1, ...act[2] });
+          await checkTokenInfo({ address:collectible2.address, tokenId:2, ownerTokenIndex:2, ...act[2] });
+        });
+
+        it('(internal) activate updates userInfo', async () => {
+          const { pool, collectible, collectible2, food } = this;
+          const registry = await MockVotingRegistry.new();
+          await pool.setRegistry(registry.address, { from:manager });
+
+          await registry.set(carol, 100, 1);  // x2
+          await registry.set(edith, 200, 3);  // x6
+          await registry.set(dave, 300, 10);  // x20
+
+          async function checkUserInfo(address, period, power) {
+            const info = await pool.userInfo(address);
+            assert.equal(info.activatedPower, `${power}`);
+            assert.equal(info.activationPeriod, `${period}`);
+            assert.equal(info.accumulatedRewardPrec, '0');
+            assert.equal(info.harvestedReward, '0');
+          }
+
+          await checkUserInfo(carol, 2, 300);
+          await checkUserInfo(edith, 2, 1000);
+          await checkUserInfo(dave, 2, 3);
+
+          await pool.activate(0, [0, 2], [], { from:bob });
+          await pool.activate(1, [4], [0, 1], { from:bob });
+          await pool.activate(2, [1, 2], [2, 3, 4, 5, 6, 7], { from:bob });
+
+          await checkUserInfo(carol, 3, 400);
+          await checkUserInfo(edith, 3, 6000);
+          await checkUserInfo(dave, 3, 40);
+        });
+      });
     });
 
-    it('should distribute RARA properly for each staker as registry levels change', async () => {
-      await this.pool.add('50', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('100', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(1, 10, dev, true, { from:alice });
-
-      await this.token2.mint(alice, 5);
-      await this.pool.update(1, alice);
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token2.mint(bob, 4);
-      await this.pool.update(1, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token.mint(bob, 10);
-      await this.pool.update(0, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      // token2: alice has 5, bob 4. Burn rate is 10%.
-      // increase alice's level to 1, bob's to 3: 10 + 24 = 34.
-      // increase alice's balance to 8: 16 + 24 = 40.
-      // add 6000 to mined amount.
-      // add 6666 with 10% burn  ==> 6000.
-      // alice gets 0 + (4000 * 16) / 40 = 1600.0
-      // bob gets 2000 + (4000 * 24) / 40 = 2400.0
-      await this.token2.mint(alice, 3);
-      await this.registry.set(alice, 100, 1);
-      await this.registry.set(bob, 10000, 3);
-      await this.pool.updateUsers(1, [alice, bob]);
-
-      await this.emitter.addOwed(this.pool.address, '6666');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '6666');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '9666');   // 3000 + 6667
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '8700');   // 2700 + 6000
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '7800');      // 1800 + 6000
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3000'); // 1400  + 1600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '2800');      // 400 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '2000');         // 0 + 2000
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      // token2: alice has 8x2, bob 4x6. Burn rate is 10%.
-      // decrease alice's balance to 3: 6 + 24 = 30.
-      // add 4500 to mined amount.
-      // add 5000 with 10% burn  ==> 4500.
-      // alice gets 0 + (3000 * 6) / 30 = 600.0
-      // bob gets 1500 + (3000 * 24) / 30 = 2400.0
-
-      await this.token2.burn(5, { from:alice });
-      await this.pool.update(1, alice);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '6666');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '9666');   // 3000 + 6667
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '8700');   // 2700 + 6000
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '7800');      // 1800 + 6000
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3000'); // 1400  + 1600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '2800');      // 400 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '2000');         // 0 + 2000
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.emitter.addOwed(this.pool.address, '5000');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '11666');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3600'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '5200');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '3500');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(1, bob, { from:bob });    // triggers a claim
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3600'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '3500');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '7100'); // + 10500 - 5200
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '5200');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '1466');
-
-      await this.pool.harvest(1, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '3500');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '3500');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '3600');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '5200');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '1466');
-
-      await this.token.burn(10, { from:bob });
-      await this.pool.update(0, bob);
-      await this.pool.harvest(0, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '3600');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '8700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '1466');
-    });
-
-    it('harvest reverts until unlockBlock', async () => {
-      let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
-
-      this.pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
-      await this.pool.grantRole(MANAGER_ROLE, manager, { from:alice });
-
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.setBurnRate(0, 1, dev, true, { from:alice });
-
-      await this.token.mint(alice, 5);
-      await this.token.mint(bob, 5);
-      await this.pool.updateUsers(0, [alice, bob]);
-
-      await this.emitter.setOwed(this.pool.address, '100');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await expectRevert(this.pool.harvest(0, dave, { from:alice }), "RaraCollectibleMining: no harvest before unlockBlock");
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await expectRevert(this.pool.harvest(0, dave, { from:alice }), "RaraCollectibleMining: no harvest before unlockBlock");
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await time.advanceBlockTo(unlockBlock);
-
-      await this.pool.harvest(0, dave, { from:alice });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '50');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '50');
-
-      await this.token.burn(5, { from:bob });
-      await this.pool.updateUsers(0, [bob]);
-      await this.pool.harvest(0, dave, { from:bob });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '100');
-    });
-
-    it('should accumulate RARA properly for each staker as stakes change, but only allow harvests after "unlockBlock"', async () => {
-      let unlockBlock = (await web3.eth.getBlockNumber()) + 30;
-
-      this.pool = await RaraCollectibleMining.new(this.reward.address, this.emitter.address, unlockBlock, { from: alice });
-      await this.pool.grantRole(MANAGER_ROLE, manager, { from:alice });
-
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(1, 10, dev, true, { from:alice });
-
-      await this.token.mint(alice, 5);
-      await this.pool.updateUsers(0, [alice]);
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token.mint(bob, 4);
-      await this.pool.updateUsers(0, [bob]);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token2.mint(bob, 10);
-      await this.pool.updateUsers(1, [bob]);  // first PID update triggers a claim from emitter
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4050');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3150');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // 1400 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '800');      // 400 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '450');        // 0 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.token.burn(5, { from:alice });
-      await this.pool.update(0, alice);  // no claim triggered
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4050');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3150');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // 1400 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '800');      // 400 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '450');        // 0 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.emitter.addOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // no change
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '1700');     // 800 + 900
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await expectRevert(this.pool.harvest(0, alice, { from:alice }), "RaraCollectibleMining: no harvest before unlockBlock");
-      await expectRevert(this.pool.harvest(0, bob, { from:bob }), "RaraCollectibleMining: no harvest before unlockBlock");
-      await expectRevert(this.pool.harvest(1, bob, { from:bob }), "RaraCollectibleMining: no harvest before unlockBlock");
-
-      await time.advanceBlockTo(unlockBlock + 10);
-
-      await this.pool.harvest(0, bob, { from:bob });    // no claim needed
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // no change
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // harvest!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, alice, { from:alice });    // triggers a claim; can't cover reward otherwise
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');      // harvest!
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // no change!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '600');
-
-      await this.token2.burn(10, { from:bob });
-      await this.pool.update(1, bob);  // no claim triggered
-      await this.pool.harvest(1, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');      // harvest!
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // no change!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '2600');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '600');
-    });
-  });
-
-  context('With mining tokens added to the field and surplus tokens held by the mining pool', () => {
-    beforeEach(async () => {
-      this.token = await MockERC20.new('Token', 'T', '0', { from: minter });
-      this.token2 = await MockERC20.new('Token2', 'T2', '0', { from: minter });
-      this.collectible = await MockERC721Valuable.new('Collectible', 'C', { from:minter });
-      this.registry = await MockVotingRegistry.new();
-    });
-
-    it('harvest retrieves Rara with 1x addition from surplus, up to emitted amount', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.setBurnRate(0, 1, dev, true, { from:alice });
-
-      await this.token.mint(bob, 10);
-      await this.pool.update(0, bob);
-      await this.emitter.setOwed(this.pool.address, '100');
-      await this.reward.mint(this.pool.address, '500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '200');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await this.pool.harvest(0, dave, { from:alice });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '200');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await this.pool.harvest(0, dave, { from:bob });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '200');
-    });
-
-    it('harvest retrieves Rara with 1x addition from surplus until surplus exhausted', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.setBurnRate(0, 1, dev, true, { from:alice });
-
-      await this.token.mint(bob, 10);
-      await this.pool.update(0, bob);
-      await this.emitter.setOwed(this.pool.address, '100');
-      await this.reward.mint(this.pool.address, '50');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '150');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await this.pool.harvest(0, dave, { from:alice });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '150');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '0');
-
-      await this.pool.harvest(0, dave, { from:bob });
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, carol)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, dave)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dave)).valueOf().toString(), '150');
-    });
-
-    it('should not mine RARA if no one deposits', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(5, 100, dev, true, { from:alice });
-
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1425');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.reward.mint(this.pool.address, '500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '2000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1900');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '500');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '2000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1900');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '100');
-
-      await this.emitter.setOwed(this.pool.address, '1500');
-      await this.token.mint(alice, 10);
-      await this.pool.update(0, alice);   // causes a claim; first staker in this pool
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '3325');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '175');
-
-      await this.reward.mint(this.pool.address, '2000');  // at this nothing is in the emitter, so none of this is available
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '3325');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2000');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '175');
-
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '3325');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2000');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '175');
-
-      await this.emitter.setOwed(this.pool.address, '1500');  // makes 1500 of surplus available
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '6175');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2000');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '175');
-
-      await this.pool.harvest(0, alice, { from:alice });   // no need to harvest; contract has enough to give
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '6175');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '175');
-
-      await this.emitter.addOwed(this.pool.address, '1500');    // + 500 from surplus
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '8500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '8075');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3166');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '175');
-
-      await this.pool.harvest(0, bob, { from:alice });        // need to claim
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '8500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '8075');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3166');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1266');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '425');
-    });
-
-    it('should distribute RARA properly for each staker', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(10, 100, dev, true, { from:alice });
-
-      await this.token.mint(alice, 5);
-      await this.token.mint(bob, 4);
-      await this.token.mint(carol, 1);
-      await this.pool.updateUsers(0, [alice, bob, carol]);
-
-      await this.emitter.setOwed(this.pool.address, '1500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
-
-      await this.pool.harvest(0, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
-
-      await this.reward.mint(this.pool.address, '750');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1200');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '150');
-
-      await this.emitter.setOwed(this.pool.address, '750');
-      await this.pool.claimFromEmitter();
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1350');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '630');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '450');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '180');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, carol, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '180');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, carol, { from:carol });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '720');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '180');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-    });
-
-    it('should distribute RARA properly for each staker as stakes change', async () => {
-      await this.pool.add('100', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('50', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(1, 10, dev, true, { from:alice });
-
-      await this.token.mint(alice, 5);
-      await this.pool.update(0, alice);
-      await this.emitter.setOwed(this.pool.address, '1000');
-      await this.reward.mint(this.pool.address, '500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '500');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token.mint(bob, 4);
-      await this.pool.update(0, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '500');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.emitter.addOwed(this.pool.address, '500');
-      await this.reward.mint(this.pool.address, 2000);    // only 1000 actual used; 1000 extra hangs around
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2500');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token2.mint(bob, 10);
-      await this.pool.update(1, bob);   // causes claim
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.emitter.addOwed(this.pool.address, '750');    // another 750 becomes available from surplus
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '750');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4050');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3150');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // 1400 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '800');      // 400 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '450');        // 0 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.token.burn(5, { from:alice });
-      await this.pool.update(0, alice);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '750');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '4050');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '3150');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // 1400 + 500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '800');      // 400 + 400
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '450');        // 0 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.emitter.addOwed(this.pool.address, '1250');    // last 250 from surplus added
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '2000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // no change
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '1700');     // 800 + 900
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '2800');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, bob, { from:bob });    // no claim needed
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '2000');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '1900');   // no change
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // harvest!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '1100');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(0, alice, { from:alice });    // triggers a claim; can't cover reward otherwise
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');      // harvest!
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // no change!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '900');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '900');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '1700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '600');
-
-      await this.token2.burn(10, { from:bob });
-      await this.pool.update(1, bob);
-      await this.pool.harvest(1, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '6000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '5400');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '4500');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');      // harvest!
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0');      // no change
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');        // no change!
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 450 + 450
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '1900');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '2600');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '600');
-    });
-
-    it('should distribute RARA properly for each staker as registry levels change', async () => {
-      await this.pool.add('50', this.token.address, false, ZERO_ADDRESS, { from:alice });
-      await this.pool.add('100', this.token2.address, false, this.registry.address, { from:manager });
-      await this.pool.setBurnRate(1, 10, dev, true, { from:alice });
-
-      // double ALL emitter output
-      await this.reward.mint(this.pool.address, '100000');
-
-      await this.token2.mint(alice, 5);
-      await this.pool.update(1, alice);
-      await this.emitter.setOwed(this.pool.address, '750');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '750');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100000');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token2.mint(bob, 4);
-      await this.pool.update(1, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '750');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '1350');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '900');
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100000');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.emitter.addOwed(this.pool.address, '750');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '1500');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100000');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '0');
-
-      await this.token.mint(bob, 10);
-      await this.pool.update(0, bob);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '3000');
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '2700');
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '1800');
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '1400'); // 900 + 500
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '400');      // 0 + 400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100300');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      // token2: alice has 5, bob 4. Burn rate is 10%.
-      // increase alice's level to 1, bob's to 3: 10 + 24 = 34.
-      // increase alice's balance to 8: 16 + 24 = 40.
-      // add 6000 to mined amount.
-      // add 6666 with 10% burn  ==> 6000.
-      // alice gets 0 + (4000 * 16) / 40 = 1600.0
-      // bob gets 2000 + (4000 * 24) / 40 = 2400.0
-      await this.token2.mint(alice, 3);
-      await this.registry.set(alice, 100, 1);
-      await this.registry.set(bob, 10000, 3);
-      await this.pool.updateUsers(1, [alice, bob]);
-
-      await this.emitter.addOwed(this.pool.address, '3333');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3333');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '9666');   // 3000 + 6667
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '8700');   // 2700 + 6000
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '7800');      // 1800 + 6000
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3000'); // 1400  + 1600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '2800');      // 400 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '2000');         // 0 + 2000
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100300');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      // token2: alice has 8x2, bob 4x6. Burn rate is 10%.
-      // decrease alice's balance to 3: 6 + 24 = 30.
-      // add 4500 to mined amount.
-      // add 5000 with 10% burn  ==> 4500.
-      // alice gets 0 + (3000 * 6) / 30 = 600.0
-      // bob gets 1500 + (3000 * 24) / 30 = 2400.0
-
-      await this.token2.burn(5, { from:alice });
-      await this.pool.update(1, alice);
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '3333');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '9666');   // 3000 + 6667
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '8700');   // 2700 + 6000
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '7800');      // 1800 + 6000
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3000'); // 1400  + 1600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '2800');      // 400 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '2000');         // 0 + 2000
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100300');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.emitter.addOwed(this.pool.address, '2500');
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '5833');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3600'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '5200');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '3500');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '100300');
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(1, bob, { from:bob });    // no claim needed
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '5833');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '3600'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '3500');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '95100'); // + 100300 - 5200
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '5200');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.pool.harvest(1, alice, { from:alice });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '5833');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '3500');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '91500');  // 95100 - 3600
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '3600');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '5200');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '300');
-
-      await this.token.burn(10, { from:bob });    // pulls all stake from  pool; prompts claimFromEmitter
-      await this.pool.update(0, bob);
-      await this.pool.harvest(0, bob, { from:bob });
-      assert.equal((await this.emitter.owed(this.pool.address)).valueOf().toString(), '0');
-      assert.equal((await this.pool.totalReceived()).valueOf().toString(), '14666');   // 9667 + 5000
-      assert.equal((await this.pool.totalRetained()).valueOf().toString(), '13200');   // 8700 + 4500
-      assert.equal((await this.pool.totalMined()).valueOf().toString(), '12300');      // 7800 + 4500
-      assert.equal((await this.pool.pendingReward(1, alice)).valueOf().toString(), '0'); // 3000 + 600
-      assert.equal((await this.pool.pendingReward(0, alice)).valueOf().toString(), '0');
-      assert.equal((await this.pool.pendingReward(1, bob)).valueOf().toString(), '0');      // 2800 + 2400
-      assert.equal((await this.pool.pendingReward(0, bob)).valueOf().toString(), '0');         // 2000 + 1500
-      assert.equal((await this.reward.balanceOf(this.pool.address)).valueOf().toString(), '92667'); // 91500 + 5833 - 1166 - 3500
-      assert.equal((await this.reward.balanceOf(alice)).valueOf().toString(), '3600');
-      assert.equal((await this.reward.balanceOf(bob)).valueOf().toString(), '8700');
-      assert.equal((await this.reward.balanceOf(carol)).valueOf().toString(), '0');
-      assert.equal((await this.reward.balanceOf(dev)).valueOf().toString(), '1466');
+    context('holistic testing', () => {
+      beforeEach(async () => {
+        const { pool, collectible, collectible2, food } = this;
+
+        await collectible.addTokenType(`Type 0`, `T0`, 0, { from:minter });
+        await collectible.addTokenType(`Type 1`, `T1`, 0, { from:minter });
+        await collectible.addTokenType(`Type 2`, `T2`, 0, { from:minter });
+
+        await collectible2.addTokenType(`Domino 0`, `D0`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 1`, `D1`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 2`, `D2`, 0, { from:minter });
+
+        await food.addTokenType(`Food 0`, `F0`, 0, { from:minter });
+        await food.addTokenType(`Food 1`, `F1`, 0, { from:minter });
+        await food.addTokenType(`Food 2`, `F2`, 0, { from:minter });
+
+        await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+        await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+        await pool.addPool(collectible2.address, '1', false, 0, { from:manager });
+        await pool.addPool(collectible2.address, '2', false, 0, { from:manager });
+
+        await pool.setPoolActivation(0, '100', ZERO_ADDRESS, 0, false, 0, { from:alice });
+        await pool.setPoolActivation(1, '1000', food.address, 2, true, 0, { from:alice });
+        await pool.setPoolActivation(2, '1', food.address, 3, false, 0, { from:alice });
+        await pool.setPoolActivation(3, '2', food.address, 3, false, 0, { from:alice });
+
+        await pool.setPeriod('1000', '0', { from:alice });
+        await pool.initialize({ from:manager });
+
+        const initBlockNumber = await web3.eth.getBlockNumber();
+        const initBlock = await web3.eth.getBlock(initBlockNumber);
+        const initTimestamp = Number(initBlock.timestamp.toString());
+        const stepMargin = initTimestamp % 1000;
+        this.startTimestamp = stepMargin >= 0
+          ? initTimestamp - (stepMargin - 0)
+          : initTimestamp - (stepMargin + 1000) + 0;
+
+        await time.increaseTo(this.startTimestamp + 1000);
+
+        await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await collectible2.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await food.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await food.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await pool.updatePeriod();
+      });
+
+      it('test behavior with basic mining power', async () => {
+        const { pool, collectible, collectible2, emitter, reward } = this;
+
+        // deposit 1303 mining power
+        await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+        await pool.deposit(1, edith, [5], { from:bob });
+        await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+
+        // grant 2404 money
+        await emitter.addOwed(pool.address, '2404');
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        // withdraw
+        await pool.withdraw(0, bob, [0], { from:carol });
+        await pool.withdraw(2, bob, [3], { from:dave });
+
+        // advance and update
+        await nextPeriod(pool);
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal((await pool.pendingReward(carol)).valueOf().toString(), '400');
+        assert.equal((await pool.pendingReward(dave)).valueOf().toString(), '4');
+        assert.equal((await pool.pendingReward(edith)).valueOf().toString(), '2000');
+
+        // harvest
+        await pool.harvest(bob, { from: bob });
+        await pool.harvest(carol, { from:carol });
+        await pool.harvest(dave, { from:dave });
+        await pool.harvest(edith, { from:edith });
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        assert.equal(await reward.balanceOf(alice), '0');
+        assert.equal(await reward.balanceOf(bob), '0');
+        assert.equal(await reward.balanceOf(carol), '400');
+        assert.equal(await reward.balanceOf(dave), '4');
+        assert.equal(await reward.balanceOf(edith), '2000');
+
+        // grant 2606 money and deposit, but don't activate
+        await emitter.addOwed(pool.address, '2606');
+        await pool.deposit(0, carol, [0], { from:bob });
+        await pool.deposit(2, dave, [3], { from:bob });
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        // advance and update
+        await nextPeriod(pool);
+
+        //assert.equal(await reward.balanceOf(pool.address), '0');
+        assert.equal(await emitter.owed(pool.address), '0');
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        // grant and activate
+        await emitter.addOwed(pool.address, '2602');
+        await pool.activate(0, [0, 2, 4], [], { from:bob });    // no cost
+        await pool.activate(1, [5], [0, 1], { from:bob });      // takes 2 of type 0
+        await pool.activate(2, [1], [2, 3, 4], { from:bob });   // takes 3 of any type
+
+        await nextPeriod(pool);
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal((await pool.pendingReward(carol)).valueOf().toString(), '600');
+        assert.equal((await pool.pendingReward(dave)).valueOf().toString(), '2');
+        assert.equal((await pool.pendingReward(edith)).valueOf().toString(), '2000');
+
+        // harvest
+        await pool.harvest(bob, { from: bob });
+        await pool.harvest(carol, { from:carol });
+        await pool.harvest(dave, { from:dave });
+        await pool.harvest(edith, { from:edith });
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        assert.equal(await reward.balanceOf(alice), '0');
+        assert.equal(await reward.balanceOf(bob), '0');
+        assert.equal(await reward.balanceOf(carol), '1000');
+        assert.equal(await reward.balanceOf(dave), '6');
+        assert.equal(await reward.balanceOf(edith), '4000');
+      });
+
+      it('test behavior with registry-multiplied mining power', async () => {
+        const { pool, collectible, collectible2, emitter, reward } = this;
+        const registry = await MockVotingRegistry.new();
+        await pool.setRegistry(registry.address, { from:manager });
+
+        // carol gets x2, edith x4, dave x6
+        await registry.set(carol, 100, 1);
+        await registry.set(edith, 200, 2);
+        await registry.set(dave, 300, 3);
+
+        // deposit 600 + 4000 + 18 mining power
+        await pool.deposit(0, carol, [0, 2, 4], { from:bob });
+        await pool.deposit(1, edith, [5], { from:bob });
+        await pool.deposit(2, dave, [1, 2, 3], { from:bob });
+
+        // grant 4412 x2 money
+        await emitter.addOwed(pool.address, 8824);
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        // withdraw to 400 + 4000 + 12
+        await pool.withdraw(0, bob, [0], { from:carol });
+        await pool.withdraw(2, bob, [3], { from:dave });
+
+        // advance and update
+        await nextPeriod(pool);
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal((await pool.pendingReward(carol)).valueOf().toString(), '800');
+        assert.equal((await pool.pendingReward(dave)).valueOf().toString(), '24');
+        assert.equal((await pool.pendingReward(edith)).valueOf().toString(), '8000');
+
+        // harvest
+        await pool.harvest(bob, { from: bob });
+        await pool.harvest(carol, { from:carol });
+        await pool.harvest(dave, { from:dave });
+        await pool.harvest(edith, { from:edith });
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        assert.equal(await reward.balanceOf(alice), '0');
+        assert.equal(await reward.balanceOf(bob), '0');
+        assert.equal(await reward.balanceOf(carol), '800');
+        assert.equal(await reward.balanceOf(dave), '24');
+        assert.equal(await reward.balanceOf(edith), '8000');
+
+        // grant 2606 money and deposit, but don't activate
+        await emitter.addOwed(pool.address, '2606');
+        await pool.deposit(0, carol, [0], { from:bob });
+        await pool.deposit(2, dave, [3], { from:bob });
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        // advance and update
+        await nextPeriod(pool);
+
+        //assert.equal(await reward.balanceOf(pool.address), '0');
+        assert.equal(await emitter.owed(pool.address), '0');
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        // alter registry: carol x1, edith x2, dave x10
+        await registry.set(carol, 100, 0);
+        await registry.set(edith, 200, 1);
+        await registry.set(dave, 300, 5);
+
+        // grant and activate 300 x1 + 1000 x2 + 1 x10 = 2310.
+        // give funds for 3x this amount
+        await emitter.addOwed(pool.address, '6930');
+        await pool.activate(0, [0, 2, 4], [], { from:bob });    // no cost
+        await pool.activate(1, [5], [0, 1], { from:bob });      // takes 2 of type 0
+        await pool.activate(2, [1], [2, 3, 4], { from:bob });   // takes 3 of any type
+
+        await nextPeriod(pool);
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal((await pool.pendingReward(carol)).valueOf().toString(), '900');
+        assert.equal((await pool.pendingReward(dave)).valueOf().toString(), '30');
+        assert.equal((await pool.pendingReward(edith)).valueOf().toString(), '6000');
+
+        // harvest
+        await pool.harvest(bob, { from: bob });
+        await pool.harvest(carol, { from:carol });
+        await pool.harvest(dave, { from:dave });
+        await pool.harvest(edith, { from:edith });
+
+        assert.equal(await pool.pendingReward(alice), '0');
+        assert.equal(await pool.pendingReward(bob), '0');
+        assert.equal(await pool.pendingReward(carol), '0');
+        assert.equal(await pool.pendingReward(dave), '0');
+        assert.equal(await pool.pendingReward(edith), '0');
+
+        assert.equal(await reward.balanceOf(alice), '0');
+        assert.equal(await reward.balanceOf(bob), '0');
+        assert.equal(await reward.balanceOf(carol), '1700');
+        assert.equal(await reward.balanceOf(dave), '54');
+        assert.equal(await reward.balanceOf(edith), '14000');
+      });
     });
   });
 });

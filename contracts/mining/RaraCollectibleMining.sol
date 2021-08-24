@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: MIT
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "../token/interfaces/IToken.sol";
 import "../token/interfaces/ITokenEmitter.sol";
-import "../token/interfaces/ITokenListener.sol";
-import "../token/interfaces/IVotingMembershipListener.sol";
 import "../utils/boring-solidity/BoringBatchable.sol";
 
 interface RCMToken {
-  function balanceOf(address user) external view returns (uint256);
-  function ownerValue(address user) external view returns (uint256);
+  function ownerOf(uint256 tokenId) external view returns (address);
+  function tokenType(uint256 tokenId) external view returns (uint256);
+  function massTransferFrom(address from, address to, uint256[] calldata tokenId) external;
+  function massBurnFrom(address from, uint256[] calldata tokenId) external;
 }
 
 interface RCMRegistry {
@@ -22,76 +18,98 @@ interface RCMRegistry {
 }
 
 pragma solidity ^0.8.0;
-contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, BoringBatchable, ITokenListener, IVotingMembershipListener {
-    using SafeERC20 for IERC20;
-
+contract RaraCollectibleMining is AccessControlEnumerable, BoringBatchable {
     uint256 private constant MAX_256 = 2**256 - 1;
 
     // Role that manages reward rates
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-    // Role that can pause/unpause collectible mining (e.g. for an update sweep).
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /// @notice Info of each RCM user.
-    /// `amount` The mining "hashPower" belonging to the user.
-    /// `rewardDebt` The amount of RARA entitled to the user.
+    /// Each staking period requires users to reactivate their staked
+    /// tokens; if they do not, their mining power for that period is
+    /// zero. Because of this, we can't use a rolling reward accumulation
+    /// with "rewardDebt". Instead, each period's mined reward and total stake
+    /// is stored by the first transaction after the end of period; this lets
+    /// us calculate the reward owed to a user for the most recent activation
+    /// period they participated in, regardless of how much later their next
+    /// transaction occurs.
     struct UserInfo {
-        uint256 amount;
-        int256 rewardDebt;
+        uint256 activatedPower;
+        uint256 activationPeriod;
+        uint256 accumulatedRewardPrec;
+        uint256 harvestedReward;
     }
 
-    /// @notice Info of each RCM pool.
-    /// `allocPoint` The amount of allocation points assigned to the pool.
-    /// Also known as the amount of RARA to distribute per block.
     struct PoolInfo {
-        uint256 accRaraPerShare;
-        uint256 lastRewardBlockRetainedRara;
-        uint256 lastRewardBlock;
-        uint256 allocPoint;
+        address token;        // the token address
+        uint256 tokenPower;   // per-token, mining power
+
+        bool stakeIsTyped;        // whether to consider token type (or just "any token")
+        uint256 stakeTokenType;   // the "type" of token to be staked
+
+        address activationToken;  // token paid to "activate"
+        uint256 activationAmount; // amount of activation token paid to "activate" one staked token
+        bool activationIsTyped;   // activation token is typed
+        uint256 activationTokenType;
     }
 
-    struct PoolSources {
-        address token;
-        bool tokenValued;
-        address votingRegistry;
+    struct TokenInfo {
+        uint256 poolId;
+        address owner;
+        uint256 ownerTokenIndex;
+        bool staked;    // has it ever been staked? (to see if _currently_ staked, check owner)
+        uint256 activatedPower;
+        uint256 activationPeriod;
+    }
+
+    struct PeriodInfo {
+        uint256 power;
+        uint256 reward;
+        uint256 startBlock;
+        uint256 endBlock;
+        uint256 initTime;
+        uint256 startTime;
+        uint256 endTime;
     }
 
     /// @notice Address of RARA token contract.
     IToken public immutable rara;
-    uint256 public raraReceived;
-    uint256 public raraRetained;
-    uint256 public raraMined;
-    uint256 public raraHarvested;
+    uint256 public totalReceived;
+    uint256 public totalRetained;
+    uint256 public totalMined;
+    uint256 public totalHarvested;
+
     /// @notice Address of RARA emitter.
     ITokenEmitter public immutable emitter;
+    /// @notice Address of voting level registry (provides power multipliers)
+    address public registry;
 
     /// @notice Info of each RCM pool.
     PoolInfo[] public poolInfo;
-    /// @notice Sources of each RCM pool.
-    PoolSources[] public poolSources;
-    /// @notice Shares of the pool measured.
-    uint256[] public poolShares;
-    /// @notice Mapping from tokens to the appropriate Pool PID, for when
-    /// updatess come from listener methods (check the msg sender).
-    mapping(address => uint256) public tokenPid;
-    mapping(address => uint256) public registryPid;
 
-    /// @notice Info of each user that stakes LP tokens.
-    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
-    /// @dev Total allocation points. Must be the sum of all allocation points in all pools.
-    uint256 public totalAllocPoint;
-    /// @dev Total staked allocation points. Must be the sum of all allocation points in all pools with nonzero stake.
-    uint256 public totalStakedAllocPoint;
+    /// @notice Info of each user (not divided between pools)
+    mapping (address => UserInfo) public userInfo;
+
+    /// @notice Info of each token by address and ID
+    mapping (address => mapping (uint256 => TokenInfo)) public tokenInfo;
+
+    /// @notice Info on mining periods. We attempt mining over a timeframe, but
+    /// because we can only actually change periods during a transaction, we mark
+    /// these events by blocks.
+    PeriodInfo[] public periodInfo;
+    uint256 public currentPeriod;
+    uint256 public currentPeriodStartTime;
+    uint256 public periodDuration;
+    uint256 public periodAnchorTime;  // @notice period transitions occur in fixed time-increments from this moment
+
+    /// @notice Enemurability for tokens staked by user into pools.
+    /// For pool p, user u, poolUserTokenIndex[p][u].length gives the number of
+    /// tokens invested, and poolUserTokenIndex[p][u][i] the tokenId of the 'i'th
+    /// such token. This `tokenId` can be used in tokenInfo[tAddress][tokenId].
+    mapping (uint256 => mapping (address => uint256[])) public poolUserTokenIndex;
 
     /// @notice Rara accumulates, but cannot be harvested before this block
     uint256 public unlockBlock;
-    /// @notice The block at which mining was last "paused". When mining is paused,
-    /// users cannot accumulate Rara, although their mining hashpower may be
-    /// freely updated. Once unpaused, Rara is portioned to them based on
-    /// their _current_ hashpower measured from the pauseBlock; i.e. all hashpower
-    /// updates during a pause are considered as happening atomically during that
-    /// block, regardless of how long the pause actually lasts.
-    uint256 public pauseBlock;
 
     /// @notice Burn quantity (numerator of a fraction)
     uint256 public burnNumerator;
@@ -102,12 +120,19 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
 
     uint256 private constant PRECISION = 1e20;
 
-    event Update(address indexed user, uint256 indexed pid, uint256 amount);
-    event Harvest(address indexed user, uint256 indexed pid, address indexed to, uint256 amount);
+    event Deposit(uint256 indexed pid, address user, address indexed to, uint256 indexed tokenId, uint256 periodId);
+    event Activation(uint256 indexed pid, address user, address indexed to, uint256 indexed tokenId, uint256 periodId, uint256 power);
+    event Withdraw(uint256 indexed pid, address user, address indexed to, uint256 indexed tokenId, uint256 periodId);
 
-    event PoolAdd(uint256 indexed pid, uint256 allocPoint, address indexed token, bool tokenValued, address indexed votingRegistry);
-    event PoolSet(uint256 indexed pid, uint256 allocPoint);
-    event PoolUpdate(uint256 indexed pid, uint256 lastRewardBlock, uint256 lastRewardBlockRetainedRara, uint256 shares, uint256 accRaraPerShare);
+    event Harvest(address indexed user, address indexed to, uint256 periodId, uint256 amount);
+
+    event PeriodStart(uint256 indexed periodId, uint256 reward, uint256 startTime, uint256 initTime);
+    event PeriodEnd(uint256 indexed periodId, uint256 power, uint256 reward, uint256 startBlock, uint256 endBlock, uint256 startTime, uint256 initTime, uint256 endTime);
+    event PeriodDurationUpdate(uint256 duration, uint256 anchor);
+
+    event PoolAdd(uint256 indexed pid, address indexed token, bool typed, uint256 tokenType);
+    event PoolUpdate(uint256 indexed pid, uint256 power);
+    event PoolActivationUpdate(uint256 indexed pid, address indexed token, uint256 amount, bool typed, uint256 tokenType);
 
     /// @param _rara The RaraToken address
     /// @param _emitter The RaraEmitter address
@@ -120,63 +145,129 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
         burnNumerator = 0;
         burnDenominator = 100;
 
+        // start with daily periods
+        periodDuration = 60 * 60 * 24;
+
+
         // set up roles
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());   // admin; can add/remove managers
         _setupRole(MANAGER_ROLE, _msgSender());         // manager; can add/remove pools
-        _setupRole(PAUSER_ROLE, _msgSender());         // pauser; can pause mining
     }
 
     /// @notice Returns the number of RMP pools.
-    function poolLength() public view returns (uint256 pools) {
+    function poolLength() external view returns (uint256 pools) {
         pools = poolInfo.length;
     }
 
-    /// @notice Add a new LP to the pool.
-    /// Performs safety checks and data-integrity operations; this increases
-    /// in complexity and will become unusable if the total number of pools
-    /// grows. Switch to batch-execution of {updatePool} and {unsafeAdd} at that point.
-    /// @param _allocPoint AP of the new pool.
-    /// @param _token Address of the ERC-20, ERC-721, or ERC-721Valuable token
-    /// @param _tokenValued Whether the token should be treated as ERC-721Valuable
-    /// with {ownerValue()} used for mining hashpower.
-    /// @param _votingRegistry either address 0x00, or an IVotingRegistry used
-    /// for hashpower multipliers.
-    function add(uint256 _allocPoint, address _token, bool _tokenValued, address _votingRegistry) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to add");
-        require(_token != address(0), "RaraCollectibleMining: token must be non-zero address");
-
-        // note: becomes progressively more expensive, nigh unusable as pools
-        // are added. Switch to batch operations with {unsafeAdd}.
-        claimFromEmitter();
-        uint256 len = poolInfo.length;
-        for (uint256 i = 0; i < len; i++) {
-            if (poolInfo[i].allocPoint > 0) {
-                updatePool(i);
-            }
-        }
-        _add(_allocPoint, _token, _tokenValued, _votingRegistry);
+    function periodLength() external view returns (uint256 periods) {
+        periods = periodInfo.length;
     }
 
-    /// @notice Update the given pool's Rara allocation point and `IStakeManager`.
-    /// Performs safety checks and data-integrity operations; this increases
-    /// in complexity and will become unusable if the total number of pools
-    /// grows. Switch to batch-execution of {updatePool} and {unsafeSet} at that point.
-    /// @param _pid The index of the pool. See `poolInfo`.
-    /// @param _allocPoint New AP of the pool.
-    function set(uint256 _pid, uint256 _allocPoint) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to set");
-        require(_pid <= poolInfo.length, "RaraCollectibleMining: no such pid");
+    function poolUserTokenCount(uint256 _pid, address _owner) external view returns (uint256 count) {
+        count =  poolUserTokenIndex[_pid][_owner].length;
+    }
 
-        // note: becomes progressively more expensive, nigh unusable as pools
-        // are added. Switch to batch operations with {unsafeSet}.
-        claimFromEmitter();
-        uint256 len = poolInfo.length;
-        for (uint256 i = 0; i < len; i++) {
-            if (poolInfo[i].allocPoint > 0 || i == _pid) {
-                updatePool(i);
-            }
+    function setRegistry(address _registry) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setRegistry");
+        registry = _registry;
+    }
+
+    function setPeriod(uint256 _duration, uint256 _anchor) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setPeriod");
+        require(_duration > 0, "RaraCollectibleMining: duration must be nonzero");
+        periodDuration = _duration;
+        periodAnchorTime = _anchor;
+        emit PeriodDurationUpdate(_duration, _anchor);
+
+        // might have updated period / transitioned to a new one.
+        if (periodInfo.length > 0) {
+            updatePeriod();
         }
-        _set(_pid, _allocPoint);
+    }
+
+    /// @notice Add a new collectible token to the pool.
+    /// @param _token Address of the ERC-721 token
+    /// @param _tokenPower The amount of mining hashpower granted for instance of this token
+    /// @param _typed Whether this token is typed (IERC721Collectible) *AND* a particular type is of interest,
+    /// i.e. if a particular {tokenType} must be deposited to earn any Rara.
+    /// @param _tokenType If `_typed`, this is the {tokenType} which must be deposited.
+    function addPool(address _token, uint256 _tokenPower, bool _typed, uint256 _tokenType) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to addPool");
+        require(_token != address(0), "RaraCollectibleMining: token must be non-zero address");
+
+        // hash power is additive, not proportional between pools, so adding a
+        // new pool does not affect the payouts of other "pools" (pool is just a
+        // shorthand to refer to staked and activation token parameters).
+        // there's no need to update anything as a result.
+        uint256 pid = poolInfo.length;
+        poolInfo.push(PoolInfo({
+            token: _token,
+            tokenPower: _tokenPower,
+
+            stakeIsTyped: _typed,
+            stakeTokenType:  _tokenType,
+
+            activationToken: address(0),
+            activationAmount: 0,
+            activationIsTyped: false,
+            activationTokenType: 0
+        }));
+
+        emit PoolAdd(pid, _token, _typed, _tokenType);
+        emit PoolUpdate(pid, _tokenPower);
+    }
+
+    /// @notice Update the given pool's tokenPower: the amount of mining hashpower
+    /// generated by a single activated token.
+    /// @param _pid The index of the pool. See `poolInfo`.
+    /// @param _tokenPower Mining hashpower of a single activated token instance.
+    function setPoolPower(uint256 _pid, uint256 _tokenPower) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setPoolPower");
+        require(_pid < poolInfo.length, "RaraCollectibleMining: no such pid");
+
+        // affects all _future_ activations of tokens in this pool, but is not
+        // retroactive to already-active ones. They can be withdrawn, re-deposited,
+        // and activated to get this new power, or the user can just wait until the
+        // period ends and then activatate them again.
+        poolInfo[_pid].tokenPower = _tokenPower;
+        emit PoolUpdate(_pid, _tokenPower);
+    }
+
+    /// @notice Update the given pool's activation requirements: the type of token,
+    /// and quantity, which must be provided to "activate" one instance of the
+    /// staked token. Also sets the resulting mining hashpower generated by a
+    /// single activated token.
+    /// @param _pid The index of the pool. See `poolInfo`.
+    /// @param _power Mining hashpower of a single activated token instance.
+    /// @param _token Token address of the "activation" token which must be burned
+    /// to activate a staked token.
+    /// @param _amount The number of the "activation" token which must be burned.
+    /// @param _typed Whether the activation token implements IERC721Collectible
+    /// *AND* a particular {tokenType} must be burned.
+    /// @param _tokenType if `_typed`, the {tokenType} which must be burned.
+    function setPoolActivation(
+        uint256 _pid,
+        uint256 _power,
+        address _token,
+        uint256 _amount,
+        bool _typed,
+        uint256 _tokenType
+    ) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setPoolActivation");
+        require(_pid < poolInfo.length, "RaraCollectibleMining: no such pid");
+        require(_amount == 0 || _token != address(0), "RaraCollectibleMining: non-zero token amount of zero-address token");
+
+        PoolInfo storage pool = poolInfo[_pid];
+        pool.activationToken = _token;
+        pool.activationAmount = _amount;
+        pool.activationIsTyped = _typed;
+        pool.activationTokenType = _tokenType;
+
+        if (_power != pool.tokenPower) {
+            pool.tokenPower = _power;
+            emit PoolUpdate(_pid, _power);
+        }
+        emit PoolActivationUpdate(_pid, _token, _amount, _typed, _tokenType);
     }
 
     /// @notice Safely update the Rara burn rate.
@@ -186,107 +277,16 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// @param _burnAddress Address of the burner; the indicated Rara proportion will
     /// be transferred here (e.g. 0x0).
     /// @param overwrite True if the _burnAddress should be set. Otherwise, `_burnAddress` is ignored.
-    function setBurnRate(uint256 _numerator, uint256 _denominator, address _burnAddress, bool overwrite) public {
+    function setBurnRate(uint256 _numerator, uint256 _denominator, address _burnAddress, bool overwrite) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setBurnRate");
-
-        // altering burn rates changes Rara calculations; claim first
-        claimFromEmitter();
-        _setBurnRate(_numerator, _denominator, _burnAddress, overwrite);
-    }
-
-    /// @notice Unsafely add a new LP to the pool. Use in a batch after updating
-    /// active pools.
-    /// DO NOT add without {claimFromEmitter} and updating active pools. Rewards will be messed up if you do.
-    /// @param _allocPoint AP of the new pool.
-    /// @param _token Address of the ERC-20, ERC-721, or ERC-721Valuable token
-    /// @param _tokenValued Whether the token should be treated as ERC-721Valuable
-    /// with {ownerValue()} used for mining hashpower.
-    /// @param _votingRegistry either address 0x00, or an IVotingRegistry used
-    /// for hashpower multipliers.
-    function unsafeAdd(uint256 _allocPoint, address _token, bool _tokenValued, address _votingRegistry) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to unsafeAdd");
-        require(_token != address(0), "RaraCollectibleMining: token must be non-zero address");
-        _add(_allocPoint, _token, _tokenValued, _votingRegistry);
-    }
-
-    /// @notice Unsafely update the given pool's Rara allocation point and `IStakeManager`.
-    /// DO NOT call without {claimFromEmitter} and updating active pools. Rewards will be messed up if you do.
-    /// @param _pid The index of the pool. See `poolInfo`.
-    /// @param _allocPoint New AP of the pool.
-    function unsafeSet(uint256 _pid, uint256 _allocPoint) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to unsafeSet");
-        _set(_pid, _allocPoint);
-    }
-
-    /// @notice Unsafely update the Rara burn rate.
-    /// DO NOT call this function except as a batch starting with {claimFromEmitter}.
-    /// @param _numerator The share of emitted Rara to burn
-    /// @param _denominator The share of all Rara out of which {_numerator} is burned.
-    /// e.g. _numerator = 5, _denominator = 100 will burn 5%.
-    /// @param _burnAddress Address of the burner; the indicated Rara proportion will
-    /// be transferred here (e.g. 0x0).
-    /// @param overwrite True if the _burnAddress should be set. Otherwise, `_burnAddress` is ignored.
-    function unsafeSetBurnRate(uint256 _numerator, uint256 _denominator, address _burnAddress, bool overwrite) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to unsafeSetBurnRate");
-        _setBurnRate(_numerator, _denominator, _burnAddress, overwrite);
-    }
-
-    /// @notice Add a new LP to the pool.
-    /// DO NOT add without updating active pools. Rewards will be messed up if you do.
-    /// @param _allocPoint AP of the new pool.
-    function _add(uint256 _allocPoint, address _token, bool _tokenValued, address _votingRegistry) internal {
-        uint256 lastRewardBlock = _blockNumber();
-        uint256 retained = totalRetained();
-        totalAllocPoint = totalAllocPoint + _allocPoint;
-
-        uint256 pid = poolInfo.length;
-
-        poolInfo.push(PoolInfo({
-            allocPoint: _allocPoint,
-            lastRewardBlock: lastRewardBlock,
-            lastRewardBlockRetainedRara: retained,
-            accRaraPerShare: 0
-        }));
-        poolSources.push(PoolSources({
-            token: _token,
-            tokenValued: _tokenValued,
-            votingRegistry: _votingRegistry
-        }));
-        poolShares.push(0);
-
-        tokenPid[_token] = pid;
-        if (_votingRegistry != address(0)) {
-            registryPid[_votingRegistry] = pid;
-        }
-        emit PoolAdd(pid, _allocPoint, _token, _tokenValued, _votingRegistry);
-    }
-
-    /// @dev Update the given pool's Rara allocation point and `IStakeManager`.
-    /// DO NOT call without updating active pools, INCLUDING this one.
-    /// Rewards will be messed up if you do.
-    /// @param _pid The index of the pool. See `poolInfo`.
-    /// @param _allocPoint New AP of the pool.
-    function _set(uint256 _pid, uint256 _allocPoint) internal {
-        totalAllocPoint = totalAllocPoint + _allocPoint - poolInfo[_pid].allocPoint;
-        if (poolShares[_pid] > 0) {
-          totalStakedAllocPoint = totalStakedAllocPoint + _allocPoint - poolInfo[_pid].allocPoint;
-        }
-        poolInfo[_pid].allocPoint = _allocPoint;
-        emit PoolSet(_pid, _allocPoint);
-    }
-
-    /// @dev Update the Rara burn rate.
-    /// DO NOT call without claiming any emitted Rara. Rewards will be messed up if you do.
-    /// @param _numerator The share of emitted Rara to burn
-    /// @param _denominator The share of all Rara out of which {_numerator} is burned.
-    /// e.g. _numerator = 5, _denominator = 100 will burn 5%.
-    /// @param _burnAddress Address of the burner; the indicated Rara proportion will
-    /// be transferred here (e.g. 0x0).
-    /// @param overwrite True if the _burnAddress should be set. Otherwise, `_burnAddress` is ignored.
-    function _setBurnRate(uint256 _numerator, uint256 _denominator, address _burnAddress, bool overwrite) internal {
         require(_denominator > 0, "RaraCollectibleMining: burn rate denominator must be non-zero");
         require(_numerator <= _denominator, "RaraCollectibleMining: burn rate numerator must be <= denominator");
-        require(_numerator <= PRECISION &&  _denominator <= PRECISION, "RaraCollectibleMining: burn rate precision too high");
+        require(_numerator <= PRECISION && _denominator <= PRECISION, "RaraCollectibleMining: burn rate precision too high");
+
+        // altering burn rates changes Rara calculations; advance period first
+        if (periodInfo.length > 0) {
+            updatePeriod();
+        }
 
         burnNumerator = _numerator;
         burnDenominator = _denominator;
@@ -297,271 +297,402 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// harvested. Can only be called by the manager, and only before the
     /// current unlockBlock.
     /// @param _block The block at which to unlock harvesting.
-    function setUnlockBlock(uint256 _block) public {
+    function setUnlockBlock(uint256 _block) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to setUnlockBlock");
-        require(_blockNumber() < unlockBlock, "RaraCollectibleMining: no setUnlockBlock after unlocked");
+        require(block.number < unlockBlock, "RaraCollectibleMining: no setUnlockBlock after unlocked");
         unlockBlock = _block;
     }
 
-    /**
-     * @dev Pauses mining. Mining details may be freely changed (both user hashpower
-     * and pool allocation), with no effect on previously earned Rara. When unpaused,
-     * proceed as if all changes occurred during {pauseBlock} (i.e. all users receive
-     * Rara as if those settings had been in effect for the entire pause duration).
-     *
-     * See {Pausable-_unpause}.
-     *
-     * Requirements:
-     *
-     * - the caller must have the `PAUSER_ROLE`.
-     */
-    function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "RaraCollectibleMining: must have pauser role to pause");
-        if (!paused()) {  // pausing twice doesn't step forward; must unpause
-            pauseBlock = block.number;  // not _blockNumber() here; use the real block
-        }
-        _pause();
-    }
-
-    /**
-     * @dev Unpauses all token transfers.
-     *
-     * See {ERC20Pausable} and {Pausable-_unpause}.
-     *
-     * Requirements:
-     *
-     * - the caller must have the `PAUSER_ROLE`.
-     */
-    function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "RaraCollectibleMining: must have pauser role to unpause");
-        pauseBlock = 0;
-        _unpause();
-    }
-
-    /// @dev Returns the current block number for mining considerations, which
-    /// is <= the actual block number. Use this instead of block.number when
-    /// calculating mining output.
-    function _blockNumber() internal view returns (uint256) {
-        return pauseBlock == 0 ? block.number : pauseBlock;
-    }
-
     /// @notice View function to see pending Rara on frontend.
-    /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending Rara reward for a given user.
-    function pendingReward(uint256 _pid, address _user) external view returns (uint256 pending) {
-        PoolInfo memory pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][_user];
-        uint256 accRaraPerShare = pool.accRaraPerShare;
-        uint256 supply = poolShares[_pid];
-        uint256 blockNumber = _blockNumber();
-        if (blockNumber > pool.lastRewardBlock && supply != 0) {
-            // TODO consider overflow storage bucket?
-            uint256 rewardSince = totalRetained() - pool.lastRewardBlockRetainedRara;
-            uint256 poolReward = (rewardSince * pool.allocPoint) / totalAllocPoint;
+    function pendingReward(address _user) external view returns (uint256 pending) {
+        UserInfo storage user = userInfo[_user];
+        uint256 pendingPrec = user.accumulatedRewardPrec;
 
-            accRaraPerShare = accRaraPerShare + (poolReward * PRECISION) / supply;
-        }
-        int256 pendingSigned = int256((user.amount * accRaraPerShare) / PRECISION) - user.rewardDebt;
-        if (pendingSigned > 0) {
-            pending = uint256(pendingSigned);
-        }
-    }
-
-    function _emissionIncludingSurplus(uint256 _emission, bool _claimed) internal view returns (uint256) {
-        uint256 surplus = rara.balanceOf(address(this)) + raraHarvested - raraMined;
-        if (_claimed) surplus = surplus - _emission;
-        return _emission + (surplus > _emission ? _emission : surplus);
-    }
-
-    // total received: actual amount emitted
-    // total retained: actual amount after ~5% burn
-    // total mined: portion of retain coins allocated to populated pools
-
-    /// @notice Calculates and returns the total Rara mined in the lifetime of
-    /// this contract (including Rara that this contract burned). Outflow is
-    /// determined by the amount received (and owed) from the emitter; if Rara
-    /// is transferred into this contract directly, it is distributed 1-to-1
-    /// with emitted Rara until exhausted.
-    function totalReceived() public view returns (uint256 amount) {
-        uint256 owed = emitter.owed(address(this));
-        amount = raraReceived + _emissionIncludingSurplus(owed, false);
-    }
-
-    function totalRetained() public view returns (uint256 amount) {
-        amount = raraRetained;
-        uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)), false);
-        uint256 burn = (owed * burnNumerator) / burnDenominator;
-        amount += owed - burn;
-    }
-
-    function totalMined() public view returns (uint256 amount) {
-        amount = raraMined;
-        if (totalStakedAllocPoint != 0) {
-          uint256 owed = _emissionIncludingSurplus(emitter.owed(address(this)), false);
-          uint256 burn = (owed * burnNumerator) / burnDenominator;
-          amount += ((owed - burn) * totalStakedAllocPoint) / totalAllocPoint;
-        }
-    }
-
-    /// @notice Claim any Rara owed from the emitter, transferring it into this
-    /// contract. Called by this contract as-needed to fulfill Rara harvests,
-    /// but can be triggered from outside to square accounts.
-    function claimFromEmitter() public {
-        if (emitter.owed(address(this)) > 0) {  // no need to check surplus; output is driven by emitter
-            uint256 claimed = _emissionIncludingSurplus(emitter.claim(address(this)), true);
-            raraReceived = raraReceived + claimed;
-
-            uint256 burned = (claimed * burnNumerator) / burnDenominator;
-            uint256 retained = claimed - burned;
-            raraRetained = raraRetained + retained;
-
-            uint256 mined = 0;
-            if (totalStakedAllocPoint != 0) {
-              mined = (retained * totalStakedAllocPoint) / totalAllocPoint;
-              raraMined = raraMined + mined;
+        if (user.activatedPower > 0) {
+            uint256 totalReward = 0;
+            uint256 totalPower = periodInfo[user.activationPeriod].power;
+            if (user.activationPeriod < currentPeriod) {
+                // full reward known and recorded
+                totalReward = periodInfo[user.activationPeriod].reward;
+            } else if (currentPeriodStartTime + periodDuration < block.timestamp) {
+                // estimate reward proportionally based on how much would go to this
+                // period vs the next and the interim (if any). Use the same
+                // calculation as in {updatePeriod}, with one exception: if
+                // no time passed do NOT award all to this period (it's a weird
+                // edge case that may not ever occur but we never want to
+                // _overestimate_ pending reward, especially in a way that may
+                // change in the next few blocks).
+                PeriodInfo storage period = periodInfo[user.activationPeriod];
+                totalReward = period.reward;
+                uint256 totalTime = block.timestamp - period.initTime;
+                uint256 periodEndTime = currentPeriodStartTime + periodDuration;
+                if (totalTime > 0) {  // proportional allocation between periods
+                    uint256 totalClaim = _estimateClaim();
+                    uint256 endingPeriodTime = periodEndTime - period.initTime;
+                    uint256 endAmount = (totalClaim * endingPeriodTime) / totalTime;
+                    totalReward += endAmount;
+                }
             }
 
-            if (burned != 0) {  // destroy coins explicitly burned, possibly sending to an address
-                _burnRara(burnAddress, burned);
-            }
-            if (retained > mined) { // destroy coins "mined" for unstaked pools (really destroy)
-                _burnRara(address(0), retained - mined);
+            if (totalPower > 0) {
+                pendingPrec += (user.activatedPower * totalReward * PRECISION) / totalPower;
             }
         }
+
+        pending = pendingPrec / PRECISION - user.harvestedReward;
     }
 
-    /// @notice Update reward variables for all pools. Be careful of gas spending!
-    /// @param pids Pool IDs of all to be updated. Make sure to update all active pools.
-    function massUpdatePools(uint256[] calldata pids) external {
-        uint256 len = pids.length;
-        for (uint256 i = 0; i < len; ++i) {
-            updatePool(pids[i]);
+    function _estimateClaim() internal view returns (uint256 amount) {
+        amount = emitter.owed(address(this));
+        amount -= (amount * burnNumerator) / burnDenominator;
+    }
+
+    function _claimFromEmitter() internal returns (uint256 amount) {
+        amount = emitter.claim(address(this));
+        totalReceived += amount;
+
+        uint256 burned = (amount * burnNumerator) / burnDenominator;
+        amount -= burned;
+        totalRetained += amount;
+
+        if (burned > 0) {
+            _burnRara(burnAddress, burned);
         }
     }
 
-    /// @notice Update reward variables of the given pool.
-    /// @param pid The index of the pool. See `poolInfo`.
-    /// @return pool Returns the pool that was updated.
-    function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
-        uint256 blockNumber = _blockNumber();
-        pool = poolInfo[pid];
-        if (blockNumber > pool.lastRewardBlock) {
-            uint256 supply = poolShares[pid];
-            uint256 retained = totalRetained();
-            if (supply > 0) {
-                uint256 retainedSince = retained - pool.lastRewardBlockRetainedRara;
-                uint256 poolReward = (retainedSince * pool.allocPoint) / totalAllocPoint;
+    function periodStartTime(uint256 timestamp, uint256 _duration, uint256 _anchor) public pure returns (uint256) {
+        // using periodAnchorTime and periodDuration, determine the appropriate
+        // "start time" for a period that includes that timestamp.
+        uint256 anchorOffset = _anchor % _duration;
+        return ((timestamp - anchorOffset) / _duration) * _duration + anchorOffset;
+    }
 
-                pool.accRaraPerShare = pool.accRaraPerShare + ((poolReward * PRECISION) / supply);
+    /// @notice Initialize the mining process, starting the first Period based
+    /// on current settings. Once called, will attempt to record mining periods
+    /// continuously (long waits between transactions and/or changes to period
+    /// durations may introduce gaps); until this function is called, however, no
+    /// deposits are possible.
+    function initialize() external returns (PeriodInfo memory period) {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraCollectibleMining: must have MANAGER role to initialize");
+        require(periodInfo.length == 0, "RaraCollectibleMining: already initialized");
+        currentPeriod = 1;
+        currentPeriodStartTime = periodStartTime(block.timestamp, periodDuration, periodAnchorTime);
+        uint256 pastPeriodStartTime = currentPeriodStartTime - periodDuration;
+
+        // push 0, to get 0 out of the way
+        periodInfo.push(PeriodInfo({
+            power: 0,
+            reward: 0,
+            startBlock: block.number,
+            endBlock: block.number,
+            initTime: block.timestamp,
+            startTime: pastPeriodStartTime,
+            endTime: currentPeriodStartTime
+        }));
+
+        // push 1, the current starting period
+        periodInfo.push(PeriodInfo({
+            power: 0,
+            reward: 0,
+            startBlock: block.number,
+            endBlock: 0,
+            initTime: block.timestamp,
+            startTime: currentPeriodStartTime,
+            endTime: 0
+        }));
+
+        period = periodInfo[1];
+        emit PeriodStart(0, 0, pastPeriodStartTime, block.timestamp);
+        emit PeriodEnd(0, 0, 0, block.number, block.number, pastPeriodStartTime, block.timestamp, currentPeriodStartTime);
+        emit PeriodStart(0, 0, currentPeriodStartTime, block.timestamp);
+    }
+
+    function updatePeriod() public returns (PeriodInfo memory period) {
+        require(periodInfo.length > 0, "RaraCollectibleMining: not initialized");
+        if (currentPeriodStartTime + periodDuration <= block.timestamp) {
+            // time to transition. Finalize existing period, push a new one
+            PeriodInfo storage endingPeriod = periodInfo[currentPeriod];
+            endingPeriod.endBlock = block.number;
+            endingPeriod.endTime = currentPeriodStartTime + periodDuration;
+
+            // note: because period duration and anchor can change, the ending
+            // period and the new one may partially overlap or may have a gap
+            // in between. In most cases the transition is exact, with
+            // endTime matching startTime.
+            currentPeriod = periodInfo.length;
+            currentPeriodStartTime = periodStartTime(block.timestamp, periodDuration, periodAnchorTime);
+            periodInfo.push(PeriodInfo({
+                power: 0,
+                reward: 0,
+                startBlock: block.number,
+                endBlock: 0,
+                initTime: block.timestamp,
+                startTime: currentPeriodStartTime,
+                endTime: 0
+            }));
+            PeriodInfo storage newPeriod = periodInfo[currentPeriod];
+
+            // allocate Rara rewards. Whatever amount is available from the
+            // emitter should be divided between the ending period, the new
+            // period, and if relevant the unmined interim (that quantity is burned).
+            uint256 claimed = _claimFromEmitter();
+            uint256 burnAmount = 0;
+            // this quantity should be split between the previous period and the
+            // next period (or periods, if time is skipped). initTime is the
+            // last time an emitter claim was made.
+
+            uint256 totalTime = block.timestamp - endingPeriod.initTime;
+
+            if (totalTime > 0) {  // proportional allocation between periods
+                uint256 endingPeriodTime = endingPeriod.endTime - endingPeriod.initTime;
+                uint256 currentPeriodTime = block.timestamp - currentPeriodStartTime;
+                uint256 interimTime = (endingPeriodTime + currentPeriodTime < totalTime)
+                    ? totalTime - (endingPeriodTime + currentPeriodTime)
+                    : 0;
+
+                uint256 endAmount = (claimed * endingPeriodTime) / totalTime;
+                uint256 interimAmount = (claimed * interimTime) / totalTime;
+
+                // add to rewards / burns
+                endingPeriod.reward += endAmount;
+                newPeriod.reward += (claimed - (endAmount + interimAmount));
+                burnAmount += interimAmount;
+            } else {  // weird, but just give it all to the one that ended
+                endingPeriod.reward += claimed;
             }
-            pool.lastRewardBlock = blockNumber;
-            pool.lastRewardBlockRetainedRara = retained;
-            poolInfo[pid] = pool;
-            emit PoolUpdate(pid, pool.lastRewardBlock, pool.lastRewardBlockRetainedRara, supply, pool.accRaraPerShare);
+
+            // if no one staked, nothing is kept
+            if (endingPeriod.power == 0) {
+                burnAmount += endingPeriod.reward;
+                endingPeriod.reward = 0;
+            }
+
+            totalMined += endingPeriod.reward;
+
+            // burn any unused
+            if (burnAmount > 0) {
+                _burnRara(address(0), burnAmount);
+            }
+
+            emit PeriodEnd(
+                currentPeriod - 1,
+                endingPeriod.power,
+                endingPeriod.reward,
+                endingPeriod.startBlock,
+                endingPeriod.endBlock,
+                endingPeriod.startTime,
+                endingPeriod.initTime,
+                endingPeriod.endTime
+            );
+            emit PeriodStart(
+                currentPeriod,
+                newPeriod.reward,
+                newPeriod.startTime,
+                newPeriod.initTime
+            );
+        }
+
+        period = periodInfo[currentPeriod];
+    }
+
+    function _updateUser(address _user) internal returns (UserInfo storage user) {
+        user = userInfo[_user];
+        if (user.activationPeriod < currentPeriod) {
+            // grant share of reward
+            uint256 totalReward = periodInfo[user.activationPeriod].reward;
+            uint256 totalPower = periodInfo[user.activationPeriod].power;
+            if (totalPower > 0) {
+                uint256 gainedPrec = (user.activatedPower * totalReward * PRECISION) / totalPower;
+                user.accumulatedRewardPrec += gainedPrec;
+            }
+
+            user.activatedPower = 0;
+            user.activationPeriod = currentPeriod;
         }
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerable, ERC165, IERC165) returns (bool) {
-        return interfaceId == type(IVotingMembershipListener).interfaceId
-            || interfaceId == type(ITokenListener).interfaceId
-            || super.supportsInterface(interfaceId);
-    }
-
-    function balanceChanged(address _owner) external override {
-        // called by a token contract; update the corresponding pool
-        address sender = _msgSender();
-        uint256 pid = tokenPid[sender];
-        PoolSources memory sources = poolSources[pid];
-        if (sources.token == sender) {
-            PoolInfo memory pool = updatePool(pid);
-            _updateUser(pid, pool, sources, _owner);
-        }
-    }
-
-    function membershipChanged(address _user, uint32 _prevLevel, uint32 _level) external override {
-        // called by a voting registry contract; update the corresponding pool
-        address sender = _msgSender();
-        uint256 pid = registryPid[sender];
-        PoolSources memory sources = poolSources[pid];
-        if (sources.votingRegistry == sender) {
-            PoolInfo memory pool = updatePool(pid);
-            _updateUser(pid, pool, sources, _user);
-        }
-    }
-
-    function update(uint256 pid, address user) external {
-        PoolInfo memory pool = updatePool(pid);
-        PoolSources memory sources = poolSources[pid];
-        _updateUser(pid, pool, sources, user);
-    }
-
-    function updateUsers(uint256 pid, address[] calldata users) external {
-        PoolInfo memory pool = updatePool(pid);
-        PoolSources memory sources = poolSources[pid];
-        for (uint256 i = 0; i < users.length; i++) {
-            _updateUser(pid, pool, sources, users[i]);
-        }
-    }
-
-    function _updateUser(uint256 pid, PoolInfo memory pool, PoolSources memory sources, address owner) internal {
-        // determine user share amount
-        uint256 value = sources.tokenValued
-            ? RCMToken(sources.token).ownerValue(owner)
-            : RCMToken(sources.token).balanceOf(owner);
-        if (sources.votingRegistry != address(0)) {
-            uint256 level = RCMRegistry(sources.votingRegistry).getCurrentLevel(owner);
+    function _powerMultiplier(address _user) internal view returns (uint256 _multiplier) {
+        _multiplier = 1;
+        if (registry != address(0)) {
+            uint256 level = RCMRegistry(registry).getCurrentLevel(_user);
             if (level > 0) {  // Level 1 => 2x.   Level 2 => 4x.   Level 3 => 6x.
-                value = value * level * 2;
+                _multiplier = level * 2;
+            }
+        }
+    }
+
+    function deposit(uint256 _pid, address _to, uint256[] calldata tokenIds) external {
+        require(_pid < poolInfo.length, "RaraCollectibleMining: invalid pid");
+
+        // always update period and user before making changes
+        PoolInfo memory pool = poolInfo[_pid];
+        updatePeriod();
+        UserInfo storage user = _updateUser(_to);
+        uint256 power = pool.tokenPower * _powerMultiplier(_to);
+
+        // check token types
+        if (pool.stakeIsTyped) {
+            for (uint256 i = 0; i < tokenIds.length; i++) {
+                require(
+                    RCMToken(pool.token).tokenType(tokenIds[i]) == pool.stakeTokenType,
+                    "RaraCollectibleMining: invalid tokenType"
+                );
             }
         }
 
-        UserInfo storage user = userInfo[pid][owner];
+        // transfer ALL tokens (checks for duplicates)
+        RCMToken(pool.token).massTransferFrom(msg.sender, address(this), tokenIds);
 
-        // Update "staked alloc points"
-        uint256 prevPoolShares = poolShares[pid];   // save gas
-        if (prevPoolShares == 0 && value > 0) {
-            claimFromEmitter();
-            totalStakedAllocPoint = totalStakedAllocPoint + pool.allocPoint;
-        } else if (prevPoolShares == user.amount && user.amount > 0 && value == 0) {
-            claimFromEmitter();
-            totalStakedAllocPoint = totalStakedAllocPoint - pool.allocPoint;
+        // update data
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            TokenInfo storage token = tokenInfo[pool.token][tokenId];
+
+            // store
+            token.poolId = _pid;
+            token.owner = _to;
+            token.ownerTokenIndex =  poolUserTokenIndex[_pid][_to].length;
+            poolUserTokenIndex[_pid][_to].push(tokenId);
+
+            // emit
+            emit Deposit(_pid, msg.sender, _to, tokenId, currentPeriod);
+
+            // activate
+            if (!token.staked) {
+                // new tokens are always initially active
+                token.staked = true;
+                token.activatedPower = power;
+                token.activationPeriod = currentPeriod;
+                user.activatedPower += power;
+                periodInfo[currentPeriod].power += power;
+
+                emit Activation(_pid, msg.sender, _to, tokenId, currentPeriod, power);
+            }
+        }
+    }
+
+    function withdraw(uint256 _pid, address _to, uint256[] calldata tokenIds) external {
+        require(_pid < poolInfo.length, "RaraCollectibleMining: invalid pid");
+
+        // always update period and user before making changes
+        PoolInfo memory pool = poolInfo[_pid];
+        updatePeriod();
+        UserInfo storage user = _updateUser(msg.sender);
+
+        // check token pools and owners
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            TokenInfo storage token = tokenInfo[pool.token][tokenIds[i]];
+            uint256 tokenId = tokenIds[i];
+            require(RCMToken(pool.token).ownerOf(tokenId) == address(this), "RaraCollectibleMining: token not staked");
+            require(token.poolId == _pid, "RaraCollectibleMining: token not in pool");
+            require(token.owner == msg.sender, "RaraCollectibleMining: token not staked by caller");
         }
 
-        // Update user amount and pool shares
-        int256 increase = int256(value) - int256(user.amount);
-        poolShares[pid] = poolShares[pid] + value - user.amount;
-        user.amount = value;
-        user.rewardDebt = user.rewardDebt + (increase * int256(pool.accRaraPerShare)) / int256(PRECISION);
+        // transfer ALL tokens (checks for duplicates)
+        RCMToken(pool.token).massTransferFrom(address(this), _to, tokenIds);
 
-        emit Update(owner, pid, value);
+        // update inner data
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            TokenInfo storage token = tokenInfo[pool.token][tokenId];
+
+            // deactivate
+            if (token.activationPeriod == currentPeriod) {
+                // deactivate
+                user.activatedPower -= token.activatedPower;
+                periodInfo[currentPeriod].power -= token.activatedPower;
+                token.activationPeriod = 0;
+                token.activatedPower = 0;
+            }
+
+            // clear owner
+            token.owner = address(0);
+
+            // remove from index
+            uint256 rIndex = poolUserTokenIndex[_pid][msg.sender].length - 1;
+            uint256 rTokenId = poolUserTokenIndex[_pid][msg.sender][rIndex];
+
+            tokenInfo[pool.token][rTokenId].ownerTokenIndex = token.ownerTokenIndex;
+            poolUserTokenIndex[_pid][msg.sender][token.ownerTokenIndex] = rTokenId;
+            poolUserTokenIndex[_pid][msg.sender].pop();
+
+            emit Withdraw(_pid, msg.sender, _to, tokenId, currentPeriod);
+        }
+    }
+
+    function activate(uint256 _pid, uint256[] calldata stakedTokenIds, uint256[] calldata activationTokenIds) external {
+        require(_pid < poolInfo.length, "RaraCollectibleMining: invalid pid");
+
+        // always update period before making changes
+        PoolInfo memory pool = poolInfo[_pid];
+        updatePeriod();
+
+        // check staked token pools and whether held by this contract
+        for (uint256 i = 0; i < stakedTokenIds.length; i++) {
+            uint256 tokenId = stakedTokenIds[i];
+            TokenInfo storage token = tokenInfo[pool.token][tokenId];
+            require(RCMToken(pool.token).ownerOf(tokenId) == address(this), "RaraCollectibleMining: token not staked");
+            require(token.poolId == _pid, "RaraCollectibleMining: token not in pool");
+            require(token.activationPeriod < currentPeriod, "RaraCollectibleMining: token already activated");
+        }
+
+        // check activation tokens
+        require(
+            stakedTokenIds.length * pool.activationAmount == activationTokenIds.length,
+            "RaraCollectibleMining: invalid activation token quantity"
+        );
+        if (pool.activationIsTyped) {
+            for (uint256 i = 0; i < activationTokenIds.length; i++) {
+                require(
+                    RCMToken(pool.activationToken).tokenType(activationTokenIds[i]) == pool.activationTokenType,
+                    "RaraCollectibleMining: invalid tokenType"
+                );
+            }
+        }
+
+        // destroy
+        if (activationTokenIds.length > 0) {
+            RCMToken(pool.activationToken).massBurnFrom(msg.sender, activationTokenIds);
+        }
+
+        // update records and grant activation power
+        for (uint256 i = 0; i < stakedTokenIds.length; i++) {
+            uint256 tokenId = stakedTokenIds[i];
+            TokenInfo storage token = tokenInfo[pool.token][tokenId];
+            UserInfo storage user = _updateUser(token.owner);
+
+            uint256 power = pool.tokenPower * _powerMultiplier(token.owner);
+
+            token.activatedPower = power;
+            token.activationPeriod = currentPeriod;
+            user.activatedPower += power;
+            periodInfo[currentPeriod].power += power;
+
+            emit Activation(_pid, msg.sender, token.owner, tokenId, currentPeriod, power);
+        }
     }
 
     /// @notice Harvest proceeds for transaction sender to `to`.
-    /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of RARA rewards.
-    function harvest(uint256 pid, address to) public {
-        uint256 blockNumber = _blockNumber();
-        require(blockNumber >= unlockBlock, "RaraCollectibleMining: no harvest before unlockBlock");
-        PoolInfo memory pool = updatePool(pid);
-        UserInfo storage user = userInfo[pid][msg.sender];
-        int256 accumulatedRara = int256((user.amount * pool.accRaraPerShare) / PRECISION);
-        int256 _pendingSigned = accumulatedRara - user.rewardDebt;
-        uint256 _pendingRara = _pendingSigned > 0 ? uint256(_pendingSigned) : 0;
+    function harvest(address to) external {
+        require(block.number >= unlockBlock, "RaraCollectibleMining: no harvest before unlockBlock");
 
-        // Effects
-        user.rewardDebt = accumulatedRara;
+        updatePeriod();
+        UserInfo storage user = _updateUser(msg.sender);
+
+        uint256 accumulatedRara = user.accumulatedRewardPrec / PRECISION;
+        uint256 pendingRara = accumulatedRara - user.harvestedReward;
 
         // Transfer rewards
-        if (_pendingRara != 0) {
-            _transferRara(to, _pendingRara);
-            raraHarvested = raraHarvested + _pendingRara;
+        if (pendingRara != 0) {
+            user.harvestedReward += pendingRara;
+            totalHarvested += pendingRara;
+            _transferRara(to, pendingRara);
         }
 
-        emit Harvest(msg.sender, pid, to, _pendingRara);
+        emit Harvest(msg.sender, to, currentPeriod, pendingRara);
     }
 
     /// @dev Transfer the indicated Rara to the indicated recipient, or as
@@ -569,11 +700,6 @@ contract RaraCollectibleMining is ERC165, Pausable, AccessControlEnumerable, Bor
     /// emitter if necessary.
     function _transferRara(address _to, uint256 _amount) internal {
         uint256 raraBal = rara.balanceOf(address(this));
-        if (_amount > raraBal) {
-            claimFromEmitter();
-            raraBal = rara.balanceOf(address(this));
-        }
-
         if (_amount > raraBal) {
             rara.transfer(_to, raraBal);
         } else {
