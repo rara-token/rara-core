@@ -165,8 +165,6 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
       this.registry = await MockVotingRegistry.new();
     });
 
-    /*
-
     it('should revert if non-manager adds a pool', async () => {
       await expectRevert(
         this.pool.addPool(this.collectible.address, '100', false, 0, { from:bob }),
@@ -376,8 +374,6 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
       await expectRevert(pool.initialize({ from:manager }), "RaraCollectibleMining: already initialized");
     });
 
-    */
-
     it('(internal) updatePeriod starts a new period when appropriate', async () => {
       const { pool, collectible, collectible2 } = this;
 
@@ -454,8 +450,6 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
       await checkStats(2);
       await checkStats(3);
     });
-
-    /*
 
     context('testing deposit', () => {
       beforeEach(async () => {
@@ -2050,7 +2044,6 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
         });
       });
     });
-    */
 
     context('testing period transition', () => {
       beforeEach(async () => {
