@@ -112,6 +112,88 @@ contract('BlindCollectiblePrizeBagFactory', ([alice, bob, carol, dave, edith, ma
       await factory.createSaleWithPrizes("Test Sale 3", false, 50, 110, 7, ZERO_ADDRESS, [1, 5], [100, 10], { from:manager });
     });
 
+    it('claimSaleProceeds reverts for non-manager and non-creator', async () => {
+      const { token, factory } = this;
+
+      await token.transfer(await factory.sales(0), '10000', { from:minter });
+      await expectRevert(
+        factory.claimSaleProceeds(0, creator, 1000, { from:bob }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+      await expectRevert(
+        factory.claimSaleProceeds(0, manager, 1000, { from:carol }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+
+      await token.transfer(await factory.sales(1), '10000', { from:minter });
+      await expectRevert(
+        factory.claimSaleProceeds(1, creator, 1000, { from:bob }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+      await expectRevert(
+        factory.claimSaleProceeds(1, manager, 1000, { from:creator }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+    });
+
+    it('claimProceeds functions as expected', async () => {
+      const { token, factory } = this;
+
+      await token.transfer(await factory.sales(0), '10000', { from:minter });
+      await factory.claimSaleProceeds(0, bob, '1000', { from:creator });
+      assert.equal(await token.balanceOf(bob), '1000');
+      await factory.claimSaleProceeds(0, carol, '3000', { from:manager });
+      assert.equal(await token.balanceOf(carol), '3000');
+
+      await token.transfer(await factory.sales(1), '10000', { from:minter });
+      await factory.claimSaleProceeds(1, dave, '1000', { from:manager });
+      assert.equal(await token.balanceOf(dave), '1000');
+      await factory.claimSaleProceeds(1, edith, '3000', { from:alice });
+      assert.equal(await token.balanceOf(edith), '3000');
+    });
+
+    it('claimAllProceeds reverts for non-manager', async () => {
+      const { token, factory } = this;
+
+      await token.transfer(await factory.sales(0), '10000', { from:minter });
+      await expectRevert(
+        factory.claimAllSaleProceeds(0, creator, { from:bob }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+      await expectRevert(
+        factory.claimAllSaleProceeds(0, manager, { from:carol }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+
+      await token.transfer(await factory.sales(1), '10000', { from:minter });
+      await expectRevert(
+        factory.claimAllSaleProceeds(1, creator, { from:bob }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+      await expectRevert(
+        factory.claimAllSaleProceeds(1, manager, { from:creator }),
+        "BlindCollectiblePrizeBagFactory: not authorized"
+      );
+    });
+
+    it('claimAllProceeds functions as expected', async () => {
+      const { token, factory } = this;
+
+      await token.transfer(await factory.sales(0), '1000', { from:minter });
+      await factory.claimAllSaleProceeds(0, bob, { from:creator });
+      assert.equal(await token.balanceOf(bob), '1000');
+      await token.transfer(await factory.sales(0), '3000', { from:minter });
+      await factory.claimAllSaleProceeds(0, carol, { from:manager });
+      assert.equal(await token.balanceOf(carol), '3000');
+
+      await token.transfer(await factory.sales(1), '1000', { from:minter });
+      await factory.claimAllSaleProceeds(1, dave, { from:manager });
+      assert.equal(await token.balanceOf(dave), '1000');
+      await token.transfer(await factory.sales(1), '3000', { from:minter });
+      await factory.claimAllSaleProceeds(1, edith, { from:alice });
+      assert.equal(await token.balanceOf(edith), '3000');
+    });
+
     it('setSaleTimes should revert for not managed by caller', async () => {
       const { token, collectible, factory } = this;
 

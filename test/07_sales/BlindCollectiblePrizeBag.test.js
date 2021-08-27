@@ -53,6 +53,59 @@ contract('BlindCollectiblePrizeBag', ([alice, bob, carol, dave, edith, manager, 
     assert.equal(await sale.prizeCount(), '0');
   });
 
+  it('claimProceeds reverts for non-manager', async () => {
+    const { token, sale } = this;
+
+    await token.transfer(sale.address, '10000', { from:minter });
+    await expectRevert(
+      sale.claimProceeds(alice, 1000, { from:bob }),
+      "BlindCollectiblePrizeBag: must have MANAGER role to claimProceeds"
+    );
+
+    await expectRevert(
+      sale.claimProceeds(manager, 1000, { from:salter }),
+      "BlindCollectiblePrizeBag: must have MANAGER role to claimProceeds"
+    );
+  });
+
+  it('claimProceeds functions as expected', async () => {
+    const { token, sale } = this;
+
+    await token.transfer(sale.address, '10000', { from:minter });
+    await sale.claimProceeds(bob, 1000, { from:alice });
+    assert.equal(await token.balanceOf(bob), '1000');
+
+    await sale.claimProceeds(edith, 5000, { from:manager });
+    assert.equal(await token.balanceOf(edith), '5000');
+  });
+
+  it('claimAllProceeds reverts for non-manager', async () => {
+    const { token, sale } = this;
+
+    await token.transfer(sale.address, '10000', { from:minter });
+    await expectRevert(
+      sale.claimAllProceeds(alice, { from:bob }),
+      "BlindCollectiblePrizeBag: must have MANAGER role to claimAllProceeds"
+    );
+
+    await expectRevert(
+      sale.claimAllProceeds(manager, { from:salter }),
+      "BlindCollectiblePrizeBag: must have MANAGER role to claimAllProceeds"
+    );
+  });
+
+  it('claimAllProceeds functions as expected', async () => {
+    const { token, sale } = this;
+
+    await token.transfer(sale.address, '10000', { from:minter });
+    await sale.claimAllProceeds(bob, { from:alice });
+    assert.equal(await token.balanceOf(bob), '10000');
+
+    await token.transfer(sale.address, '6000', { from:minter });
+    await sale.claimAllProceeds(edith, { from:manager });
+    assert.equal(await token.balanceOf(edith), '6000');
+  });
+
   it('setTimes should revert for non-managers', async () => {
     const { token, collectible, sale } = this;
 
