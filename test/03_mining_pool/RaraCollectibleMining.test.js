@@ -1,4 +1,4 @@
-const { expectRevert, time } = require('@openzeppelin/test-helpers');
+const { expectRevert, expectEvent, time } = require('@openzeppelin/test-helpers');
 const MockERC20 = artifacts.require('MockERC20');
 const ERC721ValuableCollectibleToken = artifacts.require('ERC721ValuableCollectibleToken');
 const MockTokenEmitter = artifacts.require('MockTokenEmitter');
@@ -19,16 +19,17 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
     await this.reward.transfer(this.emitter.address, '1000000000', { from: alice });
   });
 
-  async function nextPeriod(pool) {
+  async function nextPeriod(pool, overshoot = 0) {
     const periods = Number((await pool.periodLength()).toString());
     const start = Number((await pool.currentPeriodStartTime()).toString());
     const nextStart = start + Number((await pool.periodDuration()).toString());
 
-    await time.increaseTo(nextStart - 1);
-    await pool.updatePeriod();
-    while (time.latest() < start || Number((await pool.periodLength()).toString()) == periods) {
-      await pool.updatePeriod();
+    await time.increaseTo(nextStart + (overshoot ? overshoot : - 1));
+    let res = await pool.updatePeriod();
+    while (time.latest() < nextStart || Number((await pool.periodLength()).toString()) == periods) {
+      res = await pool.updatePeriod();
     }
+    return res;
   }
 
   it('should set correct state variables', async () => {
@@ -163,6 +164,8 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
       this.food = await ERC721ValuableCollectibleToken.new('Food', 'F', 'http://f/',{ from:minter });
       this.registry = await MockVotingRegistry.new();
     });
+
+    /*
 
     it('should revert if non-manager adds a pool', async () => {
       await expectRevert(
@@ -373,6 +376,8 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
       await expectRevert(pool.initialize({ from:manager }), "RaraCollectibleMining: already initialized");
     });
 
+    */
+
     it('(internal) updatePeriod starts a new period when appropriate', async () => {
       const { pool, collectible, collectible2 } = this;
 
@@ -449,6 +454,8 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
       await checkStats(2);
       await checkStats(3);
     });
+
+    /*
 
     context('testing deposit', () => {
       beforeEach(async () => {
@@ -2042,6 +2049,384 @@ contract('RaraCollectibleMining', ([alice, bob, carol, dave, edith, manager, min
           await checkUserInfo(dave, 3, 40);
         });
       });
+    });
+    */
+
+    context('testing period transition', () => {
+      beforeEach(async () => {
+        const { pool, collectible, collectible2, food } = this;
+
+        await collectible.addTokenType(`Type 0`, `T0`, 0, { from:minter });
+        await collectible.addTokenType(`Type 1`, `T1`, 0, { from:minter });
+        await collectible.addTokenType(`Type 2`, `T2`, 0, { from:minter });
+
+        await collectible2.addTokenType(`Domino 0`, `D0`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 1`, `D1`, 0, { from:minter });
+        await collectible2.addTokenType(`Domino 2`, `D2`, 0, { from:minter });
+
+        await food.addTokenType(`Food 0`, `F0`, 0, { from:minter });
+        await food.addTokenType(`Food 1`, `F1`, 0, { from:minter });
+        await food.addTokenType(`Food 2`, `F2`, 0, { from:minter });
+
+        await pool.addPool(collectible.address, '100', false, 0, { from:alice });
+        await pool.addPool(collectible.address, '1000', true, 2, { from:manager });
+        await pool.addPool(collectible2.address, '1', false, 0, { from:manager });
+        await pool.addPool(collectible2.address, '2', false, 0, { from:manager });
+
+        await pool.setPoolActivation(0, '100', ZERO_ADDRESS, 0, false, 0, { from:alice });
+        await pool.setPoolActivation(1, '1000', food.address, 2, true, 0, { from:alice });
+        await pool.setPoolActivation(2, '1', food.address, 3, false, 0, { from:alice });
+        await pool.setPoolActivation(3, '2', food.address, 3, false, 0, { from:alice });
+
+        await pool.setPeriod('1000', '0', { from:alice });
+        await pool.initialize({ from:manager });
+
+        const initBlockNumber = await web3.eth.getBlockNumber();
+        const initBlock = await web3.eth.getBlock(initBlockNumber);
+        const initTimestamp = Number(initBlock.timestamp.toString());
+        const stepMargin = initTimestamp % 1000;
+        this.startTimestamp = stepMargin >= 0
+          ? initTimestamp - (stepMargin - 0)
+          : initTimestamp - (stepMargin + 1000) + 0;
+
+        await time.increaseTo(this.startTimestamp + 1000);
+
+        await collectible.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await collectible2.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await collectible2.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await food.massMint(bob, [0, 0, 1, 1, 2, 2], { from:minter });
+        await food.setApprovalForAll(this.pool.address, true, { from:bob });
+
+        await pool.updatePeriod();
+      });
+
+      const percent = [0, 10, 25, 50, 75, 90];
+
+      for (const p of percent) {
+        it(`test delayed period transition (~${p}%)`, async () => {
+          const { pool, collectible, collectible2, food, emitter, reward } = this;
+
+          // deposit 1100 worth of mining power
+          await pool.deposit(0, carol, [0], { from:bob });
+          await pool.deposit(1, edith, [4], { from:bob });
+
+          // provide 1100 * 1.1 * 100 = 121000 of reward
+          await emitter.addOwed(pool.address, '121000');
+
+          // currently on period 2
+          let startTime = Number((await pool.currentPeriodStartTime()).toString());
+          await nextPeriod(pool, p * 10);  //  p% overshoot
+          // what's the overshoot?
+          let timestamp = await time.latest();
+          let initTimestamp = Number((await pool.periodInfo(2)).initTime.toString());
+          let periodTime = (startTime + 1000) - initTimestamp;
+          let totalTime = timestamp - initTimestamp;
+          let periodShare = Math.floor(121000 * (periodTime / totalTime));
+          let interimShare = 0;
+          let advanceShare = 121000 - periodShare;
+
+          // verify period annotation
+          let info = await pool.periodInfo(2);
+          assert.equal(info.power, '1100');
+          assert.equal((info.reward).toString(), `${periodShare}`);
+          assert.equal((info.startTime).toString(), `${startTime}`);
+          assert.equal((info.endTime).toString(), `${startTime + 1000}`);
+          info = await pool.periodInfo(3);
+          assert.equal(info.power, '0');
+          assert.equal((info.reward).toString(), `${advanceShare}`);
+          assert.equal((info.startTime).toString(), `${startTime + 1000}`);
+          assert.equal((info.initTime).toString(), `${timestamp}`);
+
+          // verify user entitlement
+          assert.equal(await pool.pendingReward(alice), '0');
+          assert.equal(await pool.pendingReward(bob), '0');
+          assert.equal(
+            Number((await pool.pendingReward(carol)).toString()),
+            Math.floor((periodShare * 100) / 1100)
+          );
+          assert.equal(await pool.pendingReward(dave), '0');
+          assert.equal(
+            Number((await pool.pendingReward(edith)).toString()),
+            Math.floor((periodShare * 1000) / 1100)
+          );
+
+          // verify remaining balance
+          assert.equal(await reward.balanceOf(pool.address), `${periodShare + advanceShare}`);
+
+          // check that the remainder goes out to investors in the next period
+          await pool.deposit(2, dave, [0], { from:bob });
+          await nextPeriod(pool);
+          assert.equal(await pool.pendingReward(dave), `${advanceShare}`);
+        });
+      }
+
+      for (const p of percent) {
+        it(`test delayed period transition (~${200 + p}%)`, async () => {
+          const { pool, collectible, collectible2, food, emitter, reward } = this;
+
+          // deposit 1100 worth of mining power
+          await pool.deposit(0, carol, [0], { from:bob });
+          await pool.deposit(1, edith, [4], { from:bob });
+
+          // provide 1100 * 1.1 * 100 = 121000 of reward
+          await emitter.addOwed(pool.address, '121000');
+
+          // currently on period 2
+          let startTime = Number((await pool.currentPeriodStartTime()).toString());
+          let res = await nextPeriod(pool, 2000 + p * 10);  //  (500 + p)% overshoot
+          // what's the overshoot?
+          let timestamp = await time.latest();
+          let initTimestamp = Number((await pool.periodInfo(2)).initTime.toString());
+          let periodTime = (startTime + 1000) - initTimestamp;
+          let totalTime = timestamp - initTimestamp;
+          let periodShare = Math.floor(121000 * (periodTime / totalTime));
+          let interimShare = Math.floor(121000 * (2000 / totalTime));
+          let advanceShare = 121000 - (periodShare + interimShare);
+
+          // verify period annotation
+          let info = await pool.periodInfo(2);
+          assert.equal(info.power, '1100');
+          assert.equal((info.reward).toString(), `${periodShare}`);
+          assert.equal((info.startTime).toString(), `${startTime}`);
+          assert.equal((info.endTime).toString(), `${startTime + 1000}`);
+          info = await pool.periodInfo(3);
+          assert.equal(info.power, '0');
+          assert.equal((info.reward).toString(), `${advanceShare}`);
+          assert.equal((info.startTime).toString(), `${startTime + 3000}`);
+          assert.equal((info.initTime).toString(), `${timestamp}`);
+
+          // verify user entitlement
+          assert.equal(await pool.pendingReward(alice), '0');
+          assert.equal(await pool.pendingReward(bob), '0');
+          assert.equal(
+            Number((await pool.pendingReward(carol)).toString()),
+            Math.floor((periodShare * 100) / 1100)
+          );
+          assert.equal(await pool.pendingReward(dave), '0');
+          assert.equal(
+            Number((await pool.pendingReward(edith)).toString()),
+            Math.floor((periodShare * 1000) / 1100)
+          );
+
+          // verify burn
+          await expectEvent.inTransaction(res.tx, reward, "Transfer", {
+            from: pool.address,
+            to: ZERO_ADDRESS,
+            value: `${interimShare}`
+          });
+
+          // verify remaining balance
+          assert.equal(await reward.balanceOf(pool.address), `${periodShare + advanceShare}`);
+
+          // check that the remainder goes out to investors in the next period
+          await pool.deposit(2, dave, [0], { from:bob });
+          await nextPeriod(pool);
+          assert.equal(await pool.pendingReward(dave), `${advanceShare}`);
+        });
+      }
+
+      for (const p of percent) {
+        it(`test re-anchored period transition (+20% anchor with ${p}% overshoot)`, async () => {
+          const { pool, collectible, collectible2, food, emitter, reward } = this;
+
+          // deposit 1100 worth of mining power
+          await pool.deposit(0, carol, [0], { from:bob });
+          await pool.deposit(1, edith, [4], { from:bob });
+
+          // provide 1100 * 1.1 * 100 = 121000 of reward
+          await emitter.addOwed(pool.address, '121000');
+
+          // currently on period 2
+          let startTime = Number((await pool.currentPeriodStartTime()).toString());
+          await pool.setPeriod('1000', '200');
+          let res = await nextPeriod(pool, 200 + p * 10);  //  (500 + p)% overshoot
+          // what's the overshoot?
+          let timestamp = await time.latest();
+          let initTimestamp = Number((await pool.periodInfo(2)).initTime.toString());
+          let periodTime = (startTime + 1000) - initTimestamp;
+          let totalTime = timestamp - initTimestamp;
+          let periodShare = Math.floor(121000 * (periodTime / totalTime));
+          let interimShare = Math.floor(121000 * (200 / totalTime));
+          let advanceShare = 121000 - (periodShare + interimShare);
+
+          // verify period annotation
+          let info = await pool.periodInfo(2);
+          assert.equal(info.power, '1100');
+          assert.equal((info.reward).toString(), `${periodShare}`);
+          assert.equal((info.startTime).toString(), `${startTime}`);
+          assert.equal((info.endTime).toString(), `${startTime + 1000}`);
+          info = await pool.periodInfo(3);
+          assert.equal(info.power, '0');
+          assert.equal((info.reward).toString(), `${advanceShare}`);
+          assert.equal((info.startTime).toString(), `${startTime + 1200}`);
+          assert.equal((info.initTime).toString(), `${timestamp}`);
+
+          // verify user entitlement
+          assert.equal(await pool.pendingReward(alice), '0');
+          assert.equal(await pool.pendingReward(bob), '0');
+          assert.equal(
+            Number((await pool.pendingReward(carol)).toString()),
+            Math.floor((periodShare * 100) / 1100)
+          );
+          assert.equal(await pool.pendingReward(dave), '0');
+          assert.equal(
+            Number((await pool.pendingReward(edith)).toString()),
+            Math.floor((periodShare * 1000) / 1100)
+          );
+
+          // verify burn
+          await expectEvent.inTransaction(res.tx, reward, "Transfer", {
+            from: pool.address,
+            to: ZERO_ADDRESS,
+            value: `${interimShare}`
+          });
+
+          // verify remaining balance
+          assert.equal(await reward.balanceOf(pool.address), `${periodShare + advanceShare}`);
+
+          // check that the remainder goes out to investors in the next period
+          await pool.deposit(2, dave, [0], { from:bob });
+          await nextPeriod(pool);
+          assert.equal(await pool.pendingReward(dave), `${advanceShare}`);
+        });
+      }
+
+      for (const p of percent) {
+        it(`test re-anchored period transition (+20% anchor with ${300 + p}% overshoot)`, async () => {
+          const { pool, collectible, collectible2, food, emitter, reward } = this;
+
+          // deposit 1100 worth of mining power
+          await pool.deposit(0, carol, [0], { from:bob });
+          await pool.deposit(1, edith, [4], { from:bob });
+
+          // provide 1100 * 1.1 * 100 = 121000 of reward
+          await emitter.addOwed(pool.address, '121000');
+
+          // currently on period 2
+          let startTime = Number((await pool.currentPeriodStartTime()).toString());
+          await pool.setPeriod('1000', '200');
+          let res = await nextPeriod(pool, 3200 + p * 10);  //  (500 + p)% overshoot
+          // what's the overshoot?
+          let timestamp = await time.latest();
+          let initTimestamp = Number((await pool.periodInfo(2)).initTime.toString());
+          let periodTime = (startTime + 1000) - initTimestamp;
+          let totalTime = timestamp - initTimestamp;
+          let periodShare = Math.floor(121000 * (periodTime / totalTime));
+          let interimShare = Math.floor(121000 * (3200 / totalTime));
+          let advanceShare = 121000 - (periodShare + interimShare);
+
+          // verify period annotation
+          let info = await pool.periodInfo(2);
+          assert.equal(info.power, '1100');
+          assert.equal((info.reward).toString(), `${periodShare}`);
+          assert.equal((info.startTime).toString(), `${startTime}`);
+          assert.equal((info.endTime).toString(), `${startTime + 1000}`);
+          info = await pool.periodInfo(3);
+          assert.equal(info.power, '0');
+          assert.equal((info.reward).toString(), `${advanceShare}`);
+          assert.equal((info.startTime).toString(), `${startTime + 4200}`);
+          assert.equal((info.initTime).toString(), `${timestamp}`);
+
+          // verify user entitlement
+          assert.equal(await pool.pendingReward(alice), '0');
+          assert.equal(await pool.pendingReward(bob), '0');
+          assert.equal(
+            Number((await pool.pendingReward(carol)).toString()),
+            Math.floor((periodShare * 100) / 1100)
+          );
+          assert.equal(await pool.pendingReward(dave), '0');
+          assert.equal(
+            Number((await pool.pendingReward(edith)).toString()),
+            Math.floor((periodShare * 1000) / 1100)
+          );
+
+          // verify burn
+          await expectEvent.inTransaction(res.tx, reward, "Transfer", {
+            from: pool.address,
+            to: ZERO_ADDRESS,
+            value: `${interimShare}`
+          });
+
+          // verify remaining balance
+          assert.equal(await reward.balanceOf(pool.address), `${periodShare + advanceShare}`);
+
+          // check that the remainder goes out to investors in the next period
+          await pool.deposit(2, dave, [0], { from:bob });
+          await nextPeriod(pool);
+          assert.equal(await pool.pendingReward(dave), `${advanceShare}`);
+        });
+      }
+
+      for (const p of percent) {
+        it(`test re-anchored and overlapping period transition (-60% anchor with ${p}% step past current end)`, async () => {
+          const { pool, collectible, collectible2, food, emitter, reward } = this;
+
+          // deposit 1100 worth of mining power
+          await pool.deposit(0, carol, [0], { from:bob });
+          await pool.deposit(1, edith, [4], { from:bob });
+
+          // provide 1100 * 1.1 * 100 = 121000 of reward
+          await emitter.addOwed(pool.address, '121000');
+
+          // currently on period 2
+          let startTime = Number((await pool.currentPeriodStartTime()).toString());
+          await pool.setPeriod('1000', '400');
+          let res = await nextPeriod(pool, p * 10);  //  (p)% overshoot
+          // what's the overshoot?
+          let timestamp = await time.latest();
+          let initTimestamp = Number((await pool.periodInfo(2)).initTime.toString());
+          let periodTime = (startTime + 1000) - initTimestamp;
+          let totalTime = timestamp - initTimestamp;
+          let periodShare = Math.floor(121000 * (periodTime / totalTime));
+          let interimShare = p >= 40 ? Math.floor(121000 * (400 / totalTime)) : 0;
+          let advanceShare = 121000 - (periodShare + interimShare);
+
+          // verify period annotation
+          let info = await pool.periodInfo(2);
+          assert.equal(info.power, '1100');
+          assert.equal((info.reward).toString(), `${periodShare}`);
+          assert.equal((info.startTime).toString(), `${startTime}`);
+          assert.equal((info.endTime).toString(), `${startTime + 1000}`);
+          info = await pool.periodInfo(3);
+          assert.equal(info.power, '0');
+          assert.equal((info.reward).toString(), `${advanceShare}`);
+          assert.equal((info.startTime).toString(), `${p >= 40 ? startTime + 1400 : startTime + 400}`);
+          assert.equal((info.initTime).toString(), `${timestamp}`);
+
+          // verify user entitlement
+          assert.equal(await pool.pendingReward(alice), '0');
+          assert.equal(await pool.pendingReward(bob), '0');
+          assert.equal(
+            Number((await pool.pendingReward(carol)).toString()),
+            Math.floor((periodShare * 100) / 1100)
+          );
+          assert.equal(await pool.pendingReward(dave), '0');
+          assert.equal(
+            Number((await pool.pendingReward(edith)).toString()),
+            Math.floor((periodShare * 1000) / 1100)
+          );
+
+          // verify burn
+          if (interimShare > 0) {
+            await expectEvent.inTransaction(res.tx, reward, "Transfer", {
+              from: pool.address,
+              to: ZERO_ADDRESS,
+              value: `${interimShare}`
+            });
+          }
+
+          // verify remaining balance
+          assert.equal(await reward.balanceOf(pool.address), `${periodShare + advanceShare}`);
+
+          // check that the remainder goes out to investors in the next period
+          await pool.deposit(2, dave, [0], { from:bob });
+          await nextPeriod(pool);
+          assert.equal(await pool.pendingReward(dave), `${advanceShare}`);
+        });
+      }
     });
 
     context('holistic testing', () => {
