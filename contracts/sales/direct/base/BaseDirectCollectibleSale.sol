@@ -23,6 +23,7 @@ abstract contract BaseDirectCollectibleSale is Context, AccessControlEnumerable,
 
     // @notice purchase info
     struct ReceiptInfo {
+        address buyer;
         address user;
         uint256 price;
         uint256 itemId;
@@ -94,6 +95,7 @@ abstract contract BaseDirectCollectibleSale is Context, AccessControlEnumerable,
             tokenTypes[i] = item.tokenType;
 
             receiptInfo.push(ReceiptInfo({
+                buyer: buyer,
                 user: _to,
                 price: price,
                 itemId: _itemId,
@@ -125,6 +127,11 @@ abstract contract BaseDirectCollectibleSale is Context, AccessControlEnumerable,
         require(hasRole(MANAGER_ROLE, _msgSender()), "BaseDirectCollectibleSale: must have MANAGER role to claimProceeds");
         IERC20(purchaseToken).safeTransfer(_to, _amount);
         // TODO emit
+    }
+
+    function setRecipient(address _recipient) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BaseDirectCollectibleSale: must have MANAGER role to setRecipient");
+        recipient = _recipient;
     }
 
     // @dev Returns the number of draws by `_user` (thus far).

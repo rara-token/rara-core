@@ -32,7 +32,11 @@ abstract contract BaseDirectCollectibleSaleRegularResupply is BaseDirectCollecti
           return  0;
       }
 
-      if (info.currentPeriodStartTime + info.duration <= block.timestamp) {
+      if (!itemInfo[_itemId].available) {
+          return 0;
+      }
+
+      if (info.duration  > 0 && info.currentPeriodStartTime + info.duration <= block.timestamp) {
           _supply = info.supply;
       } else {
           _supply = info.totalSupply - itemReceiptId[_itemId].length;
@@ -45,16 +49,21 @@ abstract contract BaseDirectCollectibleSaleRegularResupply is BaseDirectCollecti
       super.updateItem(_itemId);
   }
 
-  function periodStartTime(uint256 timestamp, uint256 _duration, uint256 _anchor) public pure returns (uint256) {
+  function periodStartTime(uint256 timestamp, uint256 _duration, uint256 _anchor) public pure returns (uint256 _start) {
       // using periodAnchorTime and periodDuration, determine the appropriate
       // "start time" for a period that includes that timestamp.
-      uint256 anchorOffset = _anchor % _duration;
-      return ((timestamp - anchorOffset) / _duration) * _duration + anchorOffset;
+      if (_duration > 0) {
+        uint256 anchorOffset = _anchor % _duration;
+        _start = ((timestamp - anchorOffset) / _duration) * _duration + anchorOffset;
+      }
   }
 
   function _updateItemSupplyPeriod(uint256 _itemId, bool _force) internal {
       ItemSupplyInfo storage info = itemSupplyInfo[_itemId];
-      if (_force || info.currentPeriodStartTime + info.duration <= block.timestamp) {
+      if (_force || (
+        info.duration > 0 &&
+        info.currentPeriodStartTime + info.duration <= block.timestamp
+      )) {
         info.currentPeriodStartTime = periodStartTime(block.timestamp, info.duration, info.anchorTime);
         info.totalSupply = itemReceiptId[_itemId].length + info.supply;
       }
@@ -67,7 +76,10 @@ abstract contract BaseDirectCollectibleSaleRegularResupply is BaseDirectCollecti
   }
 
   function _setItemSupplyPeriod(uint256 _itemId, uint256 _supply, uint256 _duration, uint256 _anchorTime, bool _immediate) internal {
-      require(_duration > 0, "BaseDirectCollectibleSaleRegularResupply: duration must be nonzero");
+      require(
+          _duration > 0 || (_anchorTime == 0 && _immediate),
+          "BaseDirectCollectibleSaleRegularResupply: duration 0 (unlimited) requires anchorTime 0 and immediate update"
+      );
       ItemSupplyInfo storage info = itemSupplyInfo[_itemId];
       info.supply = _supply;
       info.duration = _duration;
@@ -88,7 +100,7 @@ abstract contract BaseDirectCollectibleSaleRegularResupply is BaseDirectCollecti
   function _afterCreateItem(uint256 _itemId, address _token, uint256 _tokenType, bool _available) internal override virtual {
       itemSupplyInfo.push(ItemSupplyInfo({
           supply: 0,
-          duration: 86400,
+          duration: 0,  // never ending
           anchorTime: 0,
           openTime: 0,
           closeTime: 0,

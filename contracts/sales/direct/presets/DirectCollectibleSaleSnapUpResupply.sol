@@ -11,8 +11,8 @@ contract DirectCollectibleSaleSnapUpPricing is
     BaseDirectCollectibleSaleSnapUpPricing,
     BaseDirectCollectibleSaleRegularResupply
 {
-    constructor(address _purchaseToken, address _recipient)
-    BaseDirectCollectibleSale(_purchaseToken, _recipient)
+    constructor(address _purchaseToken, address _fractionalExponents, address _recipient)
+    BaseDirectCollectibleSaleSnapUpPricing(_purchaseToken, _fractionalExponents, true, _recipient)
     { }
 
     // Item creation
@@ -23,8 +23,8 @@ contract DirectCollectibleSaleSnapUpPricing is
     // @param _tokenType The token type to mint
     // @param _available Whether the item should be set available.
     // @param _priceMinimum The minimum sale price
+    // @param _priceScaleDecimals The number of decimals to scale up the price (both minimum and snap-up)
     // @param _priceThresholdSupply The threshold item supply to apply price calculations
-    // @param _priceRoundingDecimals The number of decimals to round the snap-up price
     // @param _priceScalar [numerator, denominator] Multiplied against #sold
     // @param _priceExp [numerator, denominator] Exponent for pricing
     function createItem(
@@ -32,13 +32,13 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256 _tokenType,
         bool _available,
         uint256 _priceMinimum,
+        uint256 _priceScaleDecimals,
         uint256 _priceThresholdSupply,
-        uint256 _priceRoundingDecimals,
         uint256[] calldata _priceScalar,
-        uint256[] calldata _priceExp
+        uint32[] calldata _priceExp
     ) external returns (uint256 _itemId) {
         // call checks parameter validity / authorization
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to create game");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to create item");
 
         // create
         _itemId = _createItem(_token, _tokenType, _available);
@@ -47,8 +47,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         _setPricing(
             _itemId,
             _priceMinimum,
+            _priceScaleDecimals,
             _priceThresholdSupply,
-            _priceRoundingDecimals,
             _priceScalar,
             _priceExp
         );
@@ -64,7 +64,7 @@ contract DirectCollectibleSaleSnapUpPricing is
     // @param _resupplyParams [supply, duration, anchorTime] for resupply
     // @param _openAndCloseTime [openTime, closeTime] for sale
     // @param _priceMinimum The minimum sale price
-    // @param _priceRoundingDecimals The number of decimals to round the snap-up price
+    // @param _priceScaleDecimals The number of decimals to scale up the price (both minimum and snap-up)
     // @param _priceScalar [numerator, denominator] Multiplied against #sold
     // @param _priceExp [numerator, denominator] Exponent for pricing
     function createItemWithResupplyPricing(
@@ -73,12 +73,12 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256[] calldata _resupplyParams,
         uint256[] calldata _openAndCloseTime,
         uint256 _priceMinimum,
-        uint256 _priceRoundingDecimals,
+        uint256 _priceScaleDecimals,
         uint256[] calldata _priceScalar,
-        uint256[] calldata _priceExp
+        uint32[] calldata _priceExp
     ) external returns (uint256 _itemId) {
         // call checks parameter validity / authorization
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to create game");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to create item");
         require(_resupplyParams.length == 3, "DirectCollectibleSaleSnapUpPricing: _resupplyParams must have length 3");
         require(_openAndCloseTime.length == 2, "DirectCollectibleSaleSnapUpPricing: _openAndCloseTime must have length 2");
 
@@ -103,8 +103,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         _setPricing(
             _itemId,
             _priceMinimum,
+            _priceScaleDecimals,
             _resupplyParams[0],
-            _priceRoundingDecimals,
             _priceScalar,
             _priceExp
         );
@@ -138,9 +138,9 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256[] calldata _openAndCloseTime,
         bool _immediateResupply,
         uint256 _priceMinimum,
-        uint256 _priceRoundingDecimals,
+        uint256 _priceScaleDecimals,
         uint256[] calldata _priceScalar,
-        uint256[] calldata _priceExp
+        uint32[] calldata _priceExp
     ) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
         require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
@@ -159,8 +159,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         _setPricing(
             _itemId,
             _priceMinimum,
+            _priceScaleDecimals,
             _resupplyParams[0],
-            _priceRoundingDecimals,
             _priceScalar,
             _priceExp
         );
@@ -169,10 +169,10 @@ contract DirectCollectibleSaleSnapUpPricing is
     function setItemPricing(
         uint256 _itemId,
         uint256 _priceMinimum,
+        uint256 _priceScaleDecimals,
         uint256 _priceThresholdSupply,
-        uint256 _priceRoundingDecimals,
         uint256[] calldata _priceScalar,
-        uint256[] calldata _priceExp
+        uint32[] calldata _priceExp
     ) external {
         require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
         require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
@@ -181,8 +181,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         _setPricing(
             _itemId,
             _priceMinimum,
+            _priceScaleDecimals,
             _priceThresholdSupply,
-            _priceRoundingDecimals,
             _priceScalar,
             _priceExp
         );
