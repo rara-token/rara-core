@@ -229,4 +229,10 @@ contract BlindCollectibleManagedResupplyGachaRack is
         require(_gameId < gameInfo.length, "BlindCollectibleManagedResupplyGachaRack: nonexistent gameId");
         _addGameSupply(_gameId, _supply);
     }
+
+    function setGameDrawPrice(uint256 _gameId, uint256 _drawPrice, uint256 _blocksToReveal) public {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedResupplyGachaRack: must have MANAGER role to alter game draw price");
+        require(_gameId < gameInfo.length, "BlindCollectibleManagedResupplyGachaRack: nonexistent gameId");
+        _updateGame(_gameId, _drawPrice,  _blocksToReveal);
+    }
 }

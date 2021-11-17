@@ -14,8 +14,8 @@ import "./IBlindSale.sol";
  */
 pragma solidity ^0.8.0;
 interface IBlindSaleRevealable is IBlindSale {
-    // @dev Purchase the indicated number of draws, paying a maximum total price
-    // of `_maximumCost`.
+    // @dev Reveal the indicated draws, previously purchased by the caller, and
+    // send the prizes to `_to`.
     // @param _to The address to award the prize(s).
     // @param _drawIds The _drawIds, owned by the sender, to reveal in this transaction.
     function revealDraws(address _to, uint256[] calldata _drawIds) external;

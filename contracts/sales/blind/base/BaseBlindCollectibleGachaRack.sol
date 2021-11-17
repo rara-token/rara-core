@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IBlindSaleGachaRack.sol";
 import "../interfaces/IBlindCollectibleSale.sol";
 import "../interfaces/IBlindSaleRevealable.sol";
+import "../interfaces/IBlindSaleAwardable.sol";
 import "../../../token/interfaces/IERC721TypeExchangeable.sol";
 import "../../../token/interfaces/IERC721Collectible.sol";
 import "../../../utils/eip/IEIP210.sol";
@@ -24,7 +25,14 @@ import "../../../utils/eip/IEIP210.sol";
 // {_createPrize}
 // {_updatePrize}.
 pragma solidity ^0.8.0;
-abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumerable, IBlindSaleGachaRack, IBlindCollectibleSale, IBlindSaleRevealable {
+abstract contract BaseBlindCollectibleGachaRack is
+    Context,
+    AccessControlEnumerable,
+    IBlindSaleGachaRack,
+    IBlindCollectibleSale,
+    IBlindSaleRevealable,
+    IBlindSaleAwardable
+{
     using SafeERC20 for IERC20;
 
     // Role that configures sales
@@ -57,6 +65,10 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
         bool revealed;
     }
 
+    // Settings
+    bool public allowAwarding;
+    bool public autoAwarding;
+
     // games prizes
     GameInfo[] public gameInfo;
     mapping(uint256 => PrizeInfo[]) public prizeInfo;
@@ -78,7 +90,13 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
     mapping(uint256 => uint256[]) public override gameDrawId;
     mapping(uint256 => mapping (uint256 => uint256[])) public override prizeDrawId;
     mapping(address => uint256[]) public override drawIdBy;
+    uint256[] internal _drawIdQueuedIndex;
+    bool[] internal _drawIdQueued;
     bytes32 internal _salt;
+
+    // draw queue
+    uint256[] internal _queuedDrawId;
+    uint256 internal _queuedDrawIdNextIndex;
 
     event GameCreation(uint256 indexed gameId, uint256 drawPrice, uint256 blocksToReveal);
     event GameUpdate(uint256 indexed gameId, uint256 drawPrice, uint256 blocksToReveal, bool activated);
@@ -109,6 +127,8 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
     }
 
     function _availableSupplyFor(address _user, uint256 _gameId) internal virtual view returns (uint256 _supply);
+
+    // Basic Purchase and Reveal
 
     // @dev Purchase the indicated number of draws, paying a maximum total price
     // of `_maximumCost`.
@@ -157,14 +177,21 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
             drawIdBy[_to].push(drawId);
             gameDrawId[_gameId].push(drawId);
 
+            // manage queue; note that although it starts exactly matching
+            // drawId indices, the queue can get reordered over time.
+            _drawIdQueuedIndex.push(_queuedDrawId.length);
+            _drawIdQueued.push(true);
+            _queuedDrawId.push(drawId);
+
             emit DrawPurchase(_buyer, _to, drawId, game.drawPrice);
         }
 
-        // advance the png for each purchase; this helps prevent attackers
-        // from delaying their reveal until a favorable outcome, since other
-        // purchases will lock-in the result they would reveal. Cost is approx.
-        // linear with number of draws.
         advancePNG(_draws);
+        if (autoAwarding) {
+            // award queued prizes. Try to catch up a little if there was a big
+            // purchase block (not too much).
+            _revealQueue(0, _draws > 5 ? _draws : 5);
+        }
 
         // note for subcontracts
         _afterPurchase(_buyer, _gameId, _to, _draws, amount);
@@ -176,57 +203,26 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
 
     }
 
-    // @dev Purchase the indicated number of draws, paying a maximum total price
-    // of `_maximumCost`.
-    // @param _to The address to award the prize(s).
-    // @param _drawIds The _drawIds, owned by the sender, to reveal in this transaction.
     function revealDraws(address _to, uint256[] calldata _drawIds) external override {
-        uint256 length = _drawIds.length;
-        uint256[] memory prizeIds = new uint[](_drawIds.length);
-        uint256[] memory tokenTypes = new uint[](_drawIds.length);
-
-        // verify and reveal prizes; update everything except tokenId
-        for (uint256 i = 0; i < length; i++) {
-            uint256 drawId = _drawIds[i];
-            require(drawId < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
-
-            DrawInfo storage draw = drawInfo[drawId];
-            require(draw.user == _msgSender(), "BlindCollectibleGachaRack: drawId not owned by caller");
-            require(!draw.revealed, "BlindCollectibleGachaRack: drawId already revealed");
-
-            uint256 prizeId = prizeIds[i] = _peekReveal(drawId);
-            tokenTypes[i] = prizeInfo[draw.gameId][prizeId].tokenType;
-
-            draw.prizeId = prizeId;
-            draw.revealed = true; // update here so we don't allow duplicates
-
-            prizeDrawId[draw.gameId][prizeId].push(drawId);
-
-            emit Draw(_to, drawId, draw.gameId, draw.prizeId);
-        }
-
-        // mint, write tokenIds, emit Events
-        uint256[] memory tokenIds = IERC721TypeExchangeable(prizeToken).massMint(_to, tokenTypes);
-        for (uint256 i = 0; i < length; i++) {
-            drawInfo[_drawIds[i]].tokenId = tokenIds[i];
-        }
+        advancePNG(_drawIds.length);
+        (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
+            0, _drawIds, 0, _drawIds.length, _msgSender(), false
+        );
+        (uint256[] memory prizeIds, uint256[] memory tokenTypes) = _getPrizes(revealingDrawIds, length);
+        _grantPrizes(revealingDrawIds, prizeIds, tokenTypes, length, _to);
     }
 
-    function _peekReveal(uint256 _drawId) internal virtual returns (uint256 _prizeId) {
-        DrawInfo storage draw = drawInfo[_drawId];
-        GameInfo storage game = gameInfo[draw.gameId];
-        require(draw.revealBlock < block.number, "BlindCollectibleGachaRack: not revealable");
-
-        bytes32 revealHash = IEIP210(eip210).eip210Blockhash(draw.revealBlock);
-        uint256 anchor = uint256(draw.revealSeed ^ revealHash) % game.totalWeight;
-
-        for (; _prizeId < prizeInfo[draw.gameId].length; _prizeId++) {
-            uint256 weight = prizeInfo[draw.gameId][_prizeId].weight;
-            if (anchor < weight) {
-                break;
-            }
-            anchor = anchor - weight;
-        }
+    // @notice peeks and returns  the prizeIds to be awarded for the indicated
+    // drawIds without minting prize tokens or otherwise changing the chain state.
+    // Note that because prizes are based on simulated block hashes, it is possible
+    // for a "peeked" prize result to change over time (every 256 blocks) until
+    // the blockhash has been written to the EIP210 contract. This can be
+    // done by revealing the draws or calling `advancePNG`.
+    function peekDrawPrizes(uint256[] calldata _drawIds) external view returns (uint256[] memory _prizeIds, uint256[] memory _prizeTokenTypes) {
+        (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
+            0, _drawIds, 0, _drawIds.length, address(0), true
+        );
+        (_prizeIds, _prizeTokenTypes) = _getPrizes(revealingDrawIds, length);
     }
 
     // @notice Pseudorandom number generation is handled by combining a draw-specific
@@ -252,6 +248,223 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
         }
         _revealBlocksIndex = i;
     }
+
+    // Awardable
+
+    // @dev Award the indicated draws to their purchaser(s), if possible (skips
+    // those that are already revealed, but reverts if not revealable yet or
+    // invalid).
+    // @param _drawIds The _drawIds, which will be awarded to their purchaser(s).
+    function awardDraws(uint256[] calldata _drawIds) override external {
+        require(allowAwarding, "BlindCollectibleGachaRack: awarding disabled");
+
+        advancePNG(_drawIds.length);
+        (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
+            0, _drawIds, 0, _drawIds.length, address(0), false
+        );
+        (uint256[] memory prizeIds, uint256[] memory tokenTypes) = _getPrizes(revealingDrawIds, length);
+        _grantPrizes(revealingDrawIds, prizeIds, tokenTypes, length, address(0));
+    }
+
+    // @dev Award up to `_limit` queued draws to their purchaser(s).
+    // @param _limit The maximum number to award.
+    function awardQueuedDraws(uint256 _limit) override external {
+        require(allowAwarding, "BlindCollectibleGachaRack: awarding disabled");
+        advancePNG(_limit);
+        _revealQueue(0, _limit);
+    }
+
+    // @dev Award up to `_limit` queued draws to their purchaser(s)
+    function awardStaleDraws(uint256 _blocksStale, uint256 _limit) override public {
+        require(allowAwarding, "BlindCollectibleGachaRack: awarding disabled");
+        advancePNG(_limit);
+        _revealQueue(_blocksStale, _limit);
+    }
+
+    function _revealQueue(uint256 _blocksStale, uint256 _limit) internal returns (uint256) {
+        uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
+        uint256 limit = remaining > _limit ? _limit : remaining;
+        (uint256[] memory drawIds, uint256 length, uint256 contiguous) = _filterRevealable(
+            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false
+        );
+
+        _queuedDrawIdNextIndex += contiguous;
+
+        (uint256[] memory prizeIds, uint256[] memory tokenTypes) = _getPrizes(drawIds, length);
+        _grantPrizes(drawIds, prizeIds, tokenTypes, length, address(0));
+
+        return length;
+    }
+
+    // @dev Returns the number of queued draws that are revealable right now,
+    // up to `_limit`.
+    function queuedDrawsAwardableCount(uint256 _blocksStale, uint256 _limit) override external view returns (uint256 _count) {
+        uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
+        uint256 limit = remaining > _limit ? _limit : remaining;
+        (, _count,) = _filterRevealable(
+            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false
+        );
+    }
+
+    // @dev Returns the number of draws queued right now, revealable or not.
+    function queuedDrawsCount() override external view returns (uint256 _count) {
+        return _queuedDrawId.length - _queuedDrawIdNextIndex;
+    }
+
+    // @dev Returns the drawId queued at the indicated index.
+    function queuedDrawId(uint256 _index) override external view returns (uint256 _drawid) {
+        uint256 actualIndex = _index + _queuedDrawIdNextIndex;
+        require(actualIndex < _queuedDrawId.length, "BlindCollectibleGachaRack: nonexistent index");
+        return _queuedDrawId[actualIndex];
+    }
+
+    // @dev For the draw queued at the indicated index, returns the number of
+    // blocks  "stale" (number of blocks it's been revealable).
+    function queuedDrawBlocksStale(uint256 _index) override external view returns (uint256 _blocks) {
+        uint256 actualIndex = _index + _queuedDrawIdNextIndex;
+        require(actualIndex < _queuedDrawId.length, "BlindCollectibleGachaRack: nonexistent index");
+        DrawInfo storage draw = drawInfo[_queuedDrawId[actualIndex]];
+        return draw.revealBlock < block.number
+          ? (block.number - draw.revealBlock - 1)
+          : 0;
+    }
+
+    // Prize Reveal Helpers
+
+    function _filterRevealable(
+        uint256 _blocksStale,
+        uint256[] memory _drawIds,
+        uint256 _start,
+        uint256 _limit,
+        address _requiredOwner,
+        bool _includeRevealed
+    ) internal view returns (
+        uint256[] memory _revealableDrawIds,
+        uint256 _revealableLength,
+        uint256 _contiguousLength
+    ) {
+        _revealableDrawIds = new uint[](_drawIds.length);
+        bool contiguous = true;
+        for (uint256 i = 0; i < _limit; i++) {
+            uint256 index = _start + i;
+            require(_drawIds[index] < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
+            DrawInfo storage draw = drawInfo[_drawIds[index]];
+
+            // requirements: check owner, revealable
+            require(draw.revealBlock < block.number, "BlindCollectibleGachaRack: not revealable");
+            require(
+                _requiredOwner == address(0) || draw.user == _requiredOwner,
+                "BlindCollectibleGachaRack: drawId not owned by"
+            );
+
+            if (draw.revealBlock < block.number + _blocksStale) {
+                // revealable... has it been revealed?
+                if (_includeRevealed || !draw.revealed) {
+                    _revealableDrawIds[_revealableLength++] = _drawIds[index];
+                }
+
+                if (contiguous) {
+                    _contiguousLength++;
+                }
+            } else {
+                contiguous = false;
+            }
+        }
+    }
+
+    function _getPrize(DrawInfo storage _draw, bytes32 _blockhash) internal view returns (uint256 _prizeId, uint256 _tokenType) {
+        // determine prizeId
+        PrizeInfo[] storage prizes = prizeInfo[_draw.gameId];
+        uint256 anchor = uint256(_draw.revealSeed ^ _blockhash) % gameInfo[_draw.gameId].totalWeight;
+        for (; _prizeId < prizes.length; _prizeId++) {
+            uint256 weight = prizes[_prizeId].weight;
+            if (anchor < weight) {
+                break;
+            }
+            anchor = anchor - weight;
+        }
+        _tokenType = prizes[_prizeId].tokenType;
+    }
+
+    function _getPrizes(uint256[] memory _drawIds, uint256 _length) internal view returns (uint256[] memory _prizeIds, uint256[] memory _tokenTypes) {
+        _tokenTypes = new uint[](_length);
+        _prizeIds = new uint[](_length);
+
+        uint256 revealBlock;
+        bytes32 revealHash;
+        for (uint256 i = 0; i < _length; i++) {
+            DrawInfo storage draw = drawInfo[_drawIds[i]];
+
+            // determine hash
+            if (revealBlock != draw.revealBlock) {
+              revealBlock = draw.revealBlock;
+              (revealHash,) = IEIP210(eip210).eip210BlockhashEstimate(revealBlock);
+            }
+
+            // determine prizeId
+            (_prizeIds[i], _tokenTypes[i]) = _getPrize(draw, revealHash);
+        }
+    }
+
+    function _grantPrizes(uint256[] memory _drawIds, uint256[] memory _prizeIds, uint256[] memory _tokenTypes, uint256 _length, address _to) internal returns (uint256[] memory _tokenIds) {
+        // mint or allocate
+        _tokenIds = _to != address(0)
+            ? IERC721TypeExchangeable(prizeToken).massMint(_to, _tokenTypes)
+            : new uint[](_length);
+
+        for (uint256 i = 0; i < _length; i++) {
+            uint256 drawId = _drawIds[i];
+            DrawInfo storage draw = drawInfo[drawId];
+
+            // mint?
+            if (_to == address(0)) {
+                _tokenIds[i] = IERC721TypeExchangeable(prizeToken).mint(draw.user, _tokenTypes[i]);
+            }
+
+            draw.tokenId = _tokenIds[i];
+            draw.prizeId = _prizeIds[i];
+            draw.revealed = true;   // prevent duplicate reveals
+
+            prizeDrawId[draw.gameId][_prizeIds[i]].push(drawId);
+
+            // unqueue
+            _removeFromQueue(drawId);
+
+            emit Draw(_to, drawId, draw.gameId, draw.prizeId);
+        }
+    }
+
+    // Queue Management
+
+    function setAllowAwarding(bool _allow) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to setAllowAwarding");
+        allowAwarding = _allow;
+    }
+
+    function setAutoAwarding(bool _auto) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to setAutoAwarding");
+        autoAwarding = _auto;
+    }
+
+    function _addToQueue(uint256 _drawId) internal {
+        if (!_drawIdQueued[_drawId] && !drawInfo[_drawId].revealed) {
+            _drawIdQueued[_drawId] = true;
+            _drawIdQueuedIndex[_drawId] = _queuedDrawId.length;
+            _queuedDrawId.push(_drawId);
+        }
+    }
+
+    function _removeFromQueue(uint256 _drawId) internal {
+        uint256 _index = _drawIdQueuedIndex[_drawId];
+        if (_drawIdQueued[_drawId] && _index >= _queuedDrawIdNextIndex) {
+            _queuedDrawId[_index] = _queuedDrawId[_queuedDrawId.length - 1];
+            _drawIdQueuedIndex[_queuedDrawId[_index]] = _index;
+            _queuedDrawId.pop();
+            _drawIdQueued[_drawId] = false;
+        }
+    }
+
+    // Other Configuration
 
     function drawPrice() external view override returns (uint256) {
         uint256 _gameId = _currentGameFor(_msgSender());
@@ -368,7 +581,7 @@ abstract contract BaseBlindCollectibleGachaRack is Context, AccessControlEnumera
 
     function drawRevealable(uint256 _did) external view override returns (bool) {
         require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
-        return drawInfo[_did].revealBlock <= block.number && !drawInfo[_did].revealed;
+        return drawInfo[_did].revealBlock < block.number && !drawInfo[_did].revealed;
     }
 
     function drawRevealableBlock(uint256 _did) external view returns (uint256) {
