@@ -6,6 +6,11 @@ const { ZERO_ADDRESS } = require('@openzeppelin/test-helpers').constants;
 const ZERO_BYTES = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 contract('EIP210', ([alice, bob, carol, dave, edith, manager, pauser, minter, dev]) => {
+  before(async () => {
+    const blockNumber = await web3.eth.getBlockNumber();
+    await time.advanceBlockTo(blockNumber + 500);
+  });
+
   beforeEach(async () => {
     this.eip210 = await EIP210.new();
   });
