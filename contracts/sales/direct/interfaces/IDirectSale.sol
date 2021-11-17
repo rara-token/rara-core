@@ -7,9 +7,10 @@
  */
 pragma solidity ^0.8.0;
 interface IDirectSale {
-    // @dev Returns the token address
+    // @dev Returns the token address used for purchasing
     function purchaseToken() external view returns (address);
 
+    // @dev Return the number of items available for sale
     function itemCount() external view returns (uint256);
 
     // @dev Returns the number of draws currently available from this sale.

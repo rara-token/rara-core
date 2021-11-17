@@ -36,7 +36,7 @@ abstract contract BaseDirectCollectibleSaleRegularResupply is BaseDirectCollecti
           return 0;
       }
 
-      if (info.duration  > 0 && info.currentPeriodStartTime + info.duration <= block.timestamp) {
+      if (info.duration > 0 && info.currentPeriodStartTime + info.duration <= block.timestamp) {
           _supply = info.supply;
       } else {
           _supply = info.totalSupply - itemReceiptId[_itemId].length;

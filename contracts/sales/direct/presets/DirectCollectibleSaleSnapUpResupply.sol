@@ -7,7 +7,7 @@ import "../base/BaseDirectCollectibleSaleRegularResupply.sol";
  * where the sale price of the item increases available supply drops.
  */
 pragma solidity ^0.8.0;
-contract DirectCollectibleSaleSnapUpPricing is
+contract DirectCollectibleSaleSnapUpResupply is
     BaseDirectCollectibleSaleSnapUpPricing,
     BaseDirectCollectibleSaleRegularResupply
 {
@@ -38,7 +38,7 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint32[] calldata _priceExp
     ) external returns (uint256 _itemId) {
         // call checks parameter validity / authorization
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to create item");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to create item");
 
         // create
         _itemId = _createItem(_token, _tokenType, _available);
@@ -78,9 +78,9 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint32[] calldata _priceExp
     ) external returns (uint256 _itemId) {
         // call checks parameter validity / authorization
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to create item");
-        require(_resupplyParams.length == 3, "DirectCollectibleSaleSnapUpPricing: _resupplyParams must have length 3");
-        require(_openAndCloseTime.length == 2, "DirectCollectibleSaleSnapUpPricing: _openAndCloseTime must have length 2");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to create item");
+        require(_resupplyParams.length == 3, "DirectCollectibleSaleSnapUpResupply: _resupplyParams must have length 3");
+        require(_openAndCloseTime.length == 2, "DirectCollectibleSaleSnapUpResupply: _openAndCloseTime must have length 2");
 
         // create
         _itemId = _createItem(_token, _tokenType, true);
@@ -113,19 +113,19 @@ contract DirectCollectibleSaleSnapUpPricing is
     // batch operations
 
     function setItemsAvailable(uint256[] calldata _itemIds, bool _available) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item availability");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item availability");
         for (uint256 i = 0; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
-            require(itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+            require(itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
             _setItemAvailable(itemId, _available);
         }
     }
 
     function setItemsTimes(uint256[] calldata _itemIds, uint256 _openTime, uint256 _closeTime) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item time");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item time");
         for (uint256 i = 0; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
-            require(itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+            require(itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
             _setItemTime(itemId, _openTime, _closeTime);
         }
     }
@@ -142,8 +142,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256[] calldata _priceScalar,
         uint32[] calldata _priceExp
     ) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
-        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item supply or pricing");
+        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
 
         _setItemSupplyPeriod(
             _itemId,
@@ -174,8 +174,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256[] calldata _priceScalar,
         uint32[] calldata _priceExp
     ) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
-        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item supply or pricing");
+        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
 
         // set pricing
         _setPricing(
@@ -194,8 +194,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256[] calldata _openAndCloseTime,
         bool _immediate
     ) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
-        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item supply or pricing");
+        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
 
         _setItemSupplyPeriod(
             _itemId,
@@ -212,8 +212,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256 _itemId,
         uint256 _supply
     ) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
-        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item supply or pricing");
+        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
 
         _setItemSupply(_itemId, _supply);
     }
@@ -222,8 +222,8 @@ contract DirectCollectibleSaleSnapUpPricing is
         uint256 _itemId,
         uint256 _supply
     ) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpPricing: must have MANAGER role to set item supply or pricing");
-        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpPricing: invalid itemId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), "DirectCollectibleSaleSnapUpResupply: must have MANAGER role to set item supply or pricing");
+        require(_itemId < itemCount(), "DirectCollectibleSaleSnapUpResupply: invalid itemId");
 
         _addItemSupply(_itemId, _supply);
     }
