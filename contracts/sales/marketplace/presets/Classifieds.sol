@@ -119,26 +119,30 @@ contract Classifieds {
 
     /**
      * @dev Cancels a trade by the poster.
-     * @param _trade The trade to be cancelled.
+     * @param _tradeId The trade to be cancelled.
      */
-    function cancelTrade(uint256 _trade)
+    function cancelTrade(uint256 _tradeId)
         public
         virtual
     {
-        Trade memory trade = trades[_trade];
+        Trade storage trade = trades[_tradeId];
         require(
             msg.sender == trade.poster,
             "Trade can be cancelled only by poster."
         );
-        require(trade.status == "Open", "Trade is not Open.");
-        itemToken.transferFrom(address(this), trade.poster, trade.item);
-        trades[_trade].status = "Cancelled";
+        _cancelTrade(_tradeId, trade);
+    }
+
+    function _cancelTrade(uint256 _tradeId, Trade storage _trade) internal {
+        require(_trade.status == "Open", "Trade is not Open.");
+        itemToken.transferFrom(address(this), _trade.poster, _trade.item);
+        _trade.status = "Cancelled";
         emit TradeStatusChange(
-            _trade,
+            _tradeId,
             "Cancelled",
-            trade.poster,
-            trade.item,
-            trade.price
+            _trade.poster,
+            _trade.item,
+            _trade.price
         );
     }
 }

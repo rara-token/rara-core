@@ -1,11 +1,11 @@
 pragma solidity ^0.8.0;
 
-import "./presets/Classifieds.sol";
+import "./presets/ManagedClassifieds.sol";
 
 // RaraToken.
-contract RaraCollectibleClassifieds is Classifieds {
+contract RaraCollectibleClassifieds is ManagedClassifieds {
     constructor(address _collectibleToken, address _purchaseToken)
-    Classifieds(_collectibleToken, _purchaseToken) {
+    ManagedClassifieds(_collectibleToken, _purchaseToken) {
         // nothing else to do
     }
 }
