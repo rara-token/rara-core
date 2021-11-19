@@ -39,7 +39,7 @@ abstract contract BaseBlindCollectibleGachaRackRegularResupply is BaseBlindColle
     }
 
     function _setGameSupplyPeriod(uint256 _gameId, uint256 _supply, uint256 _duration, uint256 _anchorTime, bool _immediate) internal {
-        require(_duration > 0, "BaseBlindCollectibleGachaRackRegularResupply: duration must be nonzero");
+        require(_duration > 0, ERR_NONZERO);
         GameSupplyInfo storage info = gameSupplyInfo[_gameId];
         info.supply = _supply;
         info.duration = _duration;

@@ -15,8 +15,8 @@ abstract contract BaseBlindCollectibleGachaRackLimitedFlow is BaseBlindCollectib
     GameDrawFlow[] public gameDrawFlow;
 
     function _setGameDrawFlowAndSupply(uint256 _gameId, uint256 _supply, uint256 _numerator, uint256 _denominator, uint256 _startBlock) internal {
-        require(_denominator > 0, "BlindCollectibleGachaRackLimitedFlow: denominator must be nonzero");
-        require(_numerator < PRECISION && _denominator < PRECISION, "BlindCollectibleGachaRackLimitedFlow: use lower precision");
+        require(_denominator > 0, ERR_NONZERO);
+        require(_numerator < PRECISION && _denominator < PRECISION, ERR_PRECISION);
 
         GameDrawFlow storage flow = gameDrawFlow[_gameId];
         flow.numerator = _numerator;

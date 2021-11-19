@@ -49,10 +49,10 @@ interface IBlindSaleGachaRack is IBlindSale {
     function prizeDrawId(uint256 _gameId, uint256 _prizeId, uint256 _index) external view returns (uint256);
 
     // @dev Returns the game played by the indicated draw draw.
-    function drawGameId(uint256 _did) external view returns (uint256 _gameId);
+    function drawGameId(uint256 _did) external view returns (uint256 gameId);
 
     // @dev Returns the prize won with the indicated draw (gameId and prizeId)
-    function drawPrizeId(uint256 _did) external view returns (uint256 _gameId, uint256 _prizeId);
+    function drawPrizeId(uint256 _did) external view returns (uint256 gameId, uint256 prizeId);
 
     event Draw(address indexed user, uint256 drawId, uint256 indexed gameId, uint256 indexed prizeId);
 }

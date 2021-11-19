@@ -29,15 +29,15 @@ interface IBlindSaleAwardable is IBlindSale {
 
     // @dev Returns the number of queued draws that are revealable right now,
     // up to `_limit`.
-    function queuedDrawsAwardableCount(uint256 _blocksStale, uint256 _limit) external view returns (uint256 _count);
+    function queuedDrawsAwardableCount(uint256 _blocksStale, uint256 _limit) external view returns (uint256 count);
 
     // @dev Returns the number of draws queued right now, revealable or not.
     function queuedDrawsCount() external view returns (uint256 _count);
 
     // @dev Returns the drawId queued at the indicated index.
-    function queuedDrawId(uint256 _index) external view returns (uint256 _drawid);
+    function queuedDrawId(uint256 _index) external view returns (uint256 drawid);
 
     // @dev For the draw queued at the indicated index, returns the number of
     // blocks  "stale" (number of blocks it's been revealable).
-    function queuedDrawBlocksStale(uint256 _index) external view returns (uint256 _blocks);
+    function queuedDrawBlocksStale(uint256 _index) external view returns (uint256 blocks);
 }

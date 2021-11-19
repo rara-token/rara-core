@@ -35,17 +35,17 @@ contract BlindCollectibleManagedFlowGachaRack is
         uint256 _prizeFlowStartBlock,
         uint256[] calldata _prizeTokenTypes,
         uint256[] calldata _prizeWeights
-    ) public returns (uint256 _gameId) {
+    ) public returns (uint256 gameId) {
         // call checks parameter validity / authorization
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to create game");
-        require(_prizeTokenTypes.length == _prizeWeights.length, "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_prizeTokenTypes.length == _prizeWeights.length, ERR_LENGTH);
 
         // create
-        _gameId = _createGame(_drawPrice, _blocksToReveal);
+        gameId = _createGame(_drawPrice, _blocksToReveal);
 
         // set flow and supply
         _setGameDrawFlowAndSupply(
-            _gameId,
+            gameId,
             _prizeSupply,
             _prizeFlowNumerator,
             _prizeFlowDenominator,
@@ -54,13 +54,13 @@ contract BlindCollectibleManagedFlowGachaRack is
 
         // create prizes
         for (uint256 i = 0; i < _prizeTokenTypes.length; i++) {
-            _createPrize(_gameId, _prizeTokenTypes[i], _prizeWeights[i]);
+            _createPrize(gameId, _prizeTokenTypes[i], _prizeWeights[i]);
         }
 
         // activate
-        _activateGame(_gameId);
+        _activateGame(gameId);
         if (_makeDefault) {
-            _setDefaultGame(_gameId);
+            _setDefaultGame(gameId);
         }
     }
 
@@ -75,16 +75,16 @@ contract BlindCollectibleManagedFlowGachaRack is
         uint256 _prizeFlowStartBlock,
         uint256[] calldata _prizeTokenTypes,
         uint256[] calldata _prizeWeights
-    ) public returns (uint256 _gameId) {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to create game");
-        require(_prizeTokenTypes.length == _prizeWeights.length, "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length");
+    ) public returns (uint256 gameId) {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_prizeTokenTypes.length == _prizeWeights.length, ERR_LENGTH);
 
         // create
-        _gameId = _createGame(_drawPrice, _blocksToReveal);
+        gameId = _createGame(_drawPrice, _blocksToReveal);
 
         // set flow and supply
         _setGameDrawFlowAndSupply(
-            _gameId,
+            gameId,
             _prizeSupply,
             _prizeFlowNumerator,
             _prizeFlowDenominator,
@@ -93,13 +93,13 @@ contract BlindCollectibleManagedFlowGachaRack is
 
         // create prizes
         for (uint256 i = 0; i < _prizeTokenTypes.length; i++) {
-            _createPrize(_gameId, _prizeTokenTypes[i], _prizeWeights[i]);
+            _createPrize(gameId, _prizeTokenTypes[i], _prizeWeights[i]);
         }
     }
 
     function activateGame(uint256 _gameId, bool _makeDefault) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to activate game");
-        require(_gameId < gameCount(), "BlindCollectibleManagedFlowGachaRack: invalid gameId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameCount(), ERR_OOB);
         _activateGame(_gameId);
         if (_makeDefault) {
             _setDefaultGame(_gameId);
@@ -109,9 +109,9 @@ contract BlindCollectibleManagedFlowGachaRack is
     // Prize creation (if doesn't fit in one transaction)
 
     function createPrizes(uint256 _gameId, uint256[] calldata _prizeTokenTypes, uint256[] calldata _prizeWeights) public returns (uint256[] memory prizeIds) {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to createPrizes");
-        require(_gameId < gameCount(), "BlindCollectibleManagedFlowGachaRack: invalid gameId");
-        require(_prizeTokenTypes.length == _prizeWeights.length, "BlindCollectibleManagedFlowGachaRack: prize types and weights must match length");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameCount(), ERR_OOB);
+        require(_prizeTokenTypes.length == _prizeWeights.length, ERR_LENGTH);
         prizeIds = new uint256[](_prizeTokenTypes.length);
         for (uint256 i = 0; i < _prizeTokenTypes.length; i++) {
             prizeIds[i] = _createPrize(_gameId, _prizeTokenTypes[i], _prizeWeights[i]);
@@ -119,11 +119,11 @@ contract BlindCollectibleManagedFlowGachaRack is
     }
 
     function updatePrizes(uint256 _gameId, uint256[] calldata _prizeIds, uint256[] calldata _prizeTokenTypes, uint256[] calldata _prizeWeights) public {
-      require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to createPrizes");
-      require(_gameId < gameCount(), "BlindCollectibleManagedFlowGachaRack: invalid gameId");
+      require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+      require(_gameId < gameCount(), ERR_OOB);
       require(
           _prizeIds.length == _prizeTokenTypes.length && _prizeTokenTypes.length == _prizeWeights.length,
-          "BlindCollectibleManagedFlowGachaRack: prize ids, types, and weights must match length"
+          ERR_LENGTH
       );
       for (uint256 i = 0; i < _prizeIds.length; i++) {
           _updatePrize(_gameId, _prizeIds[i], _prizeTokenTypes[i], _prizeWeights[i]);
@@ -132,16 +132,16 @@ contract BlindCollectibleManagedFlowGachaRack is
 
     // Managing game assignments
 
-    function currentGameFor(address _user) external view returns (uint256 _gameId) {
+    function currentGameFor(address _user) external view returns (uint256 gameId) {
         return _currentGameFor(_user);
     }
 
-    function availableSupplyForUser(address _user) external view returns (uint256 _supply) {
+    function availableSupplyForUser(address _user) external view returns (uint256 supply) {
         uint256 _gameId = _currentGameFor(_user);
         return _availableSupplyFor(_user, _gameId);
     }
 
-    function availableSupplyForGame(uint256 _gameId) external view returns (uint256 _supply) {
+    function availableSupplyForGame(uint256 _gameId) external view returns (uint256 supply) {
         return _availableSupplyFor(_msgSender(), _gameId);
     }
 
@@ -150,24 +150,9 @@ contract BlindCollectibleManagedFlowGachaRack is
         return gameInfo[_gameId].drawPrice;
     }
 
-    function assignGame(uint256 _gameId, address[] calldata _users) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to assignGame");
-        require(_gameId < gameCount(), "BlindCollectibleManagedFlowGachaRack: invalid gameId");
-        for (uint256 i = 0; i < _users.length; i++) {
-            _assignGame(_gameId, _users[i]);
-        }
-    }
-
-    function clearAssignedGame(address[] calldata _users) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to clearAssignedGame");
-        for (uint256 i = 0; i < _users.length; i++) {
-            _clearAssignedGame(_users[i]);
-        }
-    }
-
     function setDefaultGame(uint256 _gameId) public {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to assignGame");
-        require(_gameId < gameCount(), "BlindCollectibleManagedFlowGachaRack: invalid gameId");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameCount(), ERR_OOB);
         _setDefaultGame(_gameId);
     }
 
@@ -181,20 +166,26 @@ contract BlindCollectibleManagedFlowGachaRack is
 
     // Prize Flow
     function setGameDrawFlowAndSupply(uint256 _gameId, uint256 _supply, uint256 _numerator, uint256 _denominator, uint256 _startBlock) external {
-      require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to alter game draw flow");
-      require(_gameId < gameInfo.length, "BlindCollectibleManagedFlowGachaRack: nonexistent gameId");
+      require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+      require(_gameId < gameInfo.length, ERR_OOB);
       _setGameDrawFlowAndSupply(_gameId, _supply, _numerator, _denominator, _startBlock);
     }
 
     function setGameSupply(uint256 _gameId, uint256 _supply) external {
-      require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to alter game draw flow");
-      require(_gameId < gameInfo.length, "BlindCollectibleManagedFlowGachaRack: nonexistent gameId");
+      require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+      require(_gameId < gameInfo.length, ERR_OOB);
       _setGameSupply(_gameId, _supply);
     }
 
     function setGameDrawFlow(uint256 _gameId, uint256 _numerator, uint256 _denominator, uint256 _startBlock) external {
-      require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleManagedFlowGachaRack: must have MANAGER role to alter game draw flow");
-      require(_gameId < gameInfo.length, "BlindCollectibleManagedFlowGachaRack: nonexistent gameId");
+      require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+      require(_gameId < gameInfo.length, ERR_OOB);
       _setGameDrawFlow(_gameId, _numerator, _denominator, _startBlock);
+    }
+
+    function setGameDrawPrice(uint256 _gameId, uint256 _drawPrice, uint256 _blocksToReveal) public {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+        _updateGame(_gameId, _drawPrice,  _blocksToReveal);
     }
 }

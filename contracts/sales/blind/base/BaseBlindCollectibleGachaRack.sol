@@ -39,6 +39,22 @@ abstract contract BaseBlindCollectibleGachaRack is
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 public constant SALTER_ROLE = keccak256("SALTER_ROLE");
 
+    // Error constants
+    string internal constant ERR_AUTH = "AUTH";
+    string internal constant ERR_OOB = "OOB";
+    string internal constant ERR_LENGTH = "LENGTH";
+    string internal constant ERR_ACTIVE = "ACTIVE";
+    string internal constant ERR_WEIGHT = "WEIGHT";
+    string internal constant ERR_SUPPLY = "SUPPLY";
+    string internal constant ERR_PRICE = "PRICE";
+    string internal constant ERR_DISABLED = "DISABLED";
+    string internal constant ERR_NO_TYPE  = "NO_TYPE";
+    string internal constant ERR_OWNER = "OWNER";
+    string internal constant ERR_BLOCK = "BLOCK";
+    string internal constant ERR_REVEALED = "REVEALED";
+    string internal constant ERR_NONZERO = "NONZERO";
+    string internal constant ERR_PRECISION = "PRECISION";
+
     struct GameInfo {
         uint256 drawPrice;
         uint256 blocksToReveal;
@@ -118,7 +134,7 @@ abstract contract BaseBlindCollectibleGachaRack is
         return _currentGameFor(_msgSender());
     }
 
-    function _currentGameFor(address _user) internal virtual view returns (uint256 _gameId);
+    function _currentGameFor(address _user) internal virtual view returns (uint256 gameId);
 
     function availableSupply() public view override returns (uint256) {
         address caller = _msgSender();
@@ -145,9 +161,9 @@ abstract contract BaseBlindCollectibleGachaRack is
 
     function _purchaseDraws(address _buyer, uint256 _gameId, address _to, uint256 _draws, uint256 _maximumCost) internal {
         GameInfo storage game = gameInfo[_gameId];
-        require(game.activated, "BlindCollectibleGachaRack: not activated");
-        require(game.totalWeight > 0, "BlindCollectibleGachaRack: no prizes available");
-        require(_availableSupplyFor(_buyer, _gameId) >= _draws, "BlindCollectibleGachaRack: not enough supply");
+        require(game.activated, ERR_ACTIVE);
+        require(game.totalWeight > 0, ERR_WEIGHT);
+        require(_availableSupplyFor(_buyer, _gameId) >= _draws, ERR_SUPPLY);
 
         // push reveal block to queue for EIP210 simulation
         uint256 revealBlock = block.number + game.blocksToReveal;
@@ -155,7 +171,7 @@ abstract contract BaseBlindCollectibleGachaRack is
 
         // determine payment
         uint256 amount = _draws * game.drawPrice;
-        require(amount <= _maximumCost, "BlindCollectibleGachaRack: too expensive");
+        require(amount <= _maximumCost, ERR_PRICE);
 
         // charge payment
         address paymentTo = recipient != address(0) ? recipient : address(this);
@@ -218,11 +234,11 @@ abstract contract BaseBlindCollectibleGachaRack is
     // for a "peeked" prize result to change over time (every 256 blocks) until
     // the blockhash has been written to the EIP210 contract. This can be
     // done by revealing the draws or calling `advancePNG`.
-    function peekDrawPrizes(uint256[] calldata _drawIds) external view returns (uint256[] memory _prizeIds, uint256[] memory _prizeTokenTypes) {
+    function peekDrawPrizes(uint256[] calldata _drawIds) external view returns (uint256[] memory prizeIds, uint256[] memory prizeTokenTypes) {
         (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
             0, _drawIds, 0, _drawIds.length, address(0), true
         );
-        (_prizeIds, _prizeTokenTypes) = _getPrizes(revealingDrawIds, length);
+        (prizeIds, prizeTokenTypes) = _getPrizes(revealingDrawIds, length);
     }
 
     // @notice Pseudorandom number generation is handled by combining a draw-specific
@@ -256,7 +272,7 @@ abstract contract BaseBlindCollectibleGachaRack is
     // invalid).
     // @param _drawIds The _drawIds, which will be awarded to their purchaser(s).
     function awardDraws(uint256[] calldata _drawIds) override external {
-        require(allowAwarding, "BlindCollectibleGachaRack: awarding disabled");
+        require(allowAwarding, ERR_DISABLED);
 
         advancePNG(_drawIds.length);
         (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
@@ -269,14 +285,14 @@ abstract contract BaseBlindCollectibleGachaRack is
     // @dev Award up to `_limit` queued draws to their purchaser(s).
     // @param _limit The maximum number to award.
     function awardQueuedDraws(uint256 _limit) override external {
-        require(allowAwarding, "BlindCollectibleGachaRack: awarding disabled");
+        require(allowAwarding, ERR_DISABLED);
         advancePNG(_limit);
         _revealQueue(0, _limit);
     }
 
     // @dev Award up to `_limit` queued draws to their purchaser(s)
     function awardStaleDraws(uint256 _blocksStale, uint256 _limit) override public {
-        require(allowAwarding, "BlindCollectibleGachaRack: awarding disabled");
+        require(allowAwarding, ERR_DISABLED);
         advancePNG(_limit);
         _revealQueue(_blocksStale, _limit);
     }
@@ -298,31 +314,31 @@ abstract contract BaseBlindCollectibleGachaRack is
 
     // @dev Returns the number of queued draws that are revealable right now,
     // up to `_limit`.
-    function queuedDrawsAwardableCount(uint256 _blocksStale, uint256 _limit) override external view returns (uint256 _count) {
+    function queuedDrawsAwardableCount(uint256 _blocksStale, uint256 _limit) override external view returns (uint256 count) {
         uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
         uint256 limit = remaining > _limit ? _limit : remaining;
-        (, _count,) = _filterRevealable(
+        (, count,) = _filterRevealable(
             _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false
         );
     }
 
     // @dev Returns the number of draws queued right now, revealable or not.
-    function queuedDrawsCount() override external view returns (uint256 _count) {
+    function queuedDrawsCount() override external view returns (uint256 count) {
         return _queuedDrawId.length - _queuedDrawIdNextIndex;
     }
 
     // @dev Returns the drawId queued at the indicated index.
-    function queuedDrawId(uint256 _index) override external view returns (uint256 _drawid) {
+    function queuedDrawId(uint256 _index) override external view returns (uint256 drawid) {
         uint256 actualIndex = _index + _queuedDrawIdNextIndex;
-        require(actualIndex < _queuedDrawId.length, "BlindCollectibleGachaRack: nonexistent index");
+        require(actualIndex < _queuedDrawId.length, ERR_OOB);
         return _queuedDrawId[actualIndex];
     }
 
     // @dev For the draw queued at the indicated index, returns the number of
     // blocks  "stale" (number of blocks it's been revealable).
-    function queuedDrawBlocksStale(uint256 _index) override external view returns (uint256 _blocks) {
+    function queuedDrawBlocksStale(uint256 _index) override external view returns (uint256 blocks) {
         uint256 actualIndex = _index + _queuedDrawIdNextIndex;
-        require(actualIndex < _queuedDrawId.length, "BlindCollectibleGachaRack: nonexistent index");
+        require(actualIndex < _queuedDrawId.length, ERR_OOB);
         DrawInfo storage draw = drawInfo[_queuedDrawId[actualIndex]];
         return draw.revealBlock < block.number
           ? (block.number - draw.revealBlock - 1)
@@ -347,17 +363,17 @@ abstract contract BaseBlindCollectibleGachaRack is
         bool contiguous = true;
         for (uint256 i = 0; i < _limit; i++) {
             uint256 index = _start + i;
-            require(_drawIds[index] < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
+            require(_drawIds[index] < drawInfo.length, ERR_OOB);
             DrawInfo storage draw = drawInfo[_drawIds[index]];
 
             // requirements: check owner, revealable
-            require(draw.revealBlock < block.number, "BlindCollectibleGachaRack: not revealable");
+            require(draw.revealBlock < block.number, ERR_BLOCK);
             require(
                 _requiredOwner == address(0) || draw.user == _requiredOwner,
-                "BlindCollectibleGachaRack: drawId not owned by"
+                ERR_OWNER
             );
 
-            if (draw.revealBlock < block.number + _blocksStale) {
+            if (draw.revealBlock + _blocksStale < block.number) {
                 // revealable... has it been revealed?
                 if (_includeRevealed || !draw.revealed) {
                     _revealableDrawIds[_revealableLength++] = _drawIds[index];
@@ -437,13 +453,23 @@ abstract contract BaseBlindCollectibleGachaRack is
     // Queue Management
 
     function setAllowAwarding(bool _allow) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to setAllowAwarding");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
         allowAwarding = _allow;
     }
 
     function setAutoAwarding(bool _auto) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to setAutoAwarding");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
         autoAwarding = _auto;
+    }
+
+    function addToQueue(uint256 _drawId) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        _addToQueue(_drawId);
+    }
+
+    function removeFromQueue(uint256 _drawId) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        _removeFromQueue(_drawId);
     }
 
     function _addToQueue(uint256 _drawId) internal {
@@ -456,11 +482,15 @@ abstract contract BaseBlindCollectibleGachaRack is
 
     function _removeFromQueue(uint256 _drawId) internal {
         uint256 _index = _drawIdQueuedIndex[_drawId];
-        if (_drawIdQueued[_drawId] && _index >= _queuedDrawIdNextIndex) {
-            _queuedDrawId[_index] = _queuedDrawId[_queuedDrawId.length - 1];
-            _drawIdQueuedIndex[_queuedDrawId[_index]] = _index;
-            _queuedDrawId.pop();
+        if (_drawIdQueued[_drawId]) {
             _drawIdQueued[_drawId] = false;
+            if (_index == _queuedDrawIdNextIndex){
+                _queuedDrawIdNextIndex++;
+            } else if (_index >=  _queuedDrawIdNextIndex) {
+                _queuedDrawId[_index] = _queuedDrawId[_queuedDrawId.length - 1];
+                _drawIdQueuedIndex[_queuedDrawId[_index]] = _index;
+                _queuedDrawId.pop();
+            }
         }
     }
 
@@ -473,26 +503,26 @@ abstract contract BaseBlindCollectibleGachaRack is
     }
 
     function setDrawPrice(uint256 _gameId, uint256 _price) external {
-      require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to setDrawPrice");
-      require(_gameId < gameInfo.length, "BlindCollectibleGachaRack: nonexistent gameId");
+      require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+      require(_gameId < gameInfo.length, ERR_OOB);
       gameInfo[_gameId].drawPrice = _price;
     }
 
     function claimAllProceeds(address _to) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to claimAllProceeds");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
         uint256 amount = IERC20(purchaseToken).balanceOf(address(this));
         IERC20(purchaseToken).transfer(_to, amount);
         // TODO emit
     }
 
     function claimProceeds(address _to, uint256 _amount) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to claimProceeds");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
         IERC20(purchaseToken).transfer(_to, _amount);
         // TODO emit
     }
 
     function setSalt(bytes32 salt) external {
-        require(hasRole(SALTER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have SALTER role to setSalt");
+        require(hasRole(SALTER_ROLE, _msgSender()), ERR_AUTH);
         _salt = salt;
     }
 
@@ -516,81 +546,81 @@ abstract contract BaseBlindCollectibleGachaRack is
     // (each prize may have multiple instances and be drawn multiple times,
     // but they should be identical).
     function prizeCount(uint256 _gameId) external view override returns (uint256) {
-        require(_gameId < gameInfo.length, "BlindCollectibleGachaRack: nonexistent gameId");
+        require(_gameId < gameInfo.length, ERR_OOB);
         return prizeInfo[_gameId].length;
     }
 
     // @dev Returns the total weight of all prizes in the indicated game.
     function totalPrizeWeight(uint256 _gameId) external view override returns (uint256) {
-        require(_gameId < gameInfo.length, "BlindCollectibleGachaRack: nonexistent gameId");
+        require(_gameId < gameInfo.length, ERR_OOB);
         return gameInfo[_gameId].totalWeight;
     }
 
     // @dev Returns the probability "weight" for the given `_prizeId` in game
     // `_gameId`.
     function prizeWeight(uint256 _gameId, uint256 _prizeId) external view override returns (uint256) {
-        require(_gameId < gameInfo.length, "BlindCollectibleGachaRack: nonexistent gameId");
+        require(_gameId < gameInfo.length, ERR_OOB);
         PrizeInfo[] storage prizes = prizeInfo[_gameId];
-        require(_prizeId < prizes.length, "BlindCollectibleGachaRack: nonexistent prizeId");
+        require(_prizeId < prizes.length, ERR_OOB);
         return prizes[_prizeId].weight;
     }
 
     // @dev The number of times this prize has been drawn (so far).
     function gameDrawCount(uint256 _gameId) external view override returns (uint256) {
-        require(_gameId < gameInfo.length, "BlindCollectibleGachaRack: nonexistent gameId");
+        require(_gameId < gameInfo.length, ERR_OOB);
         return gameDrawId[_gameId].length;
     }
 
     // @dev The number of times this prize has been drawn (so far).
     function prizeDrawCount(uint256 _gameId, uint256 _prizeId) external view override returns (uint256) {
-        require(_gameId < gameInfo.length, "BlindCollectibleGachaRack: nonexistent gameId");
-        require(_prizeId < prizeInfo[_gameId].length, "BlindCollectibleGachaRack: nonexistent prizeId");
+        require(_gameId < gameInfo.length, ERR_OOB);
+        require(_prizeId < prizeInfo[_gameId].length, ERR_OOB);
         return prizeDrawId[_gameId][_prizeId].length;
     }
 
     // @dev Returns the game played by the indicated draw draw.
-    function drawGameId(uint256 _did) external view override returns (uint256 _gameId) {
-        require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
-        _gameId = drawInfo[_did].gameId;
+    function drawGameId(uint256 _did) external view override returns (uint256 gameId) {
+        require(_did < drawInfo.length, ERR_OOB);
+        gameId = drawInfo[_did].gameId;
     }
 
     // @dev Returns the prize won with the indicated draw (gameId and prizeId)
-    function drawPrizeId(uint256 _did) external view override returns (uint256 _gameId, uint256 _prizeId) {
-        require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent drawId");
-        require(drawInfo[_did].revealed, "BlindCollectibleGachaRack: not revealed");
-        _gameId = drawInfo[_did].gameId;
-        _prizeId = drawInfo[_did].prizeId;
+    function drawPrizeId(uint256 _did) external view override returns (uint256 gameId, uint256 prizeId) {
+        require(_did < drawInfo.length, ERR_OOB);
+        require(drawInfo[_did].revealed, ERR_REVEALED);
+        gameId = drawInfo[_did].gameId;
+        prizeId = drawInfo[_did].prizeId;
     }
 
 
     function drawTokenId(uint256 _did) external view override returns (uint256) {
-      require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
+      require(_did < drawInfo.length, ERR_OOB);
       return drawInfo[_did].tokenId;
     }
 
     function drawTokenType(uint256 _did) external view override returns (uint256) {
-      require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
+      require(_did < drawInfo.length, ERR_OOB);
       DrawInfo storage draw = drawInfo[_did];
       return prizeInfo[draw.gameId][draw.prizeId].tokenType;
     }
 
     function drawRevealed(uint256 _did) external view override returns (bool) {
-        require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
+        require(_did < drawInfo.length, ERR_OOB);
         return drawInfo[_did].revealed;
     }
 
     function drawRevealable(uint256 _did) external view override returns (bool) {
-        require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
+        require(_did < drawInfo.length, ERR_OOB);
         return drawInfo[_did].revealBlock < block.number && !drawInfo[_did].revealed;
     }
 
     function drawRevealableBlock(uint256 _did) external view returns (uint256) {
-        require(_did < drawInfo.length, "BlindCollectibleGachaRack: nonexistent did");
+        require(_did < drawInfo.length, ERR_OOB);
         return drawInfo[_did].revealBlock;
     }
 
     function setRecipient(address _recipient) external {
-        require(hasRole(MANAGER_ROLE, _msgSender()), "BlindCollectibleGachaRack: must have MANAGER role to setRecipient");
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
         recipient = _recipient;
     }
 
@@ -637,9 +667,9 @@ abstract contract BaseBlindCollectibleGachaRack is
     }
 
     function _createPrize(uint256 _gameId, uint256 _tokenType, uint256 _weight) internal returns (uint256 _prizeId) {
-        require(_tokenType < IERC721Collectible(prizeToken).totalTypes(), "BlindCollectibleGachaRack: nonexistent tokenType");
+        require(_tokenType < IERC721Collectible(prizeToken).totalTypes(), ERR_NO_TYPE);
         GameInfo storage game = gameInfo[_gameId];
-        require(!game.activated, "BlindCollectibleGachaRack: game has been activated");
+        require(!game.activated, ERR_ACTIVE);
 
         game.totalWeight = game.totalWeight + _weight;
 
@@ -659,7 +689,7 @@ abstract contract BaseBlindCollectibleGachaRack is
 
     function _updatePrize(uint256 _gameId, uint256 _prizeId, uint256 _tokenType, uint256 _weight) internal virtual {
         GameInfo storage game = gameInfo[_gameId];
-        require(!game.activated, "BlindCollectibleGachaRack: game has been activated");
+        require(!game.activated, ERR_ACTIVE);
 
         PrizeInfo storage prize = prizeInfo[_gameId][_prizeId];
 
