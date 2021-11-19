@@ -32,13 +32,19 @@ abstract contract BaseBlindCollectibleGachaRackRegularResupply is BaseBlindColle
         }
     }
 
-    function _setGameTime(uint256 _gameId, uint256 _openTime, uint256 _closeTime) internal {
+    function setGameTime(uint256 _gameId, uint256 _openTime, uint256 _closeTime) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         GameSupplyInfo storage info = gameSupplyInfo[_gameId];
         info.openTime = _openTime;
         info.closeTime = _closeTime;
     }
 
-    function _setGameSupplyPeriod(uint256 _gameId, uint256 _supply, uint256 _duration, uint256 _anchorTime, bool _immediate) internal {
+    function setGameSupplyPeriod(uint256 _gameId, uint256 _supply, uint256 _duration, uint256 _anchorTime, bool _immediate) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         require(_duration > 0, ERR_NONZERO);
         GameSupplyInfo storage info = gameSupplyInfo[_gameId];
         info.supply = _supply;
@@ -47,12 +53,18 @@ abstract contract BaseBlindCollectibleGachaRackRegularResupply is BaseBlindColle
         _updateGameSupplyPeriod(_gameId, _immediate);
     }
 
-    function _setGameSupply(uint256 _gameId, uint256 _supply) internal {
+    function setGameSupply(uint256 _gameId, uint256 _supply) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         _updateGameSupplyPeriod(_gameId, false);
         gameSupplyInfo[_gameId].currentSupply = _supply;
     }
 
-    function _addGameSupply(uint256 _gameId, uint256 _supply) internal {
+    function addGameSupply(uint256 _gameId, uint256 _supply) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         _updateGameSupplyPeriod(_gameId, false);
         gameSupplyInfo[_gameId].currentSupply += _supply;
     }

@@ -14,7 +14,10 @@ abstract contract BaseBlindCollectibleGachaRackLimitedFlow is BaseBlindCollectib
 
     GameDrawFlow[] public gameDrawFlow;
 
-    function _setGameDrawFlowAndSupply(uint256 _gameId, uint256 _supply, uint256 _numerator, uint256 _denominator, uint256 _startBlock) internal {
+    function setGameDrawFlowAndSupply(uint256 _gameId, uint256 _supply, uint256 _numerator, uint256 _denominator, uint256 _startBlock) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         require(_denominator > 0, ERR_NONZERO);
         require(_numerator < PRECISION && _denominator < PRECISION, ERR_PRECISION);
 
@@ -25,15 +28,27 @@ abstract contract BaseBlindCollectibleGachaRackLimitedFlow is BaseBlindCollectib
         flow.updateDraws = _supply + gameDrawId[_gameId].length;
     }
 
-    function _setGameSupply(uint256 _gameId, uint256 _supply) internal {
+    function setGameSupply(uint256 _gameId, uint256 _supply) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         GameDrawFlow storage flow = gameDrawFlow[_gameId];
         flow.updateBlock = block.number < flow.updateBlock ? flow.updateBlock : block.number; // keep future start; re-anchor active flow
         flow.updateDraws = _supply + gameDrawId[_gameId].length;
     }
 
-    function _setGameDrawFlow(uint256 _gameId, uint256 _numerator, uint256 _denominator, uint256 _startBlock) internal {
-        uint256 supply = _availableSupplyFor(address(this), _gameId);
-        _setGameDrawFlowAndSupply(_gameId, supply, _numerator, _denominator, _startBlock);
+    function setGameDrawFlow(uint256 _gameId, uint256 _numerator, uint256 _denominator, uint256 _startBlock) external {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
+        require(_denominator > 0, ERR_NONZERO);
+        require(_numerator < PRECISION && _denominator < PRECISION, ERR_PRECISION);
+
+        GameDrawFlow storage flow = gameDrawFlow[_gameId];
+        flow.numerator = _numerator;
+        flow.denominator = _denominator;
+        flow.updateBlock = _startBlock > block.number ? _startBlock : block.number;
+        // don't alter flow.updateDraws; that is current supply, unchanged by this call
     }
 
     function _availableSupplyFor(address, uint256 _gameId) internal view override virtual returns (uint256) {

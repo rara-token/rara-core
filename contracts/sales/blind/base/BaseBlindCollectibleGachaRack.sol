@@ -222,7 +222,7 @@ abstract contract BaseBlindCollectibleGachaRack is
     function revealDraws(address _to, uint256[] calldata _drawIds) external override {
         advancePNG(_drawIds.length);
         (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
-            0, _drawIds, 0, _drawIds.length, _msgSender(), false
+            0, _drawIds, 0, _drawIds.length, _msgSender(), true, false
         );
         (uint256[] memory prizeIds, uint256[] memory tokenTypes) = _getPrizes(revealingDrawIds, length);
         _grantPrizes(revealingDrawIds, prizeIds, tokenTypes, length, _to);
@@ -236,7 +236,7 @@ abstract contract BaseBlindCollectibleGachaRack is
     // done by revealing the draws or calling `advancePNG`.
     function peekDrawPrizes(uint256[] calldata _drawIds) external view returns (uint256[] memory prizeIds, uint256[] memory prizeTokenTypes) {
         (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
-            0, _drawIds, 0, _drawIds.length, address(0), true
+            0, _drawIds, 0, _drawIds.length, address(0), true, true
         );
         (prizeIds, prizeTokenTypes) = _getPrizes(revealingDrawIds, length);
     }
@@ -276,7 +276,7 @@ abstract contract BaseBlindCollectibleGachaRack is
 
         advancePNG(_drawIds.length);
         (uint256[] memory revealingDrawIds, uint256 length,) = _filterRevealable(
-            0, _drawIds, 0, _drawIds.length, address(0), false
+            0, _drawIds, 0, _drawIds.length, address(0), true, false
         );
         (uint256[] memory prizeIds, uint256[] memory tokenTypes) = _getPrizes(revealingDrawIds, length);
         _grantPrizes(revealingDrawIds, prizeIds, tokenTypes, length, address(0));
@@ -301,7 +301,7 @@ abstract contract BaseBlindCollectibleGachaRack is
         uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
         uint256 limit = remaining > _limit ? _limit : remaining;
         (uint256[] memory drawIds, uint256 length, uint256 contiguous) = _filterRevealable(
-            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false
+            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false, false
         );
 
         _queuedDrawIdNextIndex += contiguous;
@@ -318,7 +318,7 @@ abstract contract BaseBlindCollectibleGachaRack is
         uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
         uint256 limit = remaining > _limit ? _limit : remaining;
         (, count,) = _filterRevealable(
-            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false
+            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false, false
         );
     }
 
@@ -353,6 +353,7 @@ abstract contract BaseBlindCollectibleGachaRack is
         uint256 _start,
         uint256 _limit,
         address _requiredOwner,
+        bool _requireRevealBlock,
         bool _includeRevealed
     ) internal view returns (
         uint256[] memory _revealableDrawIds,
@@ -367,7 +368,10 @@ abstract contract BaseBlindCollectibleGachaRack is
             DrawInfo storage draw = drawInfo[_drawIds[index]];
 
             // requirements: check owner, revealable
-            require(draw.revealBlock < block.number, ERR_BLOCK);
+            require(
+                !_requireRevealBlock || draw.revealBlock < block.number,
+                ERR_BLOCK
+            );
             require(
                 _requiredOwner == address(0) || draw.user == _requiredOwner,
                 ERR_OWNER
@@ -624,7 +628,10 @@ abstract contract BaseBlindCollectibleGachaRack is
         recipient = _recipient;
     }
 
-    function _activateGame(uint256 _gameId) internal returns (bool _activated) {
+    function activateGame(uint256 _gameId) external returns (bool _activated) {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         GameInfo storage game = gameInfo[_gameId];
         _activated = !game.activated;
         game.activated = true;
@@ -638,7 +645,8 @@ abstract contract BaseBlindCollectibleGachaRack is
         }
     }
 
-    function _createGame(uint256 _drawPrice, uint256 _blocksToReveal) internal returns (uint256 _gameId) {
+    function createGame(uint256 _drawPrice, uint256 _blocksToReveal) external returns (uint256 _gameId) {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
         _gameId = gameInfo.length;
 
         gameInfo.push(GameInfo({
@@ -655,7 +663,10 @@ abstract contract BaseBlindCollectibleGachaRack is
         emit GameCreation(_gameId, _drawPrice, _blocksToReveal);
     }
 
-    function _updateGame(uint256 _gameId, uint256 _drawPrice, uint256 _blocksToReveal) internal virtual {
+    function updateGame(uint256 _gameId, uint256 _drawPrice, uint256 _blocksToReveal) external virtual {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+
         // note: it is fine to alter price and reveal blocks on an activated
         // game; those changes only affect new purchases from this point, not
         // existing unrevealed draws.
@@ -666,7 +677,9 @@ abstract contract BaseBlindCollectibleGachaRack is
         emit GameUpdate(_gameId, _drawPrice, _blocksToReveal, game.activated);
     }
 
-    function _createPrize(uint256 _gameId, uint256 _tokenType, uint256 _weight) internal returns (uint256 _prizeId) {
+    function createPrize(uint256 _gameId, uint256 _tokenType, uint256 _weight) external returns (uint256 _prizeId) {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
         require(_tokenType < IERC721Collectible(prizeToken).totalTypes(), ERR_NO_TYPE);
         GameInfo storage game = gameInfo[_gameId];
         require(!game.activated, ERR_ACTIVE);
@@ -687,7 +700,11 @@ abstract contract BaseBlindCollectibleGachaRack is
         emit PrizeCreation(_gameId, _prizeId, _tokenType, _weight);
     }
 
-    function _updatePrize(uint256 _gameId, uint256 _prizeId, uint256 _tokenType, uint256 _weight) internal virtual {
+    function updatePrize(uint256 _gameId, uint256 _prizeId, uint256 _tokenType, uint256 _weight) external virtual {
+        require(hasRole(MANAGER_ROLE, _msgSender()), ERR_AUTH);
+        require(_gameId < gameInfo.length, ERR_OOB);
+        require(_prizeId < prizeInfo[_gameId].length, ERR_OOB);
+
         GameInfo storage game = gameInfo[_gameId];
         require(!game.activated, ERR_ACTIVE);
 

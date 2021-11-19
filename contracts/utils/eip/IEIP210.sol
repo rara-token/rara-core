@@ -27,5 +27,16 @@
 // attempting try-and-revert since the results become fixed.
 pragma solidity ^0.8.0;
 interface IEIP210 {
+    // @dev Returns the blockhash (real or simulated) for the given block,
+    // storing the result if not previously calculated. This method is strongly
+    // preferred over {eip210BlockhashReadOnly} as the result of this function
+    // will always be consistent after the first committed transaction.
     function eip210Blockhash(uint256 _blockNumber) external returns (bytes32);
+
+    // @dev Returns the blockhash (real or simulated) for the given block,
+    // without storing the result. Useful in `view` functions but otherwise
+    // {eip210Blockhash} is preferred, as the results are immutable over time.
+    // If `_immutable`, the output of this function will be  consistent over time;
+    // otherwise it may change at an indeterminate point (every 256 blocks).
+    function eip210BlockhashEstimate(uint256 _blockNumber) external view returns (bytes32 _blockhash, bool _immutable);
 }
