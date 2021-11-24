@@ -1822,6 +1822,95 @@ contract('BlindCollectibleManagedResupplyGachaRack', ([alice, bob, carol, dave, 
         assert.equal(await sale.drawTokenType(i), (peekTokenTypes[i]).toString());
       }
     });
+
+    it('purchaseDraws progresses the draw queue', async () => {
+      const { token, collectible, sale } = this;
+
+      const buyers = [alice, bob];
+
+      await sale.setAutoAwarding(true);
+
+      const revealBlocks = []
+      for (const buyer of buyers) {
+        await token.transfer(buyer, '1000', { from:minter });
+        await token.approve(sale.address, '1000', { from:buyer });
+
+        for (let i = 0; i < 5; i++) {
+          await sale.purchaseDraws(buyer, 1, 100, { from:buyer });
+          revealBlocks.push(await web3.eth.getBlockNumber() + 15);
+        }
+      }
+
+      assert.equal(await sale.availableSupply(), '40');
+      assert.equal(await sale.drawPrice(), '100');
+      assert.equal(await sale.currentGameFor(alice), '0');
+      assert.equal(await sale.availableSupplyForUser(alice), '40');
+      assert.equal(await sale.currentGame(), '0');
+
+      assert.equal(await sale.totalDraws(), '10');
+      assert.equal(await sale.gameDrawCount(0), '10');
+      assert.equal(await sale.gameDrawCount(1), '0');
+
+      assert.equal(await sale.drawCountBy(alice), '5');
+      assert.equal(await sale.drawCountBy(bob), '5');
+      assert.equal(await sale.drawCountBy(carol), '0');
+      for (let i = 0; i < 10; i++) {
+        const buyer = i < 5 ? alice : bob;
+        const index = i < 5 ? i : i - 5;
+        assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
+        assert.equal(await sale.drawGameId(i), `0`);
+        assert.equal(await sale.drawRevealed(i), false);
+        assert.equal(await sale.drawRevealable(i), false);
+        assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
+      }
+
+      await time.advanceBlockTo(revealBlocks[0] + 30);
+      for (let i = 0; i < 10; i++) {
+        const buyer = i < 5 ? alice : bob;
+        const index = i < 5 ? i : i - 5;
+        assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
+        assert.equal(await sale.drawGameId(i), `0`);
+        assert.equal(await sale.drawRevealed(i), false);
+        assert.equal(await sale.drawRevealable(i), true);
+        assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
+      }
+
+      assert.equal(await collectible.totalSupply(), '0');
+      assert.equal(await collectible.balanceOf(alice), '0');
+      assert.equal(await collectible.balanceOf(bob), '0');
+
+      const peekResult = await sale.peekDrawPrizes([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      const peekTokenTypes = peekResult["prizeTokenTypes"];
+
+      for (const buyer of buyers) {
+        await sale.purchaseDraws(buyer, 5, 500, { from:buyer });
+      }
+
+      // side effect: reveals first set
+      assert.equal(await collectible.totalSupply(), '10');
+      assert.equal(await collectible.balanceOf(alice), '5');
+      assert.equal(await collectible.balanceOf(bob), '5');
+      for (let i = 0; i < 10; i++) {
+        const buyer = i < 5 ? alice : bob;
+        const index = i < 5 ? i : i - 5;
+        assert.equal(await sale.drawIdBy(buyer, index), `${i}`);
+        assert.equal(await sale.drawGameId(i), `0`);
+        assert.equal(await sale.drawRevealed(i), true);
+        assert.equal(await sale.drawRevealable(i), false);
+        assert.equal(await sale.drawRevealableBlock(i), `${revealBlocks[i]}`);
+        const tokenId = await collectible.tokenOfOwnerByIndex(buyer, index);
+        assert.equal(await sale.drawTokenId(i), tokenId.toString());
+        assert.equal(await sale.drawTokenType(i), (await collectible.tokenType(tokenId)).toString());
+        assert.equal(await sale.drawTokenType(i), (peekTokenTypes[i]).toString());
+      }
+
+      const peekResultAfter = await sale.peekDrawPrizes([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      const peekTokenTypesAfter = peekResult["prizeTokenTypes"];
+
+      for (let i = 0; i < 10; i++) {
+        assert.equal(await sale.drawTokenType(i), (peekTokenTypesAfter[i]).toString());
+      }
+    });
   });
 
   context('with prize flow', () => {
