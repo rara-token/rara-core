@@ -24,7 +24,15 @@ interface IERC721CollectibleOracle {
   function typeSymbol(uint256 tType) external view returns (string memory);
 
   /**
-   * @dev Returns the type of the indicated `tokenId`.
+   * @dev Returns the type of the indicated `tokenId`. Reverts if no type
+   * exists for this token.
    */
   function tokenType(address token, uint256 tokenId) external view returns (uint256 tType);
+
+  /**
+   * Returns whether the specified address and ID has a tokenType assigned.
+   * A simpler, thinner function than {tokenType} but not necessary to call
+   * in advance -- {tokenType} will revert if no type is set.
+   */
+  function hasTokenType(address token, uint256 tokenId) external view returns (bool);
 }

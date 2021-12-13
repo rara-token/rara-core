@@ -37,6 +37,9 @@ contract ERC721CollectibleReferenceOracle is Context, AccessControlEnumerable, I
     mapping(address => bool) public tokenEnabled;
     mapping(address => mapping(uint256 => TokenInfo)) public tokenInfo;
 
+    event TokenEnabledSet(address indexed token, bool enabled);
+    event TokenTypeSet(address indexed token, uint256 indexed tokenId, uint256 indexed tokenType, bool assigned);
+
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract.
@@ -74,6 +77,13 @@ contract ERC721CollectibleReferenceOracle is Context, AccessControlEnumerable, I
         return tokenInfo[_token][_tokenId].tokenType;
     }
 
+    function hasTokenType(address _token, uint256 _tokenId) external view override returns (bool) {
+        return (
+            _token == referenceToken
+            || (tokenEnabled[_token] && tokenInfo[_token][_tokenId].assigned)
+        );
+    }
+
     function setTokenEnabled(address _token, bool _enabled) external {
         require(
             hasRole(MANAGER_ROLE, _msgSender()),
@@ -85,6 +95,8 @@ contract ERC721CollectibleReferenceOracle is Context, AccessControlEnumerable, I
         );
 
         tokenEnabled[_token] = _enabled;
+
+        emit TokenEnabledSet(_token, _enabled);
     }
 
     function setTokenTypes(address _token, uint256[] calldata _tokenIds, uint256 _tokenType) external {
@@ -106,6 +118,8 @@ contract ERC721CollectibleReferenceOracle is Context, AccessControlEnumerable, I
                 assigned: true,
                 tokenType: _tokenType
             });
+
+            emit TokenTypeSet(_token, _tokenIds[i], _tokenType, true);
         }
     }
 
@@ -124,6 +138,8 @@ contract ERC721CollectibleReferenceOracle is Context, AccessControlEnumerable, I
                 assigned: false,
                 tokenType: 0
             });
+
+            emit TokenTypeSet(_token, _tokenIds[i], 0, false);
         }
     }
 }
