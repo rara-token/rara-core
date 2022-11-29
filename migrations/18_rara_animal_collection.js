@@ -1,5 +1,6 @@
 const RaraAnimal = artifacts.require("RaraAnimal");
 const RaraAnimalGachaRack = artifacts.require("RaraAnimalGachaRack");
+const RaraAnimalGachaRackHelper = artifacts.require("RaraAnimalGachaRackHelper");
 const RaraToken = artifacts.require("RaraToken");
 const RaraAnimalConverter = artifacts.require("RaraAnimalConverter");
 const RaraAnimalClassifieds = artifacts.require("RaraAnimalClassifieds");
@@ -14,6 +15,7 @@ module.exports = function (deployer, network, accounts) {
   const { roles } = values({ network, web3 });
   const { tokens, games, conversions } = nft_animals({ network, web3 });
 
+  /*
   console.log(`TokenTypes`)
   for (const t of tokens) {
     console.log(` ${t.tokenType} : ${t.name}`);
@@ -35,21 +37,29 @@ module.exports = function (deployer, network, accounts) {
     console.log(` ${c.recipeId} : [${c.tokenTypesIn}] => ${c.tokenTypesOut}`)
   }
   console.log();
+  */
 
   deployer.then(async () => {
-    await deployer.deploy(EIP210);
-    const eip210 = await EIP210.deployed();
-
     const rara = await RaraToken.deployed();
 
     // deploy the collectible
     await deployer.deploy(RaraAnimal, "https://www.rara.farm/animal/");
     const animal = await RaraAnimal.deployed();
 
+    await deployer.deploy(EIP210);
+    const eip210 = await EIP210.deployed();
+
     // deploy the gacha game
     await deployer.deploy(RaraAnimalGachaRack, animal.address, rara.address, eip210.address, ZERO);
     const gachaRack = await RaraAnimalGachaRack.deployed();
     await animal.grantRole(roles.minter, gachaRack.address);
+
+    await gachaRack.setAutoAwarding(true);
+    await gachaRack.setAllowAwarding(true);
+
+    await deployer.deploy(RaraAnimalGachaRackHelper, gachaRack.address);
+    const helper = await RaraAnimalGachaRackHelper.deployed();
+    await gachaRack.grantRole(roles.manager, helper.address);
 
     await deployer.deploy(RaraAnimalConverter, animal.address, rara.address, ZERO);
     const converter = await RaraAnimalConverter.deployed();

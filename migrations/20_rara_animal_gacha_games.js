@@ -1,4 +1,5 @@
 const RaraAnimalGachaRack = artifacts.require("RaraAnimalGachaRack");
+const RaraAnimalGachaRackHelper = artifacts.require("RaraAnimalGachaRackHelper");
 const RaraAnimal = artifacts.require("RaraAnimal");
 
 const values = require('./shared/values');
@@ -12,6 +13,7 @@ module.exports = function (deployer, network, accounts) {
 
   deployer.then(async () => {
     const gachaRack = await RaraAnimalGachaRack.deployed();
+    const helper = await  RaraAnimalGachaRackHelper.deployed();
     const animal = await RaraAnimal.deployed();
 
     let prevCount = Number((await gachaRack.gameCount()).toString());
@@ -30,8 +32,8 @@ module.exports = function (deployer, network, accounts) {
         const prizeWeights = g.prizes.map(p => p.weight);
         console.log(`Creating game ${gameId}: ${g.name}`);
         console.log(`  with types ${prizeTokenTypes} weights ${prizeWeights}`);
-        console.log(`  charging ${g.drawPrice} with reveal blocks ${g.revealBlocks}}`);
-        await gachaRack.createActivatedGame(i == 0,
+        console.log(`  charging ${g.drawPrice} with reveal blocks ${g.revealBlocks}`);
+        await helper.createUnactivatedGame(
           g.drawPrice, g.revealBlocks,
           g.prizeSupply, g.prizePeriodDuration, g.prizePeriodAnchorTime,
           g.saleOpenTime, g.saleCloseTime,

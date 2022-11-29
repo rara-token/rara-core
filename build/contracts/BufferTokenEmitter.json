@@ -14888,7 +14888,83 @@
   },
   "networks": {
     "56": {
-      "events": {},
+      "events": {
+        "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "previousAdminRole",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "newAdminRole",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleAdminChanged",
+          "type": "event"
+        },
+        "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "RoleGranted",
+          "type": "event"
+        },
+        "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "RoleRevoked",
+          "type": "event"
+        }
+      },
       "links": {},
       "address": "0x6EC69388e16943A0Ac71a139c5c0d6609E57d8c6",
       "transactionHash": "0xdb2e4b49b8fdbe5d545f56202b7ac3c62e2e30bd3edfb33f69f38f0b612ab907"
@@ -14900,8 +14976,8 @@
       "transactionHash": "0x0ff6863d5e87c2fb9735942d8f552d7beab2785023e597ccbc0c6349457ddcd0"
     }
   },
-  "schemaVersion": "3.4.1",
-  "updatedAt": "2021-07-07T19:44:13.347Z",
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-02-08T16:51:13.516Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

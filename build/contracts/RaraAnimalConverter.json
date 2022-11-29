@@ -17538,6 +17538,218 @@
     "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
   },
   "networks": {
+    "56": {
+      "events": {
+        "0x72e2d7be3abae1795e5f9d3cc118cc9c79639489066a685a3cb8c0d86a68280f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenIds",
+              "type": "uint256[]"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenTypes",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "Bank",
+          "type": "event"
+        },
+        "0x6a124d77d095a335af8a53ca58e4605dcabcf2c3233eb1017efd8fea76b1295f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "recipeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenIdsIn",
+              "type": "uint256[]"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenTypesIn",
+              "type": "uint256[]"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenIdsOut",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "Conversion",
+          "type": "event"
+        },
+        "0x3128fc94fe9525afb66af09e77d8ff89ed90a37043f49c4b44ef7add990792a1": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "recipeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "available",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenTypesIn",
+              "type": "uint256[]"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "tokenTypesOut",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "RecipeCreation",
+          "type": "event"
+        },
+        "0xbddaa1ede0df3d222cd3dd502b55af2f6c4981fd3a75754270d83372e7bf9440": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "recipeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "available",
+              "type": "bool"
+            }
+          ],
+          "name": "RecipeUpdate",
+          "type": "event"
+        },
+        "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "previousAdminRole",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "newAdminRole",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleAdminChanged",
+          "type": "event"
+        },
+        "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "RoleGranted",
+          "type": "event"
+        },
+        "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "RoleRevoked",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x3602cea0edb97be9b6d933be34ac7372c7e7775a",
+      "transactionHash": "0x5f46c160dd270cb3c8bf55d8de869917e25737cdf4cf4ab1bd065049395cb167"
+    },
     "97": {
       "events": {
         "0x72e2d7be3abae1795e5f9d3cc118cc9c79639489066a685a3cb8c0d86a68280f": {
@@ -17751,8 +17963,8 @@
       "transactionHash": "0x2d98c4fdbbb7e8bb9700344c6148231b8df6fa18a49306f00dc6ea6f231d8e8a"
     }
   },
-  "schemaVersion": "3.4.1",
-  "updatedAt": "2021-08-11T21:22:40.129Z",
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-03-14T18:46:47.552Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

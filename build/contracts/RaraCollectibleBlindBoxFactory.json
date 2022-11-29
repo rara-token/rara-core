@@ -152,7 +152,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -165,7 +166,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -178,7 +180,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -191,7 +194,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -395,7 +399,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -419,7 +424,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -438,7 +444,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -480,7 +487,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -493,7 +501,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -506,7 +515,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -583,7 +593,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -602,7 +613,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -631,7 +643,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -650,7 +663,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -669,7 +683,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -688,7 +703,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -784,7 +800,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_prizeToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_purchaseToken\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"saleId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sale\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"managed\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"startBlock\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"endBlock\",\"type\":\"uint32\"}],\"name\":\"SaleCreation\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"CREATOR_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MANAGER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SALTER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_pid\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"addSaleSupply\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"claimAllSaleProceeds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"claimSaleProceeds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"_managed\",\"type\":\"bool\"},{\"internalType\":\"uint32\",\"name\":\"_startBlock\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"_endBlock\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"_drawPrice\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"createSale\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"sale\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_supply\",\"type\":\"uint256\"}],\"name\":\"createSalePrize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"_managed\",\"type\":\"bool\"},{\"internalType\":\"uint32\",\"name\":\"_startBlock\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"_endBlock\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"_drawPrice\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"_tokenTypes\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_prizeSupplies\",\"type\":\"uint256[]\"}],\"name\":\"createSaleWithPrizes\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"sale\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"prizeToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"purchaseToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_pid\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"_zeroSafe\",\"type\":\"bool\"}],\"name\":\"removeSaleSupply\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"saleCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"}],\"name\":\"saleCreator\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"saleInfo\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"creator\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"managed\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"}],\"name\":\"saleManaged\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"}],\"name\":\"saleName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"sales\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_drawPrice\",\"type\":\"uint256\"}],\"name\":\"setDrawPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"_startBlock\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"_endBlock\",\"type\":\"uint32\"}],\"name\":\"setSaleBlocks\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"_managed\",\"type\":\"bool\"}],\"name\":\"setSaleManaged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_saleId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"setSaleRecipient\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"getRoleMember(bytes32,uint256)\":{\"details\":\"Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.\"},\"getRoleMemberCount(bytes32)\":{\"details\":\"Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.\"},\"grantRole(bytes32,address)\":{\"details\":\"Overload {grantRole} to track enumerable memberships\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"renounceRole(bytes32,address)\":{\"details\":\"Overload {renounceRole} to track enumerable memberships\"},\"revokeRole(bytes32,address)\":{\"details\":\"Overload {revokeRole} to track enumerable memberships\"},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/RaraCollectibleBlindBoxFactory.sol\":\"RaraCollectibleBlindBoxFactory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/RaraCollectibleBlindBoxFactory.sol\":{\"keccak256\":\"0x4f7e047064a0f46218bbd04d5eb2525adc14d2ab359b13e99d0f2b5b279e01fb\",\"urls\":[\"bzz-raw://27edf75e1d6682d434405e78ceac6d586bd6693b406bfc74169bbed04769c41c\",\"dweb:/ipfs/QmXWZqpVrG6NWekNF7vn8FDBau4QvqNSifTcLA8vSaY7pG\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindBoxCollectibleSale.sol\":{\"keccak256\":\"0xa670804e59991fdc76d3cf65a46b4dda745c4e88e4c34908f5a0c835b003da05\",\"urls\":[\"bzz-raw://693bffc8cbca0db0bd98e3665c3d509573440c9d9043638ae47ff7276958efe4\",\"dweb:/ipfs/QmaxZmRivxzpScYoTip1FeEfYKWVjsqdcWwqVcir9vMRLY\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindBoxSale.sol\":{\"keccak256\":\"0xa8de00b75fc8888bd80a3d4ee32d0904a50ba7639a2d96350b45aa879af1530f\",\"urls\":[\"bzz-raw://e2edba56209e847ebf1df7e5459832a025beb31e2f8e20cda865088fd3703868\",\"dweb:/ipfs/QmYRhcSKUDaqKRSa3T9MK4cdExmbVTg6S5wPt31ceTwqQC\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/presets/TokenCollectibleBlindBoxFactory.sol\":{\"keccak256\":\"0x414bd23943b0a554cbe6b92a6ba0a90359abef75114e7a51ad76602a6d658ff7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5c7956cca1eb5e40cf704e16a23578d39d6579fcf017bf0e687ba9ad78c45775\",\"dweb:/ipfs/QmV1AoeJ7wejvQ4tX17Xh96jepAgq2RvP5gtdenycYZ2xk\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/presets/TokenCollectibleBlindBoxSale.sol\":{\"keccak256\":\"0xb7059bea6d5444df970c23192da878e51b6a4c07274d042b07ffafa6d51fcfdc\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a36d42ccaf154fb8f6a83c09444cc19fb440d2a0e70c3cd5fc8de54aaaf51a2b\",\"dweb:/ipfs/QmVdhaBdhKBaDpevPZyQDnaAPkp4YY8ty8pF5CLcFTXnjQ\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721Collectible.sol\":{\"keccak256\":\"0x9e746c609e578bd5dbeee6a91d89163cacbcc9c89d51b0e914f3c45ca356e47a\",\"urls\":[\"bzz-raw://e154f88a9eab1f009235dc744ccd59f0a473b00b0b8e4c13bef4b89ba33722f2\",\"dweb:/ipfs/QmcFmWawEry2HcBGjbbdcCj8EtXX6oZqmj2Cn5DVokQfgs\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721TypeExchangeable.sol\":{\"keccak256\":\"0x1e8fe3d6b85bea54c0412cfafe5dfcdbaa0c48597fabd4742d69b24895988942\",\"urls\":[\"bzz-raw://5c9917f55c270a89c557f1900d25dbe8f79686255af5b2dbb156355f4720de3c\",\"dweb:/ipfs/QmZ2NALwRDCFL7oZCM2o9JcQfTb9NKm5ow746THccc8mUA\"]},\"@openzeppelin/contracts/access/AccessControl.sol\":{\"keccak256\":\"0x084f583de2c714665b0304529fe8b826a2809f29d03314e4dd9eea926e4bb0f3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b64becd1da9fe30ecdb65cf57e1da968bcbbecd6a4a3fa55bcc7c23568d482c0\",\"dweb:/ipfs/QmcXnRpWL7P9kEe15LZ5yHV2CDLE2CNv9sBRqVnvVQLr5T\"]},\"@openzeppelin/contracts/access/AccessControlEnumerable.sol\":{\"keccak256\":\"0x33ba8a175bb81046a02b02e8d5eb4cabc87e1875f4a74bbc6f11c51db5e40d8c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://61b5e6e61e0a342dafdab72b7113f735dfd1612389cda77d7edf6f263b400015\",\"dweb:/ipfs/QmRxm43A3sSiJhnVtqYtCJfnWwLzzLd2365DNAToYHokbS\"]},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x027b891937d20ccf213fdb9c31531574256de774bda99d3a70ecef6e1913ed2a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://087318b21c528119f649899f5b5580566dd8d7b0303d4904bd0e8580c3545f14\",\"dweb:/ipfs/Qmbn5Mj7aUn8hJuQ8VrQjjEXRsXyJKykgnjR9p4C3nfLtL\"]},\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\":{\"keccak256\":\"0x02348b2e4b9f3200c7e3907c5c2661643a6d8520e9f79939fbb9b4005a54894d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d41d627f4ef9c6006df8c2d01227d3cf4a6c3359b5704c629d88933272eecadd\",\"dweb:/ipfs/QmYDo7MvMsvuDxuJZ9RC9zFganS3Tm8RYzSmBP5qSmJfuY\"]},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"keccak256\":\"0xf101e8720213560fab41104d53b3cc7ba0456ef3a98455aa7f022391783144a0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3e7820bcf567e6892d937c3cb10db263a4042e446799bca602535868d822384e\",\"dweb:/ipfs/QmPG2oeDjKncqsEeyYGjAN7CwAJmMgHterXGGnpzhha4z7\"]},\"@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0x3b4820cac4f127869f6eb496c1d74fa6ac86ed24071e0f94742e6aef20e7252c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://23e1c7303c30a2ef9c9b3f861cda15c78e4c9697b4a7988f2bf7b21c392a02fb\",\"dweb:/ipfs/QmWQJh5MsXJZjSTzAs9n5gtrqWYgXwkBa6xfwD5KKGQgSC\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0x95098bd1d9c8dec4d80d3dedb88a0d949fa0d740ee99f2aa466bc308216ca6d5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7fec968dcd68e13961521fa3c7dd87baecad91a2653b19240e81f21cc4f3ba85\",\"dweb:/ipfs/QmaXtsYt4Mphm8XHNUfk2me1cF3ssS2SqDBNFpYAzMjomC\"]},\"@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0x391d3ba97ab6856a16b225d6ee29617ad15ff00db70f3b4df1ab5ea33aa47c9d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d636ba90bbbeed04a1ea7fe9ec2466757e30fd38ba2ca173636dbf69a518735e\",\"dweb:/ipfs/QmQwCB2BHnEuYR22PYt9HkpbgeFDhq4rHmaYqAZbX3WRC7\"]},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"keccak256\":\"0x5718c5df9bd67ac68a796961df938821bb5dc0cd4c6118d77e9145afb187409b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d10e1d9b26042424789246603906ad06143bf9a928f4e99de8b5e3bdc662f549\",\"dweb:/ipfs/Qmejonoaj5MLekPus229rJQHcC6E9dz2xorjHJR84fMfmn\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796ab6e88af7bf0e78def0f059310c903af6a312b565344e0ff524a0f26e81c6\",\"dweb:/ipfs/QmcsVgLgzWdor3UnAztUkXKNGcysm1MPneWksF72AvnwBx\"]},\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"keccak256\":\"0x211639753e28bdca7f98618f51dca3dcd08a88b57c45050eb05fa4d0053327c3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://4270d35fb4493275ceba45f1cce2d6486b0886f594f0ca6434077523844ff902\",\"dweb:/ipfs/QmWqApTqnSKhTabGCAXocAF7ovstW4divjaoM1LPYHrLqY\"]}},\"version\":1}",
@@ -14006,7 +14023,8 @@
     }
   },
   "schemaVersion": "3.4.1",
-  "updatedAt": "2021-07-28T17:10:18.407Z",
+  "updatedAt": "2021-08-25T18:14:24.357Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {

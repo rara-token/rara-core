@@ -1,12 +1,10 @@
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../interfaces/IERC721TypeExchangeable.sol";
 import "../interfaces/IERC721CollectibleOracle.sol";
+import "../interfaces/IERC721CollectibleProxyExchanger.sol";
 
 pragma solidity ^0.8.0;
-contract ERC721CollectibleProxyExchanger {
-
-    event ProxyTokenIssued(address indexed token, uint256 tokenId, uint256 indexed proxyTokenId, address indexed recipient);
-    event ProxyTokenRedeemed(address indexed token, uint256 tokenId, uint256 indexed proxyTokenId, address indexed recipient);
+contract ERC721CollectibleProxyExchanger is IERC721CollectibleProxyExchanger {
 
     struct TokenInfo {
         address token;
@@ -14,8 +12,8 @@ contract ERC721CollectibleProxyExchanger {
         bool issued;
     }
 
-    address public immutable proxyToken;
-    address public immutable oracle;
+    address public override immutable proxyToken;
+    address public override  immutable oracle;
     mapping(uint256 => TokenInfo) public tokenInfo;
     mapping(address => mapping(uint256 => uint256)) internal _proxyForToken;
 
@@ -24,7 +22,34 @@ contract ERC721CollectibleProxyExchanger {
         oracle = _oracle;
     }
 
-    function issueProxyTokens(address _token, uint256[] calldata _tokenIds, address _to) external returns (uint256[] memory proxyTokenIds) {
+    function tokenForProxy(uint256 _proxyTokenId) external override view returns (address token, uint256 tokenId) {
+        TokenInfo storage info = tokenInfo[_proxyTokenId];
+        require(info.issued, "ERC721CollectibleProxyExchanger: proxy not issued by this exchanger");
+
+        token = info.token;
+        tokenId = info.tokenId;
+    }
+
+    function proxyForToken(address _token, uint256 _tokenId) external override view returns (uint256 proxyTokenId) {
+        proxyTokenId = _proxyForToken[_token][_tokenId];
+        TokenInfo storage info = tokenInfo[proxyTokenId];
+        require(
+            info.issued && info.token == _token && info.tokenId == _tokenId,
+            "ERC721CollectibleProxyExchanger: proxy not issued by this exchanger"
+        );
+    }
+
+    function isProxyIssued(uint256 _proxyTokenId) external override view returns (bool) {
+        return tokenInfo[_proxyTokenId].issued;
+    }
+
+    function isProxyIssuedForToken(address _token, uint256 _tokenId) external override view returns (bool) {
+      uint256 proxyTokenId = _proxyForToken[_token][_tokenId];
+      TokenInfo storage info = tokenInfo[proxyTokenId];
+      return info.issued && info.token == _token && info.tokenId == _tokenId;
+    }
+
+    function issueProxyTokens(address _token, uint256[] calldata _tokenIds, address _to) external override returns (uint256[] memory proxyTokenIds) {
         require(_token != proxyToken, "ERC721CollectibleProxyExchanger: can't issue proxy tokens for the proxy token itself");
 
         // determine tokenTypes
@@ -54,7 +79,7 @@ contract ERC721CollectibleProxyExchanger {
         }
     }
 
-    function redeemProxyTokens(uint256[] calldata _proxyTokenIds, address _to) external returns (address[] memory tokens, uint256[] memory tokenIds) {
+    function redeemProxyTokens(uint256[] calldata _proxyTokenIds, address _to) external override returns (address[] memory tokens, uint256[] memory tokenIds) {
         tokens = new address[](_proxyTokenIds.length);
         tokenIds = new uint256[](_proxyTokenIds.length);
 
@@ -77,23 +102,6 @@ contract ERC721CollectibleProxyExchanger {
 
             emit ProxyTokenRedeemed(tokens[i], tokenIds[i], _proxyTokenIds[i], _to);
         }
-    }
-
-    function tokenForProxy(uint256 _proxyTokenId) external view returns (address token, uint256 tokenId) {
-        TokenInfo storage info = tokenInfo[_proxyTokenId];
-        require(info.issued, "ERC721CollectibleProxyExchanger: proxy not issued by this exchanger");
-
-        token = info.token;
-        tokenId = info.tokenId;
-    }
-
-    function proxyForToken(address _token, uint256 _tokenId) external view returns (uint256 proxyTokenId) {
-        proxyTokenId = _proxyForToken[_token][_tokenId];
-        TokenInfo storage info = tokenInfo[proxyTokenId];
-        require(
-            info.issued && info.token == _token && info.tokenId == _tokenId,
-            "ERC721CollectibleProxyExchanger: proxy not issued by this exchanger"
-        );
     }
 
 }

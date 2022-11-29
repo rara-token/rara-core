@@ -1,0 +1,2708 @@
+{
+  "contractName": "IERC721CollectibleProxyExchanger",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "proxyTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "ProxyTokenIssued",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "proxyTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "ProxyTokenRedeemed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "proxyToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "oracle",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proxyTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenForProxy",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "proxyForToken",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "proxyTokenId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proxyTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isProxyIssued",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isProxyIssuedForToken",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "issueProxyTokens",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "proxyTokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "_proxyTokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "redeemProxyTokens",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "tokens",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proxyTokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"ProxyTokenIssued\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proxyTokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"ProxyTokenRedeemed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_proxyTokenId\",\"type\":\"uint256\"}],\"name\":\"isProxyIssued\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"isProxyIssuedForToken\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"_tokenIds\",\"type\":\"uint256[]\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"issueProxyTokens\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"proxyTokenIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"oracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"proxyForToken\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"proxyTokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxyToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_proxyTokenIds\",\"type\":\"uint256[]\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"redeemProxyTokens\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_proxyTokenId\",\"type\":\"uint256\"}],\"name\":\"tokenForProxy\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"isProxyIssued(uint256)\":{\"details\":\"Returns whether the tokenId provided represents a proxy token issued by this exchanger.\"},\"isProxyIssuedForToken(address,uint256)\":{\"details\":\"Returns whether the provided address and tokenId is held by this exchanger (i.e. whether a proxy has been issued for it).\"},\"issueProxyTokens(address,uint256[],address)\":{\"details\":\"Issue proxy tokens for the provided non-proxy tokens, which must Have a token type set on the Oracle. Mints proxies to {_to}.\"},\"oracle()\":{\"details\":\"Returns the address of the token type oracle used to determine exchange value.\"},\"proxyForToken(address,uint256)\":{\"details\":\"Given an address and tokenId, returns the proxy tokenId issued for it (or reverts).\"},\"proxyToken()\":{\"details\":\"Returns the address of the ERC721 token issued as proxies\"},\"redeemProxyTokens(uint256[],address)\":{\"details\":\"Redeem the specified proxy tokens from the user's wallet, transferring the underlying tokens to {_to}.\"},\"tokenForProxy(uint256)\":{\"details\":\"Given the tokenId of a proxy token issued by this exchanger, returns the token it represnts (or reverts).\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/token/interfaces/IERC721CollectibleProxyExchanger.sol\":\"IERC721CollectibleProxyExchanger\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"keccak256\":\"0x872ba21af7c1f0ae04a715beca31e8fcac764d6c8762940b0fe1bfb6ed8e86f4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://497017741d74878b56a67ad51e98061bd9ec0e6e4fdbfef0e2ab51523f4c16de\",\"dweb:/ipfs/QmWfkpRHksy8jFywqYxdmMqdkQ1hxrGTPoNBXbZ48zTvyv\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x6aa521718bf139b44ce56f194f6aea1d590cacef995b5a84703fb1579fa49be9\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://100f8d367b5e94eb9cb991914f1de133cf272654c0708faa893bbc17a5b35b93\",\"dweb:/ipfs/QmZeBojmgXq821dL1TJKFb58B1FogM9jL3u7hXQ8hTEBKT\"]},\"project:/contracts/token/interfaces/IERC721Collectible.sol\":{\"keccak256\":\"0x9e746c609e578bd5dbeee6a91d89163cacbcc9c89d51b0e914f3c45ca356e47a\",\"urls\":[\"bzz-raw://e154f88a9eab1f009235dc744ccd59f0a473b00b0b8e4c13bef4b89ba33722f2\",\"dweb:/ipfs/QmcFmWawEry2HcBGjbbdcCj8EtXX6oZqmj2Cn5DVokQfgs\"]},\"project:/contracts/token/interfaces/IERC721CollectibleOracle.sol\":{\"keccak256\":\"0xb4dfe5af9a9225b977eaad91a1d861637edfa3b162b08c97a3c0e7b114291295\",\"urls\":[\"bzz-raw://9d953b640440049d43e689efd241f0c13355d406f928e5b67ca43d09ddbe4efb\",\"dweb:/ipfs/QmWdLjdjYgD314XwUyUEeQKBrEJQaEYoyXAPADpcUW7Nep\"]},\"project:/contracts/token/interfaces/IERC721CollectibleProxyExchanger.sol\":{\"keccak256\":\"0xb6d270de82ede23a2b545f0643ba317280144e176897035d9c3da9e3c6f19312\",\"urls\":[\"bzz-raw://6ae979877b863f376548d04f6e92274f7b8801117bc87613a6596f27e15baa64\",\"dweb:/ipfs/QmWGFL1nFFLQwHWeuqNAhGbSi6NA44K6JxHDgPv11n8AWn\"]},\"project:/contracts/token/interfaces/IERC721TypeExchangeable.sol\":{\"keccak256\":\"0x1e8fe3d6b85bea54c0412cfafe5dfcdbaa0c48597fabd4742d69b24895988942\",\"urls\":[\"bzz-raw://5c9917f55c270a89c557f1900d25dbe8f79686255af5b2dbb156355f4720de3c\",\"dweb:/ipfs/QmZ2NALwRDCFL7oZCM2o9JcQfTb9NKm5ow746THccc8mUA\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\nimport \"../interfaces/IERC721TypeExchangeable.sol\";\nimport \"../interfaces/IERC721CollectibleOracle.sol\";\n\npragma solidity ^0.8.0;\ninterface IERC721CollectibleProxyExchanger {\n\n    event ProxyTokenIssued(address indexed token, uint256 tokenId, uint256 indexed proxyTokenId, address indexed recipient);\n    event ProxyTokenRedeemed(address indexed token, uint256 tokenId, uint256 indexed proxyTokenId, address indexed recipient);\n\n    /**\n     * @dev Returns the address of the ERC721 token issued as proxies\n     */\n    function proxyToken() external view returns (address);\n\n    /**\n     * @dev Returns the address of the token type oracle used to determine exchange value.\n     */\n    function oracle() external view returns (address);\n\n    /**\n     * @dev Given the tokenId of a proxy token issued by this exchanger, returns\n     * the token it represnts (or reverts).\n     */\n    function tokenForProxy(uint256 _proxyTokenId) external view returns (address token, uint256 tokenId);\n\n    /**\n     * @dev Given an address and tokenId, returns the proxy tokenId issued for it\n     * (or reverts).\n     */\n    function proxyForToken(address _token, uint256 _tokenId) external view returns (uint256 proxyTokenId);\n\n    /**\n     * @dev Returns whether the tokenId provided represents a proxy token issued by\n     * this exchanger.\n     */\n    function isProxyIssued(uint256 _proxyTokenId) external view returns (bool);\n\n    /**\n     * @dev Returns whether the provided address and tokenId is held by this exchanger\n     * (i.e. whether a proxy has been issued for it).\n     */\n    function isProxyIssuedForToken(address _token, uint256 _tokenId) external view returns (bool);\n\n    /**\n     * @dev Issue proxy tokens for the provided non-proxy tokens, which must Have\n     * a token type set on the Oracle. Mints proxies to {_to}.\n     */\n    function issueProxyTokens(address _token, uint256[] calldata _tokenIds, address _to) external returns (uint256[] memory proxyTokenIds);\n\n    /**\n     * @dev Redeem the specified proxy tokens from the user's wallet, transferring\n     * the underlying tokens to {_to}.\n     */\n    function redeemProxyTokens(uint256[] calldata _proxyTokenIds, address _to) external returns (address[] memory tokens, uint256[] memory tokenIds);\n\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721CollectibleProxyExchanger.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/token/interfaces/IERC721CollectibleProxyExchanger.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        3187
+      ],
+      "IERC721": [
+        1872
+      ],
+      "IERC721Collectible": [
+        9226
+      ],
+      "IERC721CollectibleOracle": [
+        9272
+      ],
+      "IERC721CollectibleProxyExchanger": [
+        9377
+      ],
+      "IERC721TypeExchangeable": [
+        9446
+      ]
+    },
+    "id": 9378,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "file": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "id": 9274,
+        "nodeType": "ImportDirective",
+        "scope": 9378,
+        "sourceUnit": 1873,
+        "src": "0:58:39",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/token/interfaces/IERC721TypeExchangeable.sol",
+        "file": "../interfaces/IERC721TypeExchangeable.sol",
+        "id": 9275,
+        "nodeType": "ImportDirective",
+        "scope": 9378,
+        "sourceUnit": 9447,
+        "src": "59:51:39",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/token/interfaces/IERC721CollectibleOracle.sol",
+        "file": "../interfaces/IERC721CollectibleOracle.sol",
+        "id": 9276,
+        "nodeType": "ImportDirective",
+        "scope": 9378,
+        "sourceUnit": 9273,
+        "src": "111:52:39",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 9277,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "165:23:39"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 9377,
+        "linearizedBaseContracts": [
+          9377
+        ],
+        "name": "IERC721CollectibleProxyExchanger",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "id": 9287,
+            "name": "ProxyTokenIssued",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 9286,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9279,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "262:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9278,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "262:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9281,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "285:15:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9280,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "285:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9283,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "302:28:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9282,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "302:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9285,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "332:25:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9284,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "332:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "261:97:39"
+            },
+            "src": "239:120:39"
+          },
+          {
+            "anonymous": false,
+            "id": 9297,
+            "name": "ProxyTokenRedeemed",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 9296,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9289,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "389:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9288,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "389:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9291,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "412:15:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9290,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "412:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9293,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "429:28:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9292,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "429:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9295,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "459:25:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9294,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "459:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "388:97:39"
+            },
+            "src": "364:122:39"
+          },
+          {
+            "documentation": {
+              "id": 9298,
+              "nodeType": "StructuredDocumentation",
+              "src": "492:81:39",
+              "text": " @dev Returns the address of the ERC721 token issued as proxies"
+            },
+            "functionSelector": "4faaefae",
+            "id": 9303,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxyToken",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9299,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "597:2:39"
+            },
+            "returnParameters": {
+              "id": 9302,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9301,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9303,
+                  "src": "623:7:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9300,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "623:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "622:9:39"
+            },
+            "scope": 9377,
+            "src": "578:54:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9304,
+              "nodeType": "StructuredDocumentation",
+              "src": "638:102:39",
+              "text": " @dev Returns the address of the token type oracle used to determine exchange value."
+            },
+            "functionSelector": "7dc0d1d0",
+            "id": 9309,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "oracle",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9305,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "760:2:39"
+            },
+            "returnParameters": {
+              "id": 9308,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9307,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9309,
+                  "src": "786:7:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9306,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "786:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "785:9:39"
+            },
+            "scope": 9377,
+            "src": "745:50:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9310,
+              "nodeType": "StructuredDocumentation",
+              "src": "801:136:39",
+              "text": " @dev Given the tokenId of a proxy token issued by this exchanger, returns\n the token it represnts (or reverts)."
+            },
+            "functionSelector": "75fbe4f9",
+            "id": 9319,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenForProxy",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9313,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9312,
+                  "mutability": "mutable",
+                  "name": "_proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9319,
+                  "src": "965:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9311,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "965:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "964:23:39"
+            },
+            "returnParameters": {
+              "id": 9318,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9315,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9319,
+                  "src": "1011:13:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9314,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1011:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9317,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9319,
+                  "src": "1026:15:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9316,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1026:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1010:32:39"
+            },
+            "scope": 9377,
+            "src": "942:101:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9320,
+              "nodeType": "StructuredDocumentation",
+              "src": "1049:114:39",
+              "text": " @dev Given an address and tokenId, returns the proxy tokenId issued for it\n (or reverts)."
+            },
+            "functionSelector": "ad44c003",
+            "id": 9329,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxyForToken",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9325,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9322,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9329,
+                  "src": "1191:14:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9321,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1191:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9324,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9329,
+                  "src": "1207:16:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9323,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1207:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1190:34:39"
+            },
+            "returnParameters": {
+              "id": 9328,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9327,
+                  "mutability": "mutable",
+                  "name": "proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9329,
+                  "src": "1248:20:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9326,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1248:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1247:22:39"
+            },
+            "scope": 9377,
+            "src": "1168:102:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9330,
+              "nodeType": "StructuredDocumentation",
+              "src": "1276:118:39",
+              "text": " @dev Returns whether the tokenId provided represents a proxy token issued by\n this exchanger."
+            },
+            "functionSelector": "6d3dd288",
+            "id": 9337,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isProxyIssued",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9333,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9332,
+                  "mutability": "mutable",
+                  "name": "_proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9337,
+                  "src": "1422:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9331,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1422:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1421:23:39"
+            },
+            "returnParameters": {
+              "id": 9336,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9335,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9337,
+                  "src": "1468:4:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 9334,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1468:4:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1467:6:39"
+            },
+            "scope": 9377,
+            "src": "1399:75:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9338,
+              "nodeType": "StructuredDocumentation",
+              "src": "1480:152:39",
+              "text": " @dev Returns whether the provided address and tokenId is held by this exchanger\n (i.e. whether a proxy has been issued for it)."
+            },
+            "functionSelector": "399cfa43",
+            "id": 9347,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isProxyIssuedForToken",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9343,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9340,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9347,
+                  "src": "1668:14:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9339,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1668:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9342,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9347,
+                  "src": "1684:16:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9341,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1684:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1667:34:39"
+            },
+            "returnParameters": {
+              "id": 9346,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9345,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9347,
+                  "src": "1725:4:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 9344,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1725:4:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1724:6:39"
+            },
+            "scope": 9377,
+            "src": "1637:94:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9348,
+              "nodeType": "StructuredDocumentation",
+              "src": "1737:156:39",
+              "text": " @dev Issue proxy tokens for the provided non-proxy tokens, which must Have\n a token type set on the Oracle. Mints proxies to {_to}."
+            },
+            "functionSelector": "95561649",
+            "id": 9361,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "issueProxyTokens",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9356,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9350,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "1924:14:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9349,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1924:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9353,
+                  "mutability": "mutable",
+                  "name": "_tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "1940:28:39",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9351,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1940:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9352,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1940:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9355,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "1970:11:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9354,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1970:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1923:59:39"
+            },
+            "returnParameters": {
+              "id": 9360,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9359,
+                  "mutability": "mutable",
+                  "name": "proxyTokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "2001:30:39",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9357,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2001:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9358,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2001:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2000:32:39"
+            },
+            "scope": 9377,
+            "src": "1898:135:39",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9362,
+              "nodeType": "StructuredDocumentation",
+              "src": "2039:133:39",
+              "text": " @dev Redeem the specified proxy tokens from the user's wallet, transferring\n the underlying tokens to {_to}."
+            },
+            "functionSelector": "88f34e26",
+            "id": 9376,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemProxyTokens",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9368,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9365,
+                  "mutability": "mutable",
+                  "name": "_proxyTokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2204:33:39",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9363,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2204:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9364,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2204:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9367,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2239:11:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9366,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2239:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2203:48:39"
+            },
+            "returnParameters": {
+              "id": 9375,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9371,
+                  "mutability": "mutable",
+                  "name": "tokens",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2270:23:39",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9369,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2270:7:39",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 9370,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2270:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9374,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2295:25:39",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9372,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2295:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9373,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2295:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2269:52:39"
+            },
+            "scope": 9377,
+            "src": "2177:145:39",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 9378,
+        "src": "189:2136:39"
+      }
+    ],
+    "src": "0:2326:39"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/token/interfaces/IERC721CollectibleProxyExchanger.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        3187
+      ],
+      "IERC721": [
+        1872
+      ],
+      "IERC721Collectible": [
+        9226
+      ],
+      "IERC721CollectibleOracle": [
+        9272
+      ],
+      "IERC721CollectibleProxyExchanger": [
+        9377
+      ],
+      "IERC721TypeExchangeable": [
+        9446
+      ]
+    },
+    "id": 9378,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "file": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "id": 9274,
+        "nodeType": "ImportDirective",
+        "scope": 9378,
+        "sourceUnit": 1873,
+        "src": "0:58:39",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/token/interfaces/IERC721TypeExchangeable.sol",
+        "file": "../interfaces/IERC721TypeExchangeable.sol",
+        "id": 9275,
+        "nodeType": "ImportDirective",
+        "scope": 9378,
+        "sourceUnit": 9447,
+        "src": "59:51:39",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "project:/contracts/token/interfaces/IERC721CollectibleOracle.sol",
+        "file": "../interfaces/IERC721CollectibleOracle.sol",
+        "id": 9276,
+        "nodeType": "ImportDirective",
+        "scope": 9378,
+        "sourceUnit": 9273,
+        "src": "111:52:39",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 9277,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "165:23:39"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 9377,
+        "linearizedBaseContracts": [
+          9377
+        ],
+        "name": "IERC721CollectibleProxyExchanger",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "id": 9287,
+            "name": "ProxyTokenIssued",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 9286,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9279,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "262:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9278,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "262:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9281,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "285:15:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9280,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "285:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9283,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "302:28:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9282,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "302:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9285,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9287,
+                  "src": "332:25:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9284,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "332:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "261:97:39"
+            },
+            "src": "239:120:39"
+          },
+          {
+            "anonymous": false,
+            "id": 9297,
+            "name": "ProxyTokenRedeemed",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 9296,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9289,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "389:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9288,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "389:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9291,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "412:15:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9290,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "412:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9293,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "429:28:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9292,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "429:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9295,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "recipient",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9297,
+                  "src": "459:25:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9294,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "459:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "388:97:39"
+            },
+            "src": "364:122:39"
+          },
+          {
+            "documentation": {
+              "id": 9298,
+              "nodeType": "StructuredDocumentation",
+              "src": "492:81:39",
+              "text": " @dev Returns the address of the ERC721 token issued as proxies"
+            },
+            "functionSelector": "4faaefae",
+            "id": 9303,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxyToken",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9299,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "597:2:39"
+            },
+            "returnParameters": {
+              "id": 9302,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9301,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9303,
+                  "src": "623:7:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9300,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "623:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "622:9:39"
+            },
+            "scope": 9377,
+            "src": "578:54:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9304,
+              "nodeType": "StructuredDocumentation",
+              "src": "638:102:39",
+              "text": " @dev Returns the address of the token type oracle used to determine exchange value."
+            },
+            "functionSelector": "7dc0d1d0",
+            "id": 9309,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "oracle",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9305,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "760:2:39"
+            },
+            "returnParameters": {
+              "id": 9308,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9307,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9309,
+                  "src": "786:7:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9306,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "786:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "785:9:39"
+            },
+            "scope": 9377,
+            "src": "745:50:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9310,
+              "nodeType": "StructuredDocumentation",
+              "src": "801:136:39",
+              "text": " @dev Given the tokenId of a proxy token issued by this exchanger, returns\n the token it represnts (or reverts)."
+            },
+            "functionSelector": "75fbe4f9",
+            "id": 9319,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenForProxy",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9313,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9312,
+                  "mutability": "mutable",
+                  "name": "_proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9319,
+                  "src": "965:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9311,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "965:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "964:23:39"
+            },
+            "returnParameters": {
+              "id": 9318,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9315,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9319,
+                  "src": "1011:13:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9314,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1011:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9317,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9319,
+                  "src": "1026:15:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9316,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1026:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1010:32:39"
+            },
+            "scope": 9377,
+            "src": "942:101:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9320,
+              "nodeType": "StructuredDocumentation",
+              "src": "1049:114:39",
+              "text": " @dev Given an address and tokenId, returns the proxy tokenId issued for it\n (or reverts)."
+            },
+            "functionSelector": "ad44c003",
+            "id": 9329,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "proxyForToken",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9325,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9322,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9329,
+                  "src": "1191:14:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9321,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1191:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9324,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9329,
+                  "src": "1207:16:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9323,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1207:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1190:34:39"
+            },
+            "returnParameters": {
+              "id": 9328,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9327,
+                  "mutability": "mutable",
+                  "name": "proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9329,
+                  "src": "1248:20:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9326,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1248:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1247:22:39"
+            },
+            "scope": 9377,
+            "src": "1168:102:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9330,
+              "nodeType": "StructuredDocumentation",
+              "src": "1276:118:39",
+              "text": " @dev Returns whether the tokenId provided represents a proxy token issued by\n this exchanger."
+            },
+            "functionSelector": "6d3dd288",
+            "id": 9337,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isProxyIssued",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9333,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9332,
+                  "mutability": "mutable",
+                  "name": "_proxyTokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9337,
+                  "src": "1422:21:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9331,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1422:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1421:23:39"
+            },
+            "returnParameters": {
+              "id": 9336,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9335,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9337,
+                  "src": "1468:4:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 9334,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1468:4:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1467:6:39"
+            },
+            "scope": 9377,
+            "src": "1399:75:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9338,
+              "nodeType": "StructuredDocumentation",
+              "src": "1480:152:39",
+              "text": " @dev Returns whether the provided address and tokenId is held by this exchanger\n (i.e. whether a proxy has been issued for it)."
+            },
+            "functionSelector": "399cfa43",
+            "id": 9347,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isProxyIssuedForToken",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9343,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9340,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9347,
+                  "src": "1668:14:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9339,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1668:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9342,
+                  "mutability": "mutable",
+                  "name": "_tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9347,
+                  "src": "1684:16:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9341,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1684:7:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1667:34:39"
+            },
+            "returnParameters": {
+              "id": 9346,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9345,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9347,
+                  "src": "1725:4:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 9344,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1725:4:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1724:6:39"
+            },
+            "scope": 9377,
+            "src": "1637:94:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9348,
+              "nodeType": "StructuredDocumentation",
+              "src": "1737:156:39",
+              "text": " @dev Issue proxy tokens for the provided non-proxy tokens, which must Have\n a token type set on the Oracle. Mints proxies to {_to}."
+            },
+            "functionSelector": "95561649",
+            "id": 9361,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "issueProxyTokens",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9356,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9350,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "1924:14:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9349,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1924:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9353,
+                  "mutability": "mutable",
+                  "name": "_tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "1940:28:39",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9351,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1940:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9352,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1940:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9355,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "1970:11:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9354,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1970:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1923:59:39"
+            },
+            "returnParameters": {
+              "id": 9360,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9359,
+                  "mutability": "mutable",
+                  "name": "proxyTokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9361,
+                  "src": "2001:30:39",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9357,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2001:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9358,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2001:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2000:32:39"
+            },
+            "scope": 9377,
+            "src": "1898:135:39",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 9362,
+              "nodeType": "StructuredDocumentation",
+              "src": "2039:133:39",
+              "text": " @dev Redeem the specified proxy tokens from the user's wallet, transferring\n the underlying tokens to {_to}."
+            },
+            "functionSelector": "88f34e26",
+            "id": 9376,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemProxyTokens",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9368,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9365,
+                  "mutability": "mutable",
+                  "name": "_proxyTokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2204:33:39",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9363,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2204:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9364,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2204:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9367,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2239:11:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9366,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2239:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2203:48:39"
+            },
+            "returnParameters": {
+              "id": 9375,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9371,
+                  "mutability": "mutable",
+                  "name": "tokens",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2270:23:39",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9369,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2270:7:39",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 9370,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2270:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 9374,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9376,
+                  "src": "2295:25:39",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9372,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2295:7:39",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 9373,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2295:9:39",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2269:52:39"
+            },
+            "scope": 9377,
+            "src": "2177:145:39",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 9378,
+        "src": "189:2136:39"
+      }
+    ],
+    "src": "0:2326:39"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2021-12-13T16:46:28.616Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "isProxyIssued(uint256)": {
+        "details": "Returns whether the tokenId provided represents a proxy token issued by this exchanger."
+      },
+      "isProxyIssuedForToken(address,uint256)": {
+        "details": "Returns whether the provided address and tokenId is held by this exchanger (i.e. whether a proxy has been issued for it)."
+      },
+      "issueProxyTokens(address,uint256[],address)": {
+        "details": "Issue proxy tokens for the provided non-proxy tokens, which must Have a token type set on the Oracle. Mints proxies to {_to}."
+      },
+      "oracle()": {
+        "details": "Returns the address of the token type oracle used to determine exchange value."
+      },
+      "proxyForToken(address,uint256)": {
+        "details": "Given an address and tokenId, returns the proxy tokenId issued for it (or reverts)."
+      },
+      "proxyToken()": {
+        "details": "Returns the address of the ERC721 token issued as proxies"
+      },
+      "redeemProxyTokens(uint256[],address)": {
+        "details": "Redeem the specified proxy tokens from the user's wallet, transferring the underlying tokens to {_to}."
+      },
+      "tokenForProxy(uint256)": {
+        "details": "Given the tokenId of a proxy token issued by this exchanger, returns the token it represnts (or reverts)."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

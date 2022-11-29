@@ -37,9 +37,14 @@ module.exports = exports = ({ network, web3 }) => {
 
   const values = {};
 
+  // remove extra name text
+  network = network.replace('-fork', '');
+  network = network.replace('_moralis', '').replace('moralis_', '');
+
   // standardize network name
   if (network === 'bsc_test-fork') network = 'bsc_test';
   if (network === 'bsc-fork') network = 'bsc';
+  if (network === 'test-fork' || network === 'ganache-fork') network = 'test';
 
   // token addresses
   // TODO expand with tokens used in migration, including LP token pools
@@ -96,6 +101,10 @@ module.exports = exports = ({ network, web3 }) => {
     startBlock: blocks.start,
     raraToMiningPool: expandToDecimals(12, raraDecimals),
     raraToMysteryBox: expandToDecimals(8, raraDecimals),
+
+    raraToLPMiningPostBurn: expandToDecimals(114, raraDecimals - 1),
+    raraToAnimalMiningPostBurn: expandToDecimals(76, raraDecimals - 1),
+    raraToBurn: expandToDecimals(1, raraDecimals)
   }
 
   // mining pool inputs

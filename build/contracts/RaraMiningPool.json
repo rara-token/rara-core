@@ -68097,8 +68097,8 @@
       "transactionHash": "0x179789cbf2c2f53fff3849c5b1f9e9d255560fa0d4ddeba1fd4493a6f8676301"
     }
   },
-  "schemaVersion": "3.4.1",
-  "updatedAt": "2021-07-14T20:58:33.431Z",
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-02-08T16:51:13.552Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

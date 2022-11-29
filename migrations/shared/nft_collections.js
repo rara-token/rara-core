@@ -26,9 +26,14 @@ module.exports = exports = ({ network, web3 }) => {
 
   const values = {};
 
+  // remove extra name text
+  network = network.replace('-fork', '');
+  network = network.replace('_moralis', '').replace('moralis_', '');
+
   // standardize network name
   if (network === 'bsc_test-fork') network = 'bsc_test';
   if (network === 'bsc-fork') network = 'bsc';
+  if (network === 'test-fork' || network === 'ganache-fork') network = 'test';
 
   const decimals = network == 'bsc_test' ? 8 : 18;
   const five = expandToDecimals(5, decimals).toString();
@@ -156,6 +161,16 @@ module.exports = exports = ({ network, web3 }) => {
   // add Jamie Chua Doll House
   tokens.push({ symbol:"JC_0", name:"Jamie's Doll House", value:0 });
 
+  // Add Singapore Card
+  collection = { name:"Singapore Card", tokenTypes:[] };
+  [
+    { symbol:"SING_CARD_0", name:"Singapore Card" }
+  ].map(a => { return { ...a, value:thirty }; }).forEach(a => {
+    collection.tokenTypes.push(tokens.length);
+    tokens.push(a);
+  });
+  collections.push(collection);
+
   values['tokens'] = values['token'] = tokens.map((e, tokenType) => { return { tokenType, ...e } });
   values['collections'] = values['collection'] = collections;
 
@@ -192,6 +207,40 @@ module.exports = exports = ({ network, web3 }) => {
   pushJamieChuaBlindBox("Kitchen", 3000);
   pushJamieChuaBlindBox("Bedroom", 1000);
   pushJamieChuaBlindBox("Wardrobe", 100);
+
+  let singaporeStartTime = {
+    bsc: 1630065600,   // approx 8 AM EDT 8/27
+    bsc_test: 1629892800,  //  approx 8 AM EDT 8/25
+    test: 1627416000
+  }[network];
+
+  function pushBlindBox(collectionName, opts) {
+    const { supply, startTime, endTime, cardSupply } = opts;
+    const raraCardPrizes = findCollection("Rara Card").tokenTypes.map(tokenType => {
+      return { tokenType, supply:cardSupply };
+    });
+    const collection = findCollection(collectionName);
+    const collectionPrizes = collection.tokenTypes.map(tokenType => {
+      return { tokenType, supply };
+    });
+    blindBoxes.push({
+      name: collection.name,
+      startTime: startTime,
+      endTime: endTime,
+      drawPrice: five,
+      prizes: [
+        ...collectionPrizes,
+        ...(cardSupply ? raraCardPrizes : [])
+      ].map((p, prizeId) => { return { ...p, prizeId }; })
+    });
+  }
+
+  pushBlindBox("Singapore Card", {
+    supply: 50,
+    startTime: singaporeStartTime,
+    endTime: 0,
+    cardSupply: 2000
+  });
 
   values['blindBoxes'] = values['blindBox'] = blindBoxes.map((b, saleId) => { return { ...b, saleId }; });
 

@@ -300,10 +300,17 @@ abstract contract BaseBlindCollectibleGachaRack is
     function _revealQueue(uint256 _blocksStale, uint256 _limit) internal returns (uint256) {
         uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
         uint256 limit = remaining > _limit ? _limit : remaining;
-        (uint256[] memory drawIds, uint256 length, uint256 contiguous) = _filterRevealable(
-            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false, false
-        );
 
+        // copy an array slice; passing in the whole array to _filterRevealable
+        // costs way, way too much gas
+        uint256[] memory _candidateDrawIds =  new uint[](limit);
+        for (uint256 i = 0; i < limit; i++) {
+          _candidateDrawIds[i] = _queuedDrawId[i + _queuedDrawIdNextIndex];
+        }
+
+        (uint256[] memory drawIds, uint256 length, uint256 contiguous) = _filterRevealable(
+            _blocksStale, _candidateDrawIds, 0, limit, address(0), false, false
+        );
         _queuedDrawIdNextIndex += contiguous;
 
         (uint256[] memory prizeIds, uint256[] memory tokenTypes) = _getPrizes(drawIds, length);
@@ -317,8 +324,15 @@ abstract contract BaseBlindCollectibleGachaRack is
     function queuedDrawsAwardableCount(uint256 _blocksStale, uint256 _limit) override external view returns (uint256 count) {
         uint256 remaining = _queuedDrawId.length - _queuedDrawIdNextIndex;
         uint256 limit = remaining > _limit ? _limit : remaining;
+
+        // copy an array slice; passing in the whole array to _filterRevealable
+        // costs way, way too much gas
+        uint256[] memory _candidateDrawIds =  new uint[](limit);
+        for (uint256 i = 0; i < limit; i++) {
+          _candidateDrawIds[i] = _queuedDrawId[i + _queuedDrawIdNextIndex];
+        }
         (, count,) = _filterRevealable(
-            _blocksStale, _queuedDrawId, _queuedDrawIdNextIndex, limit, address(0), false, false
+            _blocksStale, _candidateDrawIds, 0, limit, address(0), false, false
         );
     }
 
@@ -360,7 +374,7 @@ abstract contract BaseBlindCollectibleGachaRack is
         uint256 _revealableLength,
         uint256 _contiguousLength
     ) {
-        _revealableDrawIds = new uint[](_drawIds.length);
+        _revealableDrawIds = new uint[](_drawIds.length < _limit ? _drawIds.length : _limit);
         bool contiguous = true;
         for (uint256 i = 0; i < _limit; i++) {
             uint256 index = _start + i;
@@ -450,7 +464,7 @@ abstract contract BaseBlindCollectibleGachaRack is
             // unqueue
             _removeFromQueue(drawId);
 
-            emit Draw(_to, drawId, draw.gameId, draw.prizeId);
+            emit Draw(_to == address(0) ? draw.user : _to, drawId, draw.gameId, draw.prizeId);
         }
     }
 
