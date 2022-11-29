@@ -1,0 +1,817 @@
+{
+  "contractName": "ITokenEmitter",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "claim",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_recipient",
+          "type": "address"
+        }
+      ],
+      "name": "owed",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "emitted",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"claim\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"emitted\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"owed\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"claim(address)\":{\"details\":\"Claims tokens owed to the caller, sending it to the designated address. No effect if the caller is not a targetted recipient. No need to call {mint} before making this call. Returns the amount transferred; for recipients, emits a {RaraEmitted} event.\"},\"emitted()\":{\"details\":\"Returns the total token amount emitted by the emitter up to this block, whether or not they have been claimed. (e.g. for an emitter that operates by mint-and-burn patterns, reports only the number left after burning.)\"},\"owed(address)\":{\"details\":\"Returns the amount of tokens currently owed to the _recipient (the amount to transfer on a call to {claim}). For recipients, this value changes each block.\"},\"token()\":{\"details\":\"Returns token address\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenEmitter.sol\":\"ITokenEmitter\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenEmitter.sol\":{\"keccak256\":\"0x999333ae3e39a46bf838c8ca64cfa6463f2630f9adece43f4f1d2f530eac8c06\",\"urls\":[\"bzz-raw://8983f8b3a96d2fb559d4fb1d735481d38c9e406136b1f109c83baa0ce9041a4a\",\"dweb:/ipfs/QmT3C3SLRKD7yjQReGoz8aRjogEWksJ5dqoWUpYikMyPMM\"]},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0xf8e8d118a7a8b2e134181f7da655f6266aa3a0f9134b2605747139fcb0c5d835\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9ec48567e7ad06acb670980d5cdf3fd7f3949bf12894f02d68c3bb43e75aa84f\",\"dweb:/ipfs/QmaG3R2J9cz92YT77vFjYrjMNU2wHp4ypwYD62HqDUqS5U\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n\n// An ITokenEmitter accumulates tokens on its own internal schedule,\n// allocating it to specific recipients.\npragma solidity ^0.8.0;\ninterface ITokenEmitter {\n    /**\n     * @dev Returns token address\n     */\n    function token() external view returns (IERC20);\n\n    /**\n     * @dev Claims tokens owed to the caller, sending it to the designated address.\n     * No effect if the caller is not a targetted recipient.\n     *\n     * No need to call {mint} before making this call.\n     *\n     * Returns the amount transferred; for recipients, emits a {RaraEmitted} event.\n     */\n    function claim(address _to) external returns (uint256);\n\n    /**\n     * @dev Returns the amount of tokens currently owed to the _recipient\n     * (the amount to transfer on a call to {claim}).\n     *\n     * For recipients, this value changes each block.\n     */\n    function owed(address _recipient) external view returns (uint256);\n\n    /**\n     * @dev Returns the total token amount emitted by the emitter\n     * up to this block, whether or not they have been claimed.\n     * (e.g. for an emitter that operates by mint-and-burn patterns,\n     * reports only the number left after burning.)\n     */\n    function emitted() external view returns (uint256);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenEmitter.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenEmitter.sol",
+    "exportedSymbols": {
+      "IERC20": [
+        15489
+      ],
+      "ITokenEmitter": [
+        6541
+      ]
+    },
+    "id": 6542,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "id": 6510,
+        "nodeType": "ImportDirective",
+        "scope": 6542,
+        "sourceUnit": 15490,
+        "src": "0:56:15",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 6511,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "168:23:15"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 6541,
+        "linearizedBaseContracts": [
+          6541
+        ],
+        "name": "ITokenEmitter",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 6512,
+              "nodeType": "StructuredDocumentation",
+              "src": "222:45:15",
+              "text": " @dev Returns token address"
+            },
+            "functionSelector": "fc0c546a",
+            "id": 6518,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "token",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6513,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "286:2:15"
+            },
+            "returnParameters": {
+              "id": 6517,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6516,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6518,
+                  "src": "312:6:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$15489",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 6515,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 6514,
+                      "name": "IERC20",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 15489,
+                      "src": "312:6:15"
+                    },
+                    "referencedDeclaration": 15489,
+                    "src": "312:6:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$15489",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "311:8:15"
+            },
+            "scope": 6541,
+            "src": "272:48:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6519,
+              "nodeType": "StructuredDocumentation",
+              "src": "326:309:15",
+              "text": " @dev Claims tokens owed to the caller, sending it to the designated address.\n No effect if the caller is not a targetted recipient.\n No need to call {mint} before making this call.\n Returns the amount transferred; for recipients, emits a {RaraEmitted} event."
+            },
+            "functionSelector": "1e83409a",
+            "id": 6526,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "claim",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6522,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6521,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6526,
+                  "src": "655:11:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6520,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "655:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "654:13:15"
+            },
+            "returnParameters": {
+              "id": 6525,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6524,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6526,
+                  "src": "686:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6523,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "686:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "685:9:15"
+            },
+            "scope": 6541,
+            "src": "640:55:15",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6527,
+              "nodeType": "StructuredDocumentation",
+              "src": "701:200:15",
+              "text": " @dev Returns the amount of tokens currently owed to the _recipient\n (the amount to transfer on a call to {claim}).\n For recipients, this value changes each block."
+            },
+            "functionSelector": "df18e047",
+            "id": 6534,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "owed",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6530,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6529,
+                  "mutability": "mutable",
+                  "name": "_recipient",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6534,
+                  "src": "920:18:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6528,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "920:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "919:20:15"
+            },
+            "returnParameters": {
+              "id": 6533,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6532,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6534,
+                  "src": "963:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6531,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "963:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "962:9:15"
+            },
+            "scope": 6541,
+            "src": "906:66:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6535,
+              "nodeType": "StructuredDocumentation",
+              "src": "978:262:15",
+              "text": " @dev Returns the total token amount emitted by the emitter\n up to this block, whether or not they have been claimed.\n (e.g. for an emitter that operates by mint-and-burn patterns,\n reports only the number left after burning.)"
+            },
+            "functionSelector": "bd153c64",
+            "id": 6540,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "emitted",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6536,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1261:2:15"
+            },
+            "returnParameters": {
+              "id": 6539,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6538,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6540,
+                  "src": "1287:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6537,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1287:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1286:9:15"
+            },
+            "scope": 6541,
+            "src": "1245:51:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6542,
+        "src": "192:1106:15"
+      }
+    ],
+    "src": "0:1299:15"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenEmitter.sol",
+    "exportedSymbols": {
+      "IERC20": [
+        15489
+      ],
+      "ITokenEmitter": [
+        6541
+      ]
+    },
+    "id": 6542,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "id": 6510,
+        "nodeType": "ImportDirective",
+        "scope": 6542,
+        "sourceUnit": 15490,
+        "src": "0:56:15",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 6511,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "168:23:15"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 6541,
+        "linearizedBaseContracts": [
+          6541
+        ],
+        "name": "ITokenEmitter",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 6512,
+              "nodeType": "StructuredDocumentation",
+              "src": "222:45:15",
+              "text": " @dev Returns token address"
+            },
+            "functionSelector": "fc0c546a",
+            "id": 6518,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "token",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6513,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "286:2:15"
+            },
+            "returnParameters": {
+              "id": 6517,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6516,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6518,
+                  "src": "312:6:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$15489",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 6515,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 6514,
+                      "name": "IERC20",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 15489,
+                      "src": "312:6:15"
+                    },
+                    "referencedDeclaration": 15489,
+                    "src": "312:6:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$15489",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "311:8:15"
+            },
+            "scope": 6541,
+            "src": "272:48:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6519,
+              "nodeType": "StructuredDocumentation",
+              "src": "326:309:15",
+              "text": " @dev Claims tokens owed to the caller, sending it to the designated address.\n No effect if the caller is not a targetted recipient.\n No need to call {mint} before making this call.\n Returns the amount transferred; for recipients, emits a {RaraEmitted} event."
+            },
+            "functionSelector": "1e83409a",
+            "id": 6526,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "claim",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6522,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6521,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6526,
+                  "src": "655:11:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6520,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "655:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "654:13:15"
+            },
+            "returnParameters": {
+              "id": 6525,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6524,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6526,
+                  "src": "686:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6523,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "686:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "685:9:15"
+            },
+            "scope": 6541,
+            "src": "640:55:15",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6527,
+              "nodeType": "StructuredDocumentation",
+              "src": "701:200:15",
+              "text": " @dev Returns the amount of tokens currently owed to the _recipient\n (the amount to transfer on a call to {claim}).\n For recipients, this value changes each block."
+            },
+            "functionSelector": "df18e047",
+            "id": 6534,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "owed",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6530,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6529,
+                  "mutability": "mutable",
+                  "name": "_recipient",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6534,
+                  "src": "920:18:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6528,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "920:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "919:20:15"
+            },
+            "returnParameters": {
+              "id": 6533,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6532,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6534,
+                  "src": "963:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6531,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "963:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "962:9:15"
+            },
+            "scope": 6541,
+            "src": "906:66:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6535,
+              "nodeType": "StructuredDocumentation",
+              "src": "978:262:15",
+              "text": " @dev Returns the total token amount emitted by the emitter\n up to this block, whether or not they have been claimed.\n (e.g. for an emitter that operates by mint-and-burn patterns,\n reports only the number left after burning.)"
+            },
+            "functionSelector": "bd153c64",
+            "id": 6540,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "emitted",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6536,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1261:2:15"
+            },
+            "returnParameters": {
+              "id": 6539,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6538,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6540,
+                  "src": "1287:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6537,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1287:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1286:9:15"
+            },
+            "scope": 6541,
+            "src": "1245:51:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6542,
+        "src": "192:1106:15"
+      }
+    ],
+    "src": "0:1299:15"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-06-18T20:52:53.743Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "claim(address)": {
+        "details": "Claims tokens owed to the caller, sending it to the designated address. No effect if the caller is not a targetted recipient. No need to call {mint} before making this call. Returns the amount transferred; for recipients, emits a {RaraEmitted} event."
+      },
+      "emitted()": {
+        "details": "Returns the total token amount emitted by the emitter up to this block, whether or not they have been claimed. (e.g. for an emitter that operates by mint-and-burn patterns, reports only the number left after burning.)"
+      },
+      "owed(address)": {
+        "details": "Returns the amount of tokens currently owed to the _recipient (the amount to transfer on a call to {claim}). For recipients, this value changes each block."
+      },
+      "token()": {
+        "details": "Returns token address"
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

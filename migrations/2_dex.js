@@ -1,6 +1,5 @@
 const MockWETH = artifacts.require("MockWETH");
 const UniswapV2Factory = artifacts.require("UniswapV2Factory");
-const UniswapV2Router02 = artifacts.require("UniswapV2Router02");
 
 const values = require('./shared/values');
 
@@ -20,8 +19,7 @@ module.exports = function (deployer, network, accounts) {
     factory = await UniswapV2Factory.deployed();
     await factory.setCreationDisallowed(true);    // temporary; authority pair creation only
     if (tokens.BUSD) { // Disable creation of BUSD/WBNB pair; special consideration later
-      await factory.setPairDisallowed(tokens.BUSD, wbnb);
+      await factory.setPairDisallowed(tokens.BUSD, wbnb, true);
     }
-    await deployer.deploy(UniswapV2Router02, factory.address, wbnb);
   });
 };

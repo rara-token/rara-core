@@ -12,7 +12,7 @@ contract RaraToken is ERC20PresetMinterPauser, IPermitERC20, Domain {
     }
 
     function decimals() public view virtual override returns (uint8) {
-        return 8;
+        return 18;
     }
 
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");

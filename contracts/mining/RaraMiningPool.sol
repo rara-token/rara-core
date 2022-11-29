@@ -271,6 +271,16 @@ contract RaraMiningPool is IMiningPool, BoringBatchable, LendingPool {
         lpToken[_pid] = newLpToken;
     }
 
+    /// @notice Set the `unlockBlock`; the block after which mined Rara can be
+    /// harvested. Can only be called by the manager, and only before the
+    /// current unlockBlock.
+    /// @param _block The block at which to unlock harvesting.
+    function setUnlockBlock(uint256 _block) public {
+        require(hasRole(MANAGER_ROLE, _msgSender()), "RaraMiningPool: must have MANAGER role to setUnlockBlock");
+        require(block.number < unlockBlock, "RaraMiningPool: no setUnlockBlock after unlocked");
+        unlockBlock = _block;
+    }
+
     /// @notice View function to see pending Rara on frontend.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.

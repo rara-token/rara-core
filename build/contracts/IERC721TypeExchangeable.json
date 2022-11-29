@@ -1,0 +1,1744 @@
+{
+  "contractName": "IERC721TypeExchangeable",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenType",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "tokenTypes",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "massMint",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "massBurnFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "tokenId",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "massTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "burnTokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "tokenTypes",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "exchange",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"burnFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"burnTokenIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenTypes\",\"type\":\"uint256[]\"}],\"name\":\"exchange\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"massBurnFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenTypes\",\"type\":\"uint256[]\"}],\"name\":\"massMint\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"tokenId\",\"type\":\"uint256[]\"}],\"name\":\"massTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenType\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"burnFrom(address,uint256)\":{\"details\":\"Burns the indicated token from `from`'s collection. Only allowed if the caller has approval to access this token its owner's collection (and `from` is the owner of the token).\"},\"exchange(address,uint256[],uint256[])\":{\"details\":\"A batch-operation: burns the indicated tokens from the collection of `owner` (the caller must have approval to do this for all tokens), and mints to them the token type(s) indicated. The caller must have minting privileges and transfer access to all listed tokens (which must be owned by the indicated account).\",\"returns\":{\"tokenIds\":\"The created tokenIDs, in the same order as their specified types.\"}},\"massBurnFrom(address,uint256[])\":{\"details\":\"Burns the indicated token from `from`'s collection. Only allowed if the caller has approval to access this token its owner's collection (and `from` is the owner of the token).\"},\"massMint(address,uint256[])\":{\"details\":\"Creates a new token for `to`. Its token ID will be automatically assigned (and available on the emitted {IERC721-Transfer} event), and the token URI autogenerated based on the base URI passed at construction.\",\"returns\":{\"tokenIds\":\"The created tokenIDs, in the same order as their specified types.\"}},\"massTransferFrom(address,address,uint256[])\":{\"details\":\"Mass transfers tokens (listed as IDs) between the indicated addresses. The caller must have access to the tokens, which must all be owned by the indicated address. This is not a _safe_ transfer; tokens may be trapped in a contract which can't access them. For safe transfers, move them one at a time.\"},\"mint(address,uint256)\":{\"details\":\"Creates a new token for `to`. Its token ID will be automatically assigned (and available on the emitted {IERC721-Transfer} event), and the token URI autogenerated based on the base URI passed at construction.\",\"returns\":{\"tokenId\":\"The created tokenID\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721TypeExchangeable.sol\":\"IERC721TypeExchangeable\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721Collectible.sol\":{\"keccak256\":\"0x9e746c609e578bd5dbeee6a91d89163cacbcc9c89d51b0e914f3c45ca356e47a\",\"urls\":[\"bzz-raw://e154f88a9eab1f009235dc744ccd59f0a473b00b0b8e4c13bef4b89ba33722f2\",\"dweb:/ipfs/QmcFmWawEry2HcBGjbbdcCj8EtXX6oZqmj2Cn5DVokQfgs\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721TypeExchangeable.sol\":{\"keccak256\":\"0x1e8fe3d6b85bea54c0412cfafe5dfcdbaa0c48597fabd4742d69b24895988942\",\"urls\":[\"bzz-raw://5c9917f55c270a89c557f1900d25dbe8f79686255af5b2dbb156355f4720de3c\",\"dweb:/ipfs/QmZ2NALwRDCFL7oZCM2o9JcQfTb9NKm5ow746THccc8mUA\"]},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"keccak256\":\"0xf101e8720213560fab41104d53b3cc7ba0456ef3a98455aa7f022391783144a0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3e7820bcf567e6892d937c3cb10db263a4042e446799bca602535868d822384e\",\"dweb:/ipfs/QmPG2oeDjKncqsEeyYGjAN7CwAJmMgHterXGGnpzhha4z7\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796ab6e88af7bf0e78def0f059310c903af6a312b565344e0ff524a0f26e81c6\",\"dweb:/ipfs/QmcsVgLgzWdor3UnAztUkXKNGcysm1MPneWksF72AvnwBx\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"./IERC721Collectible.sol\";\n\n/**\n * @title IERC721Exchangeable\n * @dev An ERC-721 Non-Fungible Token where each token is one of an enumerable\n * set of \"types.\" Each token type has with a value (that may or may not correspond to\n * purchase / sale price; e.g. it may be \"mining power\"). The total value owned\n * by an address may be queried, as well as the number of types owned and list of\n * tokens by type. Types are enumerated 0...n-1.\n */\npragma solidity ^0.8.0;\ninterface IERC721TypeExchangeable {\n    /**\n     * @dev Creates a new token for `to`. Its token ID will be automatically\n     * assigned (and available on the emitted {IERC721-Transfer} event), and the token\n     * URI autogenerated based on the base URI passed at construction.\n     * @return tokenId The created tokenID\n     */\n    function mint(address to, uint256 tokenType) external returns (uint256 tokenId);\n\n    /**\n     * @dev Creates a new token for `to`. Its token ID will be automatically\n     * assigned (and available on the emitted {IERC721-Transfer} event), and the token\n     * URI autogenerated based on the base URI passed at construction.\n     * @return tokenIds The created tokenIDs, in the same order as their specified types.\n     */\n    function massMint(address to, uint256[] calldata tokenTypes) external returns (uint256[] memory tokenIds);\n\n    /**\n     * @dev Burns the indicated token from `from`'s collection. Only allowed if the\n     * caller has approval to access this token its owner's collection (and `from`\n     * is the owner of the token).\n     */\n    function burnFrom(address from, uint256 tokenId) external;\n\n    /**\n     * @dev Burns the indicated token from `from`'s collection. Only allowed if the\n     * caller has approval to access this token its owner's collection (and `from`\n     * is the owner of the token).\n     */\n    function massBurnFrom(address from, uint256[] calldata tokenIds) external;\n\n    /**\n     * @dev Mass transfers tokens (listed as IDs) between the indicated addresses.\n     * The caller must have access to the tokens, which must all be owned by the\n     * indicated address. This is not a _safe_ transfer; tokens may be trapped\n     * in a contract which can't access them. For safe transfers, move them\n     * one at a time.\n     */\n    function massTransferFrom(address from, address to, uint256[] calldata tokenId) external;\n\n    /**\n     * @dev A batch-operation: burns the indicated tokens from the collection of\n     * `owner` (the caller must have approval to do this for all tokens), and\n     * mints to them the token type(s) indicated. The caller must have minting\n     * privileges and transfer access to all listed tokens (which must be owned\n     * by the indicated account).\n     * @return tokenIds The created tokenIDs, in the same order as their specified types.\n     */\n    function exchange(address owner, uint256[] calldata burnTokenIds, uint256[] calldata tokenTypes) external returns (uint256[] memory tokenIds);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721TypeExchangeable.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721TypeExchangeable.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        9218
+      ],
+      "IERC721": [
+        7903
+      ],
+      "IERC721Collectible": [
+        4030
+      ],
+      "IERC721TypeExchangeable": [
+        4099
+      ]
+    },
+    "id": 4100,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721Collectible.sol",
+        "file": "./IERC721Collectible.sol",
+        "id": 4032,
+        "nodeType": "ImportDirective",
+        "scope": 4100,
+        "sourceUnit": 4031,
+        "src": "0:34:16",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 4033,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "451:23:16"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 4099,
+        "linearizedBaseContracts": [
+          4099
+        ],
+        "name": "IERC721TypeExchangeable",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 4034,
+              "nodeType": "StructuredDocumentation",
+              "src": "515:289:16",
+              "text": " @dev Creates a new token for `to`. Its token ID will be automatically\n assigned (and available on the emitted {IERC721-Transfer} event), and the token\n URI autogenerated based on the base URI passed at construction.\n @return tokenId The created tokenID"
+            },
+            "functionSelector": "40c10f19",
+            "id": 4043,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mint",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4039,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4036,
+                  "mutability": "mutable",
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4043,
+                  "src": "823:10:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4035,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "823:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4038,
+                  "mutability": "mutable",
+                  "name": "tokenType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4043,
+                  "src": "835:17:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4037,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "835:7:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "822:31:16"
+            },
+            "returnParameters": {
+              "id": 4042,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4041,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4043,
+                  "src": "872:15:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4040,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "872:7:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "871:17:16"
+            },
+            "scope": 4099,
+            "src": "809:80:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4044,
+              "nodeType": "StructuredDocumentation",
+              "src": "895:336:16",
+              "text": " @dev Creates a new token for `to`. Its token ID will be automatically\n assigned (and available on the emitted {IERC721-Transfer} event), and the token\n URI autogenerated based on the base URI passed at construction.\n @return tokenIds The created tokenIDs, in the same order as their specified types."
+            },
+            "functionSelector": "ca7445fa",
+            "id": 4055,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "massMint",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4050,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4046,
+                  "mutability": "mutable",
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4055,
+                  "src": "1254:10:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4045,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1254:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4049,
+                  "mutability": "mutable",
+                  "name": "tokenTypes",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4055,
+                  "src": "1266:29:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4047,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1266:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4048,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1266:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1253:43:16"
+            },
+            "returnParameters": {
+              "id": 4054,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4053,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4055,
+                  "src": "1315:25:16",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4051,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1315:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4052,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1315:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1314:27:16"
+            },
+            "scope": 4099,
+            "src": "1236:106:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4056,
+              "nodeType": "StructuredDocumentation",
+              "src": "1348:213:16",
+              "text": " @dev Burns the indicated token from `from`'s collection. Only allowed if the\n caller has approval to access this token its owner's collection (and `from`\n is the owner of the token)."
+            },
+            "functionSelector": "79cc6790",
+            "id": 4063,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burnFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4061,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4058,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4063,
+                  "src": "1584:12:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4057,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1584:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4060,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4063,
+                  "src": "1598:15:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4059,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1598:7:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1583:31:16"
+            },
+            "returnParameters": {
+              "id": 4062,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1623:0:16"
+            },
+            "scope": 4099,
+            "src": "1566:58:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4064,
+              "nodeType": "StructuredDocumentation",
+              "src": "1630:213:16",
+              "text": " @dev Burns the indicated token from `from`'s collection. Only allowed if the\n caller has approval to access this token its owner's collection (and `from`\n is the owner of the token)."
+            },
+            "functionSelector": "8245fc0b",
+            "id": 4072,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "massBurnFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4070,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4066,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4072,
+                  "src": "1870:12:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4065,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1870:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4069,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4072,
+                  "src": "1884:27:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4067,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1884:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4068,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1884:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1869:43:16"
+            },
+            "returnParameters": {
+              "id": 4071,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1921:0:16"
+            },
+            "scope": 4099,
+            "src": "1848:74:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4073,
+              "nodeType": "StructuredDocumentation",
+              "src": "1928:352:16",
+              "text": " @dev Mass transfers tokens (listed as IDs) between the indicated addresses.\n The caller must have access to the tokens, which must all be owned by the\n indicated address. This is not a _safe_ transfer; tokens may be trapped\n in a contract which can't access them. For safe transfers, move them\n one at a time."
+            },
+            "functionSelector": "a94ed1f8",
+            "id": 4083,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "massTransferFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4081,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4075,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4083,
+                  "src": "2311:12:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4074,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2311:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4077,
+                  "mutability": "mutable",
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4083,
+                  "src": "2325:10:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4076,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2325:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4080,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4083,
+                  "src": "2337:26:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4078,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2337:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4079,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2337:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2310:54:16"
+            },
+            "returnParameters": {
+              "id": 4082,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2373:0:16"
+            },
+            "scope": 4099,
+            "src": "2285:89:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4084,
+              "nodeType": "StructuredDocumentation",
+              "src": "2380:453:16",
+              "text": " @dev A batch-operation: burns the indicated tokens from the collection of\n `owner` (the caller must have approval to do this for all tokens), and\n mints to them the token type(s) indicated. The caller must have minting\n privileges and transfer access to all listed tokens (which must be owned\n by the indicated account).\n @return tokenIds The created tokenIDs, in the same order as their specified types."
+            },
+            "functionSelector": "8891a475",
+            "id": 4098,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "exchange",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4093,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4086,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2856:13:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4085,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2856:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4089,
+                  "mutability": "mutable",
+                  "name": "burnTokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2871:31:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4087,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2871:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4088,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2871:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4092,
+                  "mutability": "mutable",
+                  "name": "tokenTypes",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2904:29:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4090,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2904:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4091,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2904:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2855:79:16"
+            },
+            "returnParameters": {
+              "id": 4097,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4096,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2953:25:16",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4094,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2953:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4095,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2953:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2952:27:16"
+            },
+            "scope": 4099,
+            "src": "2838:142:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 4100,
+        "src": "475:2507:16"
+      }
+    ],
+    "src": "0:2983:16"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721TypeExchangeable.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        9218
+      ],
+      "IERC721": [
+        7903
+      ],
+      "IERC721Collectible": [
+        4030
+      ],
+      "IERC721TypeExchangeable": [
+        4099
+      ]
+    },
+    "id": 4100,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721Collectible.sol",
+        "file": "./IERC721Collectible.sol",
+        "id": 4032,
+        "nodeType": "ImportDirective",
+        "scope": 4100,
+        "sourceUnit": 4031,
+        "src": "0:34:16",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 4033,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "451:23:16"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 4099,
+        "linearizedBaseContracts": [
+          4099
+        ],
+        "name": "IERC721TypeExchangeable",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 4034,
+              "nodeType": "StructuredDocumentation",
+              "src": "515:289:16",
+              "text": " @dev Creates a new token for `to`. Its token ID will be automatically\n assigned (and available on the emitted {IERC721-Transfer} event), and the token\n URI autogenerated based on the base URI passed at construction.\n @return tokenId The created tokenID"
+            },
+            "functionSelector": "40c10f19",
+            "id": 4043,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mint",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4039,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4036,
+                  "mutability": "mutable",
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4043,
+                  "src": "823:10:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4035,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "823:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4038,
+                  "mutability": "mutable",
+                  "name": "tokenType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4043,
+                  "src": "835:17:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4037,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "835:7:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "822:31:16"
+            },
+            "returnParameters": {
+              "id": 4042,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4041,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4043,
+                  "src": "872:15:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4040,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "872:7:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "871:17:16"
+            },
+            "scope": 4099,
+            "src": "809:80:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4044,
+              "nodeType": "StructuredDocumentation",
+              "src": "895:336:16",
+              "text": " @dev Creates a new token for `to`. Its token ID will be automatically\n assigned (and available on the emitted {IERC721-Transfer} event), and the token\n URI autogenerated based on the base URI passed at construction.\n @return tokenIds The created tokenIDs, in the same order as their specified types."
+            },
+            "functionSelector": "ca7445fa",
+            "id": 4055,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "massMint",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4050,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4046,
+                  "mutability": "mutable",
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4055,
+                  "src": "1254:10:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4045,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1254:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4049,
+                  "mutability": "mutable",
+                  "name": "tokenTypes",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4055,
+                  "src": "1266:29:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4047,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1266:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4048,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1266:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1253:43:16"
+            },
+            "returnParameters": {
+              "id": 4054,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4053,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4055,
+                  "src": "1315:25:16",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4051,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1315:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4052,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1315:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1314:27:16"
+            },
+            "scope": 4099,
+            "src": "1236:106:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4056,
+              "nodeType": "StructuredDocumentation",
+              "src": "1348:213:16",
+              "text": " @dev Burns the indicated token from `from`'s collection. Only allowed if the\n caller has approval to access this token its owner's collection (and `from`\n is the owner of the token)."
+            },
+            "functionSelector": "79cc6790",
+            "id": 4063,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "burnFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4061,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4058,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4063,
+                  "src": "1584:12:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4057,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1584:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4060,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4063,
+                  "src": "1598:15:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 4059,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1598:7:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1583:31:16"
+            },
+            "returnParameters": {
+              "id": 4062,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1623:0:16"
+            },
+            "scope": 4099,
+            "src": "1566:58:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4064,
+              "nodeType": "StructuredDocumentation",
+              "src": "1630:213:16",
+              "text": " @dev Burns the indicated token from `from`'s collection. Only allowed if the\n caller has approval to access this token its owner's collection (and `from`\n is the owner of the token)."
+            },
+            "functionSelector": "8245fc0b",
+            "id": 4072,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "massBurnFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4070,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4066,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4072,
+                  "src": "1870:12:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4065,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1870:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4069,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4072,
+                  "src": "1884:27:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4067,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1884:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4068,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1884:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1869:43:16"
+            },
+            "returnParameters": {
+              "id": 4071,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1921:0:16"
+            },
+            "scope": 4099,
+            "src": "1848:74:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4073,
+              "nodeType": "StructuredDocumentation",
+              "src": "1928:352:16",
+              "text": " @dev Mass transfers tokens (listed as IDs) between the indicated addresses.\n The caller must have access to the tokens, which must all be owned by the\n indicated address. This is not a _safe_ transfer; tokens may be trapped\n in a contract which can't access them. For safe transfers, move them\n one at a time."
+            },
+            "functionSelector": "a94ed1f8",
+            "id": 4083,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "massTransferFrom",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4081,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4075,
+                  "mutability": "mutable",
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4083,
+                  "src": "2311:12:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4074,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2311:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4077,
+                  "mutability": "mutable",
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4083,
+                  "src": "2325:10:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4076,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2325:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4080,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4083,
+                  "src": "2337:26:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4078,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2337:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4079,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2337:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2310:54:16"
+            },
+            "returnParameters": {
+              "id": 4082,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2373:0:16"
+            },
+            "scope": 4099,
+            "src": "2285:89:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 4084,
+              "nodeType": "StructuredDocumentation",
+              "src": "2380:453:16",
+              "text": " @dev A batch-operation: burns the indicated tokens from the collection of\n `owner` (the caller must have approval to do this for all tokens), and\n mints to them the token type(s) indicated. The caller must have minting\n privileges and transfer access to all listed tokens (which must be owned\n by the indicated account).\n @return tokenIds The created tokenIDs, in the same order as their specified types."
+            },
+            "functionSelector": "8891a475",
+            "id": 4098,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "exchange",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4093,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4086,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2856:13:16",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4085,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2856:7:16",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4089,
+                  "mutability": "mutable",
+                  "name": "burnTokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2871:31:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4087,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2871:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4088,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2871:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 4092,
+                  "mutability": "mutable",
+                  "name": "tokenTypes",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2904:29:16",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4090,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2904:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4091,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2904:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2855:79:16"
+            },
+            "returnParameters": {
+              "id": 4097,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4096,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4098,
+                  "src": "2953:25:16",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 4094,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2953:7:16",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 4095,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2953:9:16",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2952:27:16"
+            },
+            "scope": 4099,
+            "src": "2838:142:16",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 4100,
+        "src": "475:2507:16"
+      }
+    ],
+    "src": "0:2983:16"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-07-28T17:10:18.579Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "burnFrom(address,uint256)": {
+        "details": "Burns the indicated token from `from`'s collection. Only allowed if the caller has approval to access this token its owner's collection (and `from` is the owner of the token)."
+      },
+      "exchange(address,uint256[],uint256[])": {
+        "details": "A batch-operation: burns the indicated tokens from the collection of `owner` (the caller must have approval to do this for all tokens), and mints to them the token type(s) indicated. The caller must have minting privileges and transfer access to all listed tokens (which must be owned by the indicated account).",
+        "returns": {
+          "tokenIds": "The created tokenIDs, in the same order as their specified types."
+        }
+      },
+      "massBurnFrom(address,uint256[])": {
+        "details": "Burns the indicated token from `from`'s collection. Only allowed if the caller has approval to access this token its owner's collection (and `from` is the owner of the token)."
+      },
+      "massMint(address,uint256[])": {
+        "details": "Creates a new token for `to`. Its token ID will be automatically assigned (and available on the emitted {IERC721-Transfer} event), and the token URI autogenerated based on the base URI passed at construction.",
+        "returns": {
+          "tokenIds": "The created tokenIDs, in the same order as their specified types."
+        }
+      },
+      "massTransferFrom(address,address,uint256[])": {
+        "details": "Mass transfers tokens (listed as IDs) between the indicated addresses. The caller must have access to the tokens, which must all be owned by the indicated address. This is not a _safe_ transfer; tokens may be trapped in a contract which can't access them. For safe transfers, move them one at a time."
+      },
+      "mint(address,uint256)": {
+        "details": "Creates a new token for `to`. Its token ID will be automatically assigned (and available on the emitted {IERC721-Transfer} event), and the token URI autogenerated based on the base URI passed at construction.",
+        "returns": {
+          "tokenId": "The created tokenID"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

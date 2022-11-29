@@ -1,0 +1,318 @@
+{
+  "contractName": "ITokenCollectionListener",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "tokenCollectionChanged",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"tokenCollectionChanged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol\":\"ITokenCollectionListener\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol\":{\"keccak256\":\"0xe7e7b6e0cdf5a50655158263c76f118140807525c6fb73b444235a235eedbdf2\",\"urls\":[\"bzz-raw://3431edbcf32f534f95db495af8ef99b694cdb7814f9c51fd75f3fde0f0bf0d92\",\"dweb:/ipfs/QmQmnktKVi42oimhujcjZ9FC48RFAbDXmYnDmzLqMXeFCW\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796ab6e88af7bf0e78def0f059310c903af6a312b565344e0ff524a0f26e81c6\",\"dweb:/ipfs/QmcsVgLgzWdor3UnAztUkXKNGcysm1MPneWksF72AvnwBx\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"@openzeppelin/contracts/utils/introspection/IERC165.sol\";\n\n// A listener for changes to ERC721Collectible balances, for when accumulating\n// effects occur based on the collectible(s) owned by a user.\npragma solidity ^0.8.0;\ninterface ITokenCollectionListener is IERC165 {\n    // @dev Informs the listener that the token collection of the given use has changed.\n    // this call is streamlined (does not indicate which tokens have been added\n    // or removed) to avoid a large transaction cost for batch transfers.\n    function tokenCollectionChanged(address _owner) external;\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        5449
+      ],
+      "ITokenCollectionListener": [
+        234
+      ]
+    },
+    "id": 235,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "id": 225,
+        "nodeType": "ImportDirective",
+        "scope": 235,
+        "sourceUnit": 5450,
+        "src": "0:65:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 226,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "208:23:6"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 227,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 5449,
+              "src": "270:7:6"
+            },
+            "id": 228,
+            "nodeType": "InheritanceSpecifier",
+            "src": "270:7:6"
+          }
+        ],
+        "contractDependencies": [
+          5449
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 234,
+        "linearizedBaseContracts": [
+          234,
+          5449
+        ],
+        "name": "ITokenCollectionListener",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "024e6b5a",
+            "id": 233,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenCollectionChanged",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 231,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 230,
+                  "mutability": "mutable",
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 233,
+                  "src": "559:14:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 229,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "559:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "558:16:6"
+            },
+            "returnParameters": {
+              "id": 232,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "583:0:6"
+            },
+            "scope": 234,
+            "src": "527:57:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 235,
+        "src": "232:354:6"
+      }
+    ],
+    "src": "0:587:6"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/ITokenCollectionListener.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        5449
+      ],
+      "ITokenCollectionListener": [
+        234
+      ]
+    },
+    "id": 235,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "id": 225,
+        "nodeType": "ImportDirective",
+        "scope": 235,
+        "sourceUnit": 5450,
+        "src": "0:65:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 226,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "208:23:6"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 227,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 5449,
+              "src": "270:7:6"
+            },
+            "id": 228,
+            "nodeType": "InheritanceSpecifier",
+            "src": "270:7:6"
+          }
+        ],
+        "contractDependencies": [
+          5449
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 234,
+        "linearizedBaseContracts": [
+          234,
+          5449
+        ],
+        "name": "ITokenCollectionListener",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "024e6b5a",
+            "id": 233,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenCollectionChanged",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 231,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 230,
+                  "mutability": "mutable",
+                  "name": "_owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 233,
+                  "src": "559:14:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 229,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "559:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "558:16:6"
+            },
+            "returnParameters": {
+              "id": 232,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "583:0:6"
+            },
+            "scope": 234,
+            "src": "527:57:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 235,
+        "src": "232:354:6"
+      }
+    ],
+    "src": "0:587:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-07-14T20:50:06.076Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "supportsInterface(bytes4)": {
+        "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

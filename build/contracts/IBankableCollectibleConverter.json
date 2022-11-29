@@ -1,0 +1,1018 @@
+{
+  "contractName": "IBankableCollectibleConverter",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenTypes",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "Bank",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "recipeId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIdsIn",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenTypesIn",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "tokenIdsOut",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "Conversion",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_recipeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maximumCost",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_tokenIdsIn",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "canConvert",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_recipeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maximumCost",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_tokenIdsIn",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "convert",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIdsOut",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "purchaseToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_recipeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "recipeAvailable",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "recipeCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_recipeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "recipeInput",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenTypes",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_recipeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "recipeOutput",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenTypes",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_recipeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "recipePrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "_tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "bank",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenType",
+          "type": "uint256"
+        }
+      ],
+      "name": "bankedBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tokenIds\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tokenTypes\",\"type\":\"uint256[]\"}],\"name\":\"Bank\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"recipeId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tokenIdsIn\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tokenTypesIn\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"tokenIdsOut\",\"type\":\"uint256[]\"}],\"name\":\"Conversion\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"_tokenIds\",\"type\":\"uint256[]\"}],\"name\":\"bank\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"}],\"name\":\"bankedBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_recipeId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maximumCost\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_tokenIdsIn\",\"type\":\"uint256[]\"}],\"name\":\"canConvert\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_recipeId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maximumCost\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_tokenIdsIn\",\"type\":\"uint256[]\"}],\"name\":\"convert\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenIdsOut\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"purchaseToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_recipeId\",\"type\":\"uint256\"}],\"name\":\"recipeAvailable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"recipeCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_recipeId\",\"type\":\"uint256\"}],\"name\":\"recipeInput\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenTypes\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_recipeId\",\"type\":\"uint256\"}],\"name\":\"recipeOutput\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"tokenTypes\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_recipeId\",\"type\":\"uint256\"}],\"name\":\"recipePrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/IBankableCollectibleConverter.sol\":\"IBankableCollectibleConverter\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/IBankableCollectibleConverter.sol\":{\"keccak256\":\"0x30a1b95dd599473f341dbf60f01858c75cda9a213818367784687f87c089e5d8\",\"urls\":[\"bzz-raw://2db6a08346d70078d52700634561d8ee0cb92bc59240ce6dcf991aa68eb3f4f6\",\"dweb:/ipfs/QmYUWpA2o1T5tV3ajUQR855MAfeZDPM6fFCwEqLGKjXeb8\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/ICollectibleConverter.sol\":{\"keccak256\":\"0x68f78c60e29325285f15e41420f30d8639a0d139108955d72c730211fd0ba9e0\",\"urls\":[\"bzz-raw://f98a91941906b54f81c40d3f883c78a50d3f3937c3fba9d6ce22a25039b535b0\",\"dweb:/ipfs/QmXouYXXJ7qxywYtojEkvpD7WMXckbBLcmJYbJL9HEXnoE\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"./ICollectibleConverter.sol\";\n\npragma solidity ^0.8.0;\ninterface IBankableCollectibleConverter is ICollectibleConverter {\n  // @dev Bank the indicated tokens in the converter for later conversion into\n  // a different token type by one of its recipes. Banked tokens may not be\n  // recoverable; no recovery functions are specified in this interface, though\n  // individual implementations are free to provide them if appropriate.\n  //\n  // The result of banking tokens is that a later {convert} operation must\n  // only specify the remaining token required, not those already banked.\n  function bank(uint256[] calldata _tokenIds) external;\n\n  // @dev Returns the number of tokens of the given type currently banked by\n  // `_user` of the given `_tokenType`. {bank} will increase this number;\n  // {convert} will possibly reduce it.\n  function bankedBalance(address _user, uint256 _tokenType) external view returns (uint256);\n\n  event Bank(address indexed owner, uint256[] tokenIds, uint256[] tokenTypes);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/IBankableCollectibleConverter.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/IBankableCollectibleConverter.sol",
+    "exportedSymbols": {
+      "IBankableCollectibleConverter": [
+        2101
+      ],
+      "ICollectibleConverter": [
+        2191
+      ]
+    },
+    "id": 2102,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/ICollectibleConverter.sol",
+        "file": "./ICollectibleConverter.sol",
+        "id": 2072,
+        "nodeType": "ImportDirective",
+        "scope": 2102,
+        "sourceUnit": 2192,
+        "src": "0:37:2",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 2073,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "39:23:2"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 2074,
+              "name": "ICollectibleConverter",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 2191,
+              "src": "106:21:2"
+            },
+            "id": 2075,
+            "nodeType": "InheritanceSpecifier",
+            "src": "106:21:2"
+          }
+        ],
+        "contractDependencies": [
+          2191
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 2101,
+        "linearizedBaseContracts": [
+          2101,
+          2191
+        ],
+        "name": "IBankableCollectibleConverter",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "37eef528",
+            "id": 2081,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "bank",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2079,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2078,
+                  "mutability": "mutable",
+                  "name": "_tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2081,
+                  "src": "608:28:2",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2076,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "608:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2077,
+                    "nodeType": "ArrayTypeName",
+                    "src": "608:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "607:30:2"
+            },
+            "returnParameters": {
+              "id": 2080,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "646:0:2"
+            },
+            "scope": 2101,
+            "src": "594:53:2",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "451c906a",
+            "id": 2090,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "bankedBalance",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2086,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2083,
+                  "mutability": "mutable",
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2090,
+                  "src": "865:13:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2082,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "865:7:2",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2085,
+                  "mutability": "mutable",
+                  "name": "_tokenType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2090,
+                  "src": "880:18:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2084,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "880:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "864:35:2"
+            },
+            "returnParameters": {
+              "id": 2089,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2088,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2090,
+                  "src": "923:7:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2087,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "923:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "922:9:2"
+            },
+            "scope": 2101,
+            "src": "842:90:2",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "anonymous": false,
+            "id": 2100,
+            "name": "Bank",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 2099,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2092,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2100,
+                  "src": "947:21:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2091,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "947:7:2",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2095,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2100,
+                  "src": "970:18:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2093,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "970:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2094,
+                    "nodeType": "ArrayTypeName",
+                    "src": "970:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2098,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenTypes",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2100,
+                  "src": "990:20:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2096,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "990:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2097,
+                    "nodeType": "ArrayTypeName",
+                    "src": "990:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "946:65:2"
+            },
+            "src": "936:76:2"
+          }
+        ],
+        "scope": 2102,
+        "src": "63:951:2"
+      }
+    ],
+    "src": "0:1015:2"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/IBankableCollectibleConverter.sol",
+    "exportedSymbols": {
+      "IBankableCollectibleConverter": [
+        2101
+      ],
+      "ICollectibleConverter": [
+        2191
+      ]
+    },
+    "id": 2102,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/conversion/interfaces/ICollectibleConverter.sol",
+        "file": "./ICollectibleConverter.sol",
+        "id": 2072,
+        "nodeType": "ImportDirective",
+        "scope": 2102,
+        "sourceUnit": 2192,
+        "src": "0:37:2",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 2073,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "39:23:2"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 2074,
+              "name": "ICollectibleConverter",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 2191,
+              "src": "106:21:2"
+            },
+            "id": 2075,
+            "nodeType": "InheritanceSpecifier",
+            "src": "106:21:2"
+          }
+        ],
+        "contractDependencies": [
+          2191
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 2101,
+        "linearizedBaseContracts": [
+          2101,
+          2191
+        ],
+        "name": "IBankableCollectibleConverter",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "37eef528",
+            "id": 2081,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "bank",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2079,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2078,
+                  "mutability": "mutable",
+                  "name": "_tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2081,
+                  "src": "608:28:2",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2076,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "608:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2077,
+                    "nodeType": "ArrayTypeName",
+                    "src": "608:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "607:30:2"
+            },
+            "returnParameters": {
+              "id": 2080,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "646:0:2"
+            },
+            "scope": 2101,
+            "src": "594:53:2",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "451c906a",
+            "id": 2090,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "bankedBalance",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2086,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2083,
+                  "mutability": "mutable",
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2090,
+                  "src": "865:13:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2082,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "865:7:2",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2085,
+                  "mutability": "mutable",
+                  "name": "_tokenType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2090,
+                  "src": "880:18:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2084,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "880:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "864:35:2"
+            },
+            "returnParameters": {
+              "id": 2089,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2088,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2090,
+                  "src": "923:7:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2087,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "923:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "922:9:2"
+            },
+            "scope": 2101,
+            "src": "842:90:2",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "anonymous": false,
+            "id": 2100,
+            "name": "Bank",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 2099,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2092,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2100,
+                  "src": "947:21:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2091,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "947:7:2",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2095,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenIds",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2100,
+                  "src": "970:18:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2093,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "970:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2094,
+                    "nodeType": "ArrayTypeName",
+                    "src": "970:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2098,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "tokenTypes",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2100,
+                  "src": "990:20:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2096,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "990:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2097,
+                    "nodeType": "ArrayTypeName",
+                    "src": "990:9:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "946:65:2"
+            },
+            "src": "936:76:2"
+          }
+        ],
+        "scope": 2102,
+        "src": "63:951:2"
+      }
+    ],
+    "src": "0:1015:2"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-08-10T22:08:44.437Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

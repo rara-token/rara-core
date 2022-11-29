@@ -1,0 +1,529 @@
+{
+  "contractName": "IEIP210",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "eip210Blockhash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "eip210BlockhashEstimate",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_blockhash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "_immutable",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"eip210Blockhash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"eip210BlockhashEstimate\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"_blockhash\",\"type\":\"bytes32\"},{\"internalType\":\"bool\",\"name\":\"_immutable\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/eip/IEIP210.sol\":\"IEIP210\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/eip/IEIP210.sol\":{\"keccak256\":\"0xb50464ba6130732015127fe1ba4330b86b7403c6eee3b55c31cfc4741054da21\",\"urls\":[\"bzz-raw://607a6b5f05f19d3a6afe0e5b019f9e8e9cab3fe556d3a838973b4241c0b5ef70\",\"dweb:/ipfs/QmZK2WZTMgn1yGHzhcQr8SKgarNii6xeWz5fRozwVLNtAM\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// @dev A contract which records blockhashes for later retrieval. Solidity\n// supports blockhash(blockNumber), but only for the most recent 256 blocks.\n// In some cases hashes for older blocks are useful or necessary; for instance,\n// 2-step \"purchase-then-reveal\" PNG draws might use block hash information\n// that occurs between the two steps to determine the result, but if the \"reveal\"\n// transaction occurs more than 256 blocks later the only two options are\n// 1. Invalidate the purchase, or 2. Allow the revealed data to be determined\n// by when the reveal happens.\n//\n// This contract attempts to mitigate this risk by simulating the effects of\n// EIP-210 (https://eips.ethereum.org/EIPS/eip-210), a proposed rule change that\n// makes blockhashes available for all blocks going forward (eliminating the\n// Blockhash-Minus-256 problem).\n//\n// This contract combines in-contract blockhash storage with blockhash \"simulation\"\n// as used by CryptoKitties. This allows genuine hashes to be retrieved for\n// blocks recorded earlier, and immutable \"simulated\" hashes to be used for\n// others (once read, the simulated hash is recorded).\n//\n// The simulation output changes only once every 256 blocks, meaning attackers\n// that revert unfavorable simulations can only make one attempt every 12.8 minutes\n// (on BSC; longer on Ethereum). Further, as this record is shared among all users,\n// proper use may cause a disadvantageous simulation to be written by a non-attacker\n// as a side-effect of their actions. For example, as a side-effect of purchasing\n// a random draw to be fulfilled later, a contract might record a different user's\n// pending blockhash into this contract. This prevents the attacker from later\n// attempting try-and-revert since the results become fixed.\npragma solidity ^0.8.0;\ninterface IEIP210 {\n    // @dev Returns the blockhash (real or simulated) for the given block,\n    // storing the result if not previously calculated. This method is strongly\n    // preferred over {eip210BlockhashReadOnly} as the result of this function\n    // will always be consistent after the first committed transaction.\n    function eip210Blockhash(uint256 _blockNumber) external returns (bytes32);\n\n    // @dev Returns the blockhash (real or simulated) for the given block,\n    // without storing the result. Useful in `view` functions but otherwise\n    // {eip210Blockhash} is preferred, as the results are immutable over time.\n    // If `_immutable`, the output of this function will be  consistent over time;\n    // otherwise it may change at an indeterminate point (every 256 blocks).\n    function eip210BlockhashEstimate(uint256 _blockNumber) external view returns (bytes32 _blockhash, bool _immutable);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/eip/IEIP210.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/eip/IEIP210.sol",
+    "exportedSymbols": {
+      "IEIP210": [
+        11352
+      ]
+    },
+    "id": 11353,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 11335,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "1778:23:30"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 11352,
+        "linearizedBaseContracts": [
+          11352
+        ],
+        "name": "IEIP210",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "f9130701",
+            "id": 11342,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "eip210Blockhash",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 11338,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11337,
+                  "mutability": "mutable",
+                  "name": "_blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11342,
+                  "src": "2157:20:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 11336,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2157:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2156:22:30"
+            },
+            "returnParameters": {
+              "id": 11341,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11340,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11342,
+                  "src": "2197:7:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 11339,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2197:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2196:9:30"
+            },
+            "scope": 11352,
+            "src": "2132:74:30",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "26c040b6",
+            "id": 11351,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "eip210BlockhashEstimate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 11345,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11344,
+                  "mutability": "mutable",
+                  "name": "_blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11351,
+                  "src": "2635:20:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 11343,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2635:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2634:22:30"
+            },
+            "returnParameters": {
+              "id": 11350,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11347,
+                  "mutability": "mutable",
+                  "name": "_blockhash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11351,
+                  "src": "2680:18:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 11346,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2680:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 11349,
+                  "mutability": "mutable",
+                  "name": "_immutable",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11351,
+                  "src": "2700:15:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 11348,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2700:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2679:37:30"
+            },
+            "scope": 11352,
+            "src": "2602:115:30",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 11353,
+        "src": "1802:917:30"
+      }
+    ],
+    "src": "1778:942:30"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/eip/IEIP210.sol",
+    "exportedSymbols": {
+      "IEIP210": [
+        11352
+      ]
+    },
+    "id": 11353,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 11335,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "1778:23:30"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 11352,
+        "linearizedBaseContracts": [
+          11352
+        ],
+        "name": "IEIP210",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "f9130701",
+            "id": 11342,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "eip210Blockhash",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 11338,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11337,
+                  "mutability": "mutable",
+                  "name": "_blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11342,
+                  "src": "2157:20:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 11336,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2157:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2156:22:30"
+            },
+            "returnParameters": {
+              "id": 11341,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11340,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11342,
+                  "src": "2197:7:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 11339,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2197:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2196:9:30"
+            },
+            "scope": 11352,
+            "src": "2132:74:30",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "26c040b6",
+            "id": 11351,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "eip210BlockhashEstimate",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 11345,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11344,
+                  "mutability": "mutable",
+                  "name": "_blockNumber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11351,
+                  "src": "2635:20:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 11343,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2635:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2634:22:30"
+            },
+            "returnParameters": {
+              "id": 11350,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 11347,
+                  "mutability": "mutable",
+                  "name": "_blockhash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11351,
+                  "src": "2680:18:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 11346,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2680:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 11349,
+                  "mutability": "mutable",
+                  "name": "_immutable",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 11351,
+                  "src": "2700:15:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 11348,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2700:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2679:37:30"
+            },
+            "scope": 11352,
+            "src": "2602:115:30",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 11353,
+        "src": "1802:917:30"
+      }
+    ],
+    "src": "1778:942:30"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-11-05T17:51:34.592Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

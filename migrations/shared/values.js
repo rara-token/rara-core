@@ -35,15 +35,16 @@ module.exports = exports = ({ network, web3 }) => {
     return bn(n).mul(bn(10).pow(bn(d)));
   }
 
-  function expandTo8Decimals(n) {
-    return expandToDecimals(n, 8);
-  }
-
   const values = {};
+
+  // remove extra name text
+  network = network.replace('-fork', '');
+  network = network.replace('_moralis', '').replace('moralis_', '');
 
   // standardize network name
   if (network === 'bsc_test-fork') network = 'bsc_test';
   if (network === 'bsc-fork') network = 'bsc';
+  if (network === 'test-fork' || network === 'ganache-fork') network = 'test';
 
   // token addresses
   // TODO expand with tokens used in migration, including LP token pools
@@ -69,10 +70,10 @@ module.exports = exports = ({ network, web3 }) => {
   const ONE_DAY = bn(28800);  // 3 sec / block
   const ONE_WEEK = ONE_DAY.mul(bn(7));
   const blocks = values['blocks'] = values['block'] = {
-    mainnet: {
-      start: bn('8207763')    // TODO: configure
+    bsc: {
+      start: bn('8978363')    // Estimated at 10 AM EST (2 PM UTC) July 8th.
     },
-    rinkeby: {
+    bsc_test: {
       start: bn('9642666')    // TODO: configure
     },
     test: {
@@ -81,10 +82,29 @@ module.exports = exports = ({ network, web3 }) => {
   }[network]
   blocks['unlock'] = blocks.start.add(ONE_WEEK.mul(bn(2))); // 14 days later
 
+  const decimals = values['decimals'] = {
+    bsc: {
+      rara: 18
+    },
+    bsc_test: {
+      rara: 8
+    },
+    test: {
+      rara: 18
+    }
+  }[network];
+
   // emitter inputs
+  const raraDecimals = decimals.rara;
   const emitter = values['emitter'] = {
-    raraPerBlock: expandTo8Decimals(48),
-    startBlock: blocks.start
+    raraPerBlock: expandToDecimals(48, raraDecimals),
+    startBlock: blocks.start,
+    raraToMiningPool: expandToDecimals(12, raraDecimals),
+    raraToMysteryBox: expandToDecimals(8, raraDecimals),
+
+    raraToLPMiningPostBurn: expandToDecimals(114, raraDecimals - 1),
+    raraToAnimalMiningPostBurn: expandToDecimals(76, raraDecimals - 1),
+    raraToBurn: expandToDecimals(1, raraDecimals)
   }
 
   // mining pool inputs
@@ -97,7 +117,8 @@ module.exports = exports = ({ network, web3 }) => {
     const roles = values['roles'] = values['role'] = {
       manager: web3.utils.soliditySha3('MANAGER_ROLE'),
       minter: web3.utils.soliditySha3('MINTER_ROLE'),
-      pauser: web3.utils.soliditySha3('PAUSER_ROLE')
+      pauser: web3.utils.soliditySha3('PAUSER_ROLE'),
+      lender: web3.utils.soliditySha3('LENDER_ROLE'),
     }
   }
 

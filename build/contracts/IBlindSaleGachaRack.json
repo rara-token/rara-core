@@ -1,0 +1,2791 @@
+{
+  "contractName": "IBlindSaleGachaRack",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "drawId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "gameId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "prizeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Draw",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "drawId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        }
+      ],
+      "name": "DrawPurchase",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "availableSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        }
+      ],
+      "name": "drawCountBy",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "drawIdBy",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "drawPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_draws",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maximumCost",
+          "type": "uint256"
+        }
+      ],
+      "name": "purchaseDraws",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "purchaseToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalDraws",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "gameCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentGame",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        }
+      ],
+      "name": "prizeCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        }
+      ],
+      "name": "totalPrizeWeight",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_prizeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "prizeWeight",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        }
+      ],
+      "name": "gameDrawCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "gameDrawId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_prizeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "prizeDrawCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_prizeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "prizeDrawId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_did",
+          "type": "uint256"
+        }
+      ],
+      "name": "drawGameId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "gameId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_did",
+          "type": "uint256"
+        }
+      ],
+      "name": "drawPrizeId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "prizeId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"drawId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"prizeId\",\"type\":\"uint256\"}],\"name\":\"Draw\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"drawId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"DrawPurchase\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"availableSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentGame\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"}],\"name\":\"drawCountBy\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_did\",\"type\":\"uint256\"}],\"name\":\"drawGameId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"drawIdBy\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"drawPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_did\",\"type\":\"uint256\"}],\"name\":\"drawPrizeId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"gameId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"prizeId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"gameCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"}],\"name\":\"gameDrawCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"gameDrawId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"}],\"name\":\"prizeCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_prizeId\",\"type\":\"uint256\"}],\"name\":\"prizeDrawCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_prizeId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"prizeDrawId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_prizeId\",\"type\":\"uint256\"}],\"name\":\"prizeWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_draws\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maximumCost\",\"type\":\"uint256\"}],\"name\":\"purchaseDraws\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"purchaseToken\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalDraws\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"}],\"name\":\"totalPrizeWeight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSaleGachaRack.sol\":\"IBlindSaleGachaRack\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSale.sol\":{\"keccak256\":\"0x19fe4d12ecfb05ff668b2800e452cbac93509dae9f74d01da8df26f7c79a1976\",\"urls\":[\"bzz-raw://c8c4069f9205f53c336534a9efb45cddb974b9111223031be1b2df7e21eceb97\",\"dweb:/ipfs/QmSGVxjaTrEbKwbh8mV2xj9eFcTVgnVuzbUAdUeK3B8d9w\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSaleGachaRack.sol\":{\"keccak256\":\"0xc6ec965f2392ce7b0b084c275d45beece96be9c68199e6d29ea8775c0157c963\",\"urls\":[\"bzz-raw://7676d6776957c0e768d84ae26b19bdc8586394fb5fdbc27d65981e084859d89f\",\"dweb:/ipfs/QmXiXH2MUAHzE4EmQ4ubHKkruQCUtDuJykx1jL8UKtPU8k\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"./IBlindSale.sol\";\n\n/**\n * @dev A blind box sale that acts like a rack of Gacha games, each with its\n * own prize set and probabilities. Uses a two-index system, gameId and prizeId,\n * to identify prizes.\n *\n * To support {purchaseDraws} and {drawPrice}, GachaRacks should have a current or \"default\"\n * gameId. It is unspecified whether other gameIds are accessible for draws\n * or if the purchaser is forced to use the current game.\n *\n * Distinguished from\n */\npragma solidity ^0.8.0;\ninterface IBlindSaleGachaRack is IBlindSale {\n    // @dev Returns the number of games available in this rack.\n    function gameCount() external view returns (uint256);\n\n    // @dev Returns the current active game used for {purchaseDraws}. In some\n    // cases, players may choose the game they want, with {currentGame} acting\n    // only as a default value; in others the contract forces all purchases\n    // to use the current game.\n    function currentGame() external view returns (uint256);\n\n    // @dev Returns the number of distinct prizes offered by game `_gameId`\n    // (each prize may have multiple instances and be drawn multiple times,\n    // but they should be identical).\n    function prizeCount(uint256 _gameId) external view returns (uint256);\n\n    // @dev Returns the total weight of all prizes in the indicated game.\n    function totalPrizeWeight(uint256 _gameId) external view returns (uint256);\n\n    // @dev Returns the probability \"weight\" for the given `_prizeId` in game\n    // `_gameId`.\n    function prizeWeight(uint256 _gameId, uint256 _prizeId) external view returns (uint256);\n\n    // @dev The number of times this game has been drawn (so far).\n    function gameDrawCount(uint256 _gameId) external view returns (uint256);\n\n    // @dev The `drawId` of the `indexed` time a draw was purchased from\n    // the indicated game.\n    function gameDrawId(uint256 _gameId, uint256 _index) external view returns (uint256);\n\n    // @dev The number of times this prize has been drawn (so far).\n    function prizeDrawCount(uint256 _gameId, uint256 _prizeId) external view returns (uint256);\n\n    // @dev The `drawId` of the `indexed` time the indicated prize was\n    // awarded for the indicated game.\n    function prizeDrawId(uint256 _gameId, uint256 _prizeId, uint256 _index) external view returns (uint256);\n\n    // @dev Returns the game played by the indicated draw draw.\n    function drawGameId(uint256 _did) external view returns (uint256 gameId);\n\n    // @dev Returns the prize won with the indicated draw (gameId and prizeId)\n    function drawPrizeId(uint256 _did) external view returns (uint256 gameId, uint256 prizeId);\n\n    event Draw(address indexed user, uint256 drawId, uint256 indexed gameId, uint256 indexed prizeId);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSaleGachaRack.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSaleGachaRack.sol",
+    "exportedSymbols": {
+      "IBlindSale": [
+        5796
+      ],
+      "IBlindSaleGachaRack": [
+        5949
+      ]
+    },
+    "id": 5950,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSale.sol",
+        "file": "./IBlindSale.sol",
+        "id": 5850,
+        "nodeType": "ImportDirective",
+        "scope": 5950,
+        "sourceUnit": 5797,
+        "src": "0:26:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 5851,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "472:23:9"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 5852,
+              "name": "IBlindSale",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 5796,
+              "src": "529:10:9"
+            },
+            "id": 5853,
+            "nodeType": "InheritanceSpecifier",
+            "src": "529:10:9"
+          }
+        ],
+        "contractDependencies": [
+          5796
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 5949,
+        "linearizedBaseContracts": [
+          5949,
+          5796
+        ],
+        "name": "IBlindSaleGachaRack",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "4d1975b4",
+            "id": 5858,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "gameCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5854,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "628:2:9"
+            },
+            "returnParameters": {
+              "id": 5857,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5856,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5858,
+                  "src": "654:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5855,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "654:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "653:9:9"
+            },
+            "scope": 5949,
+            "src": "610:53:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "60b663bb",
+            "id": 5863,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "currentGame",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5859,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "954:2:9"
+            },
+            "returnParameters": {
+              "id": 5862,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5861,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5863,
+                  "src": "980:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5860,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "980:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "979:9:9"
+            },
+            "scope": 5949,
+            "src": "934:55:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "802155db",
+            "id": 5870,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5866,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5865,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5870,
+                  "src": "1205:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5864,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1205:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1204:17:9"
+            },
+            "returnParameters": {
+              "id": 5869,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5868,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5870,
+                  "src": "1245:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5867,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1245:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1244:9:9"
+            },
+            "scope": 5949,
+            "src": "1185:69:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "16237065",
+            "id": 5877,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "totalPrizeWeight",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5873,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5872,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5877,
+                  "src": "1360:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5871,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1360:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1359:17:9"
+            },
+            "returnParameters": {
+              "id": 5876,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5875,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5877,
+                  "src": "1400:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5874,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1400:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1399:9:9"
+            },
+            "scope": 5949,
+            "src": "1334:75:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "277bf178",
+            "id": 5886,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeWeight",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5882,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5879,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5886,
+                  "src": "1532:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5878,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1532:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5881,
+                  "mutability": "mutable",
+                  "name": "_prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5886,
+                  "src": "1549:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5880,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1549:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1531:35:9"
+            },
+            "returnParameters": {
+              "id": 5885,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5884,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5886,
+                  "src": "1590:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5883,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1590:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1589:9:9"
+            },
+            "scope": 5949,
+            "src": "1511:88:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "e11f96dd",
+            "id": 5893,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "gameDrawCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5889,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5888,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5893,
+                  "src": "1695:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5887,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1695:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1694:17:9"
+            },
+            "returnParameters": {
+              "id": 5892,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5891,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5893,
+                  "src": "1735:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5890,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1735:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1734:9:9"
+            },
+            "scope": 5949,
+            "src": "1672:72:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "cbfe9a4a",
+            "id": 5902,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "gameDrawId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5898,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5895,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5902,
+                  "src": "1870:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5894,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1870:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5897,
+                  "mutability": "mutable",
+                  "name": "_index",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5902,
+                  "src": "1887:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5896,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1887:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1869:33:9"
+            },
+            "returnParameters": {
+              "id": 5901,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5900,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5902,
+                  "src": "1926:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5899,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1926:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1925:9:9"
+            },
+            "scope": 5949,
+            "src": "1850:85:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "b61c6a84",
+            "id": 5911,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeDrawCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5907,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5904,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5911,
+                  "src": "2033:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5903,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2033:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5906,
+                  "mutability": "mutable",
+                  "name": "_prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5911,
+                  "src": "2050:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5905,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2050:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2032:35:9"
+            },
+            "returnParameters": {
+              "id": 5910,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5909,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5911,
+                  "src": "2091:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5908,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2091:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2090:9:9"
+            },
+            "scope": 5949,
+            "src": "2009:91:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "8cda9bc5",
+            "id": 5922,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeDrawId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5918,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5913,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2237:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5912,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2237:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5915,
+                  "mutability": "mutable",
+                  "name": "_prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2254:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5914,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2254:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5917,
+                  "mutability": "mutable",
+                  "name": "_index",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2272:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5916,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2272:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2236:51:9"
+            },
+            "returnParameters": {
+              "id": 5921,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5920,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2311:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5919,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2311:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2310:9:9"
+            },
+            "scope": 5949,
+            "src": "2216:104:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "992bbfbb",
+            "id": 5929,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "drawGameId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5925,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5924,
+                  "mutability": "mutable",
+                  "name": "_did",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5929,
+                  "src": "2410:12:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5923,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2410:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2409:14:9"
+            },
+            "returnParameters": {
+              "id": 5928,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5927,
+                  "mutability": "mutable",
+                  "name": "gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5929,
+                  "src": "2447:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5926,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2447:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2446:16:9"
+            },
+            "scope": 5949,
+            "src": "2390:73:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "4f73d542",
+            "id": 5938,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "drawPrizeId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5932,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5931,
+                  "mutability": "mutable",
+                  "name": "_did",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5938,
+                  "src": "2569:12:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5930,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2569:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2568:14:9"
+            },
+            "returnParameters": {
+              "id": 5937,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5934,
+                  "mutability": "mutable",
+                  "name": "gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5938,
+                  "src": "2606:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5933,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2606:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5936,
+                  "mutability": "mutable",
+                  "name": "prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5938,
+                  "src": "2622:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5935,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2622:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2605:33:9"
+            },
+            "scope": 5949,
+            "src": "2548:91:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "anonymous": false,
+            "id": 5948,
+            "name": "Draw",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 5947,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5940,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2656:20:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5939,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2656:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5942,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "drawId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2678:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5941,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2678:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5944,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2694:22:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5943,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2694:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5946,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2718:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5945,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2718:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2655:87:9"
+            },
+            "src": "2645:98:9"
+          }
+        ],
+        "scope": 5950,
+        "src": "496:2249:9"
+      }
+    ],
+    "src": "0:2746:9"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSaleGachaRack.sol",
+    "exportedSymbols": {
+      "IBlindSale": [
+        5796
+      ],
+      "IBlindSaleGachaRack": [
+        5949
+      ]
+    },
+    "id": 5950,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/blind/interfaces/IBlindSale.sol",
+        "file": "./IBlindSale.sol",
+        "id": 5850,
+        "nodeType": "ImportDirective",
+        "scope": 5950,
+        "sourceUnit": 5797,
+        "src": "0:26:9",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 5851,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "472:23:9"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 5852,
+              "name": "IBlindSale",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 5796,
+              "src": "529:10:9"
+            },
+            "id": 5853,
+            "nodeType": "InheritanceSpecifier",
+            "src": "529:10:9"
+          }
+        ],
+        "contractDependencies": [
+          5796
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 5949,
+        "linearizedBaseContracts": [
+          5949,
+          5796
+        ],
+        "name": "IBlindSaleGachaRack",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "4d1975b4",
+            "id": 5858,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "gameCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5854,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "628:2:9"
+            },
+            "returnParameters": {
+              "id": 5857,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5856,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5858,
+                  "src": "654:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5855,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "654:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "653:9:9"
+            },
+            "scope": 5949,
+            "src": "610:53:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "60b663bb",
+            "id": 5863,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "currentGame",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5859,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "954:2:9"
+            },
+            "returnParameters": {
+              "id": 5862,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5861,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5863,
+                  "src": "980:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5860,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "980:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "979:9:9"
+            },
+            "scope": 5949,
+            "src": "934:55:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "802155db",
+            "id": 5870,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5866,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5865,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5870,
+                  "src": "1205:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5864,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1205:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1204:17:9"
+            },
+            "returnParameters": {
+              "id": 5869,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5868,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5870,
+                  "src": "1245:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5867,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1245:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1244:9:9"
+            },
+            "scope": 5949,
+            "src": "1185:69:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "16237065",
+            "id": 5877,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "totalPrizeWeight",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5873,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5872,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5877,
+                  "src": "1360:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5871,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1360:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1359:17:9"
+            },
+            "returnParameters": {
+              "id": 5876,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5875,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5877,
+                  "src": "1400:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5874,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1400:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1399:9:9"
+            },
+            "scope": 5949,
+            "src": "1334:75:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "277bf178",
+            "id": 5886,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeWeight",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5882,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5879,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5886,
+                  "src": "1532:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5878,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1532:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5881,
+                  "mutability": "mutable",
+                  "name": "_prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5886,
+                  "src": "1549:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5880,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1549:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1531:35:9"
+            },
+            "returnParameters": {
+              "id": 5885,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5884,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5886,
+                  "src": "1590:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5883,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1590:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1589:9:9"
+            },
+            "scope": 5949,
+            "src": "1511:88:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "e11f96dd",
+            "id": 5893,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "gameDrawCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5889,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5888,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5893,
+                  "src": "1695:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5887,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1695:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1694:17:9"
+            },
+            "returnParameters": {
+              "id": 5892,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5891,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5893,
+                  "src": "1735:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5890,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1735:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1734:9:9"
+            },
+            "scope": 5949,
+            "src": "1672:72:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "cbfe9a4a",
+            "id": 5902,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "gameDrawId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5898,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5895,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5902,
+                  "src": "1870:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5894,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1870:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5897,
+                  "mutability": "mutable",
+                  "name": "_index",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5902,
+                  "src": "1887:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5896,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1887:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1869:33:9"
+            },
+            "returnParameters": {
+              "id": 5901,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5900,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5902,
+                  "src": "1926:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5899,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1926:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1925:9:9"
+            },
+            "scope": 5949,
+            "src": "1850:85:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "b61c6a84",
+            "id": 5911,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeDrawCount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5907,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5904,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5911,
+                  "src": "2033:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5903,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2033:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5906,
+                  "mutability": "mutable",
+                  "name": "_prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5911,
+                  "src": "2050:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5905,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2050:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2032:35:9"
+            },
+            "returnParameters": {
+              "id": 5910,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5909,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5911,
+                  "src": "2091:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5908,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2091:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2090:9:9"
+            },
+            "scope": 5949,
+            "src": "2009:91:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "8cda9bc5",
+            "id": 5922,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prizeDrawId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5918,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5913,
+                  "mutability": "mutable",
+                  "name": "_gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2237:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5912,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2237:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5915,
+                  "mutability": "mutable",
+                  "name": "_prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2254:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5914,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2254:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5917,
+                  "mutability": "mutable",
+                  "name": "_index",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2272:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5916,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2272:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2236:51:9"
+            },
+            "returnParameters": {
+              "id": 5921,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5920,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5922,
+                  "src": "2311:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5919,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2311:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2310:9:9"
+            },
+            "scope": 5949,
+            "src": "2216:104:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "992bbfbb",
+            "id": 5929,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "drawGameId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5925,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5924,
+                  "mutability": "mutable",
+                  "name": "_did",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5929,
+                  "src": "2410:12:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5923,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2410:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2409:14:9"
+            },
+            "returnParameters": {
+              "id": 5928,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5927,
+                  "mutability": "mutable",
+                  "name": "gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5929,
+                  "src": "2447:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5926,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2447:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2446:16:9"
+            },
+            "scope": 5949,
+            "src": "2390:73:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "4f73d542",
+            "id": 5938,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "drawPrizeId",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5932,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5931,
+                  "mutability": "mutable",
+                  "name": "_did",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5938,
+                  "src": "2569:12:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5930,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2569:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2568:14:9"
+            },
+            "returnParameters": {
+              "id": 5937,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5934,
+                  "mutability": "mutable",
+                  "name": "gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5938,
+                  "src": "2606:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5933,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2606:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5936,
+                  "mutability": "mutable",
+                  "name": "prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5938,
+                  "src": "2622:15:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5935,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2622:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2605:33:9"
+            },
+            "scope": 5949,
+            "src": "2548:91:9",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "anonymous": false,
+            "id": 5948,
+            "name": "Draw",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 5947,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5940,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2656:20:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5939,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2656:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5942,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "drawId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2678:14:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5941,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2678:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5944,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "gameId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2694:22:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5943,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2694:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5946,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "prizeId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5948,
+                  "src": "2718:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5945,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2718:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2655:87:9"
+            },
+            "src": "2645:98:9"
+          }
+        ],
+        "scope": 5950,
+        "src": "496:2249:9"
+      }
+    ],
+    "src": "0:2746:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-11-19T16:35:38.457Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

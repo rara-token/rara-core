@@ -1,0 +1,642 @@
+{
+  "contractName": "ILendingPool",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "approveLending",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "lend",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"approveLending\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"lend\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/lending/ILendingPool.sol\":\"ILendingPool\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/lending/ILendingPool.sol\":{\"keccak256\":\"0xec60534121ae603b33d3b6e8d5d681eaf03c9b5b2b8f64a522796f8df6543ef4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b9cdaf40d3788d7659c90ccc4c91aa55c5997795b4103c9d47bf78d4f24d97d8\",\"dweb:/ipfs/QmZjxBLfLFZfzSCFbUvC2NReVsKVKfcYyYmnDBHrf87uNE\"]},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0xf8e8d118a7a8b2e134181f7da655f6266aa3a0f9134b2605747139fcb0c5d835\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9ec48567e7ad06acb670980d5cdf3fd7f3949bf12894f02d68c3bb43e75aa84f\",\"dweb:/ipfs/QmaG3R2J9cz92YT77vFjYrjMNU2wHp4ypwYD62HqDUqS5U\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\nimport \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n\n/// @notice A contract which holds tokens that can be lent (without internal\n/// bookkeeping). Address(es) with LENDER_ROLE can prompt the approval of\n/// outgoing token transfers. LENDER_ROLE is administrated by DEFAULT_ADMIN_ROLE.\npragma solidity ^0.8.0;\ninterface ILendingPool {\n    function approveLending(IERC20 _token, address _to, uint256 _amount) external;\n    function lend(IERC20 _token, address _to, uint256 _amount) external;\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/lending/ILendingPool.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/lending/ILendingPool.sol",
+    "exportedSymbols": {
+      "IERC20": [
+        15489
+      ],
+      "ILendingPool": [
+        14170
+      ]
+    },
+    "id": 14171,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "id": 14148,
+        "nodeType": "ImportDirective",
+        "scope": 14171,
+        "sourceUnit": 15490,
+        "src": "32:56:46",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 14149,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "323:23:46"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 14170,
+        "linearizedBaseContracts": [
+          14170
+        ],
+        "name": "ILendingPool",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "32eeb83b",
+            "id": 14159,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "approveLending",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 14157,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 14152,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14159,
+                  "src": "400:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$15489",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 14151,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 14150,
+                      "name": "IERC20",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 15489,
+                      "src": "400:6:46"
+                    },
+                    "referencedDeclaration": 15489,
+                    "src": "400:6:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$15489",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14154,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14159,
+                  "src": "415:11:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 14153,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "415:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14156,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14159,
+                  "src": "428:15:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 14155,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "428:7:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "399:45:46"
+            },
+            "returnParameters": {
+              "id": 14158,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "453:0:46"
+            },
+            "scope": 14170,
+            "src": "376:78:46",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "05ec2d4d",
+            "id": 14169,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "lend",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 14167,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 14162,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14169,
+                  "src": "473:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$15489",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 14161,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 14160,
+                      "name": "IERC20",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 15489,
+                      "src": "473:6:46"
+                    },
+                    "referencedDeclaration": 15489,
+                    "src": "473:6:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$15489",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14164,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14169,
+                  "src": "488:11:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 14163,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "488:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14166,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14169,
+                  "src": "501:15:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 14165,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "501:7:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "472:45:46"
+            },
+            "returnParameters": {
+              "id": 14168,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "526:0:46"
+            },
+            "scope": 14170,
+            "src": "459:68:46",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 14171,
+        "src": "347:182:46"
+      }
+    ],
+    "src": "32:498:46"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/utils/lending/ILendingPool.sol",
+    "exportedSymbols": {
+      "IERC20": [
+        15489
+      ],
+      "ILendingPool": [
+        14170
+      ]
+    },
+    "id": 14171,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "id": 14148,
+        "nodeType": "ImportDirective",
+        "scope": 14171,
+        "sourceUnit": 15490,
+        "src": "32:56:46",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 14149,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "323:23:46"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 14170,
+        "linearizedBaseContracts": [
+          14170
+        ],
+        "name": "ILendingPool",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "32eeb83b",
+            "id": 14159,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "approveLending",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 14157,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 14152,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14159,
+                  "src": "400:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$15489",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 14151,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 14150,
+                      "name": "IERC20",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 15489,
+                      "src": "400:6:46"
+                    },
+                    "referencedDeclaration": 15489,
+                    "src": "400:6:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$15489",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14154,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14159,
+                  "src": "415:11:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 14153,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "415:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14156,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14159,
+                  "src": "428:15:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 14155,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "428:7:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "399:45:46"
+            },
+            "returnParameters": {
+              "id": 14158,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "453:0:46"
+            },
+            "scope": 14170,
+            "src": "376:78:46",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "05ec2d4d",
+            "id": 14169,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "lend",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 14167,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 14162,
+                  "mutability": "mutable",
+                  "name": "_token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14169,
+                  "src": "473:13:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IERC20_$15489",
+                    "typeString": "contract IERC20"
+                  },
+                  "typeName": {
+                    "id": 14161,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 14160,
+                      "name": "IERC20",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 15489,
+                      "src": "473:6:46"
+                    },
+                    "referencedDeclaration": 15489,
+                    "src": "473:6:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IERC20_$15489",
+                      "typeString": "contract IERC20"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14164,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14169,
+                  "src": "488:11:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 14163,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "488:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 14166,
+                  "mutability": "mutable",
+                  "name": "_amount",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 14169,
+                  "src": "501:15:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 14165,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "501:7:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "472:45:46"
+            },
+            "returnParameters": {
+              "id": 14168,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "526:0:46"
+            },
+            "scope": 14170,
+            "src": "459:68:46",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 14171,
+        "src": "347:182:46"
+      }
+    ],
+    "src": "32:498:46"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-06-18T20:52:53.891Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

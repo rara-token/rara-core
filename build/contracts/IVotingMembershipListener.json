@@ -1,0 +1,432 @@
+{
+  "contractName": "IVotingMembershipListener",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_prevLevel",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_level",
+          "type": "uint32"
+        }
+      ],
+      "name": "membershipChanged",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_prevLevel\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"_level\",\"type\":\"uint32\"}],\"name\":\"membershipChanged\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol\":\"IVotingMembershipListener\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol\":{\"keccak256\":\"0x93fdebf4390cb883df9aad9fe902ee78749f37c13dd0fb80403e18bd447ffa23\",\"urls\":[\"bzz-raw://445bbebfb6ad6b6b44149abaf47d1cf59e77810c6cd8b61dbf4f17ed15912f5c\",\"dweb:/ipfs/QmQF4j5AkXtpmPF7YffKQHgH1DsigHmrWr5i9QouoGAnig\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796ab6e88af7bf0e78def0f059310c903af6a312b565344e0ff524a0f26e81c6\",\"dweb:/ipfs/QmcsVgLgzWdor3UnAztUkXKNGcysm1MPneWksF72AvnwBx\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"@openzeppelin/contracts/utils/introspection/IERC165.sol\";\n\n// A listener for changes to Voting Membership levels, in case changes in those levels\n// carries a significance in accumulating effects (e.g. mining power).\npragma solidity ^0.8.0;\ninterface IVotingMembershipListener is IERC165 {\n    function membershipChanged(address _user, uint32 _prevLevel, uint32 _level) external;\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        10525
+      ],
+      "IVotingMembershipListener": [
+        5184
+      ]
+    },
+    "id": 5185,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "id": 5171,
+        "nodeType": "ImportDirective",
+        "scope": 5185,
+        "sourceUnit": 10526,
+        "src": "0:65:14",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 5172,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "225:23:14"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 5173,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 10525,
+              "src": "288:7:14"
+            },
+            "id": 5174,
+            "nodeType": "InheritanceSpecifier",
+            "src": "288:7:14"
+          }
+        ],
+        "contractDependencies": [
+          10525
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 5184,
+        "linearizedBaseContracts": [
+          5184,
+          10525
+        ],
+        "name": "IVotingMembershipListener",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "e4efa241",
+            "id": 5183,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "membershipChanged",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5181,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5176,
+                  "mutability": "mutable",
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5183,
+                  "src": "329:13:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5175,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "329:7:14",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5178,
+                  "mutability": "mutable",
+                  "name": "_prevLevel",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5183,
+                  "src": "344:17:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 5177,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "344:6:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5180,
+                  "mutability": "mutable",
+                  "name": "_level",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5183,
+                  "src": "363:13:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 5179,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "363:6:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "328:49:14"
+            },
+            "returnParameters": {
+              "id": 5182,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "386:0:14"
+            },
+            "scope": 5184,
+            "src": "302:85:14",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 5185,
+        "src": "249:140:14"
+      }
+    ],
+    "src": "0:390:14"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IVotingMembershipListener.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        10525
+      ],
+      "IVotingMembershipListener": [
+        5184
+      ]
+    },
+    "id": 5185,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "file": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "id": 5171,
+        "nodeType": "ImportDirective",
+        "scope": 5185,
+        "sourceUnit": 10526,
+        "src": "0:65:14",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 5172,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "225:23:14"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 5173,
+              "name": "IERC165",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 10525,
+              "src": "288:7:14"
+            },
+            "id": 5174,
+            "nodeType": "InheritanceSpecifier",
+            "src": "288:7:14"
+          }
+        ],
+        "contractDependencies": [
+          10525
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 5184,
+        "linearizedBaseContracts": [
+          5184,
+          10525
+        ],
+        "name": "IVotingMembershipListener",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "e4efa241",
+            "id": 5183,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "membershipChanged",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5181,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5176,
+                  "mutability": "mutable",
+                  "name": "_user",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5183,
+                  "src": "329:13:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5175,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "329:7:14",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5178,
+                  "mutability": "mutable",
+                  "name": "_prevLevel",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5183,
+                  "src": "344:17:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 5177,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "344:6:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5180,
+                  "mutability": "mutable",
+                  "name": "_level",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5183,
+                  "src": "363:13:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 5179,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "363:6:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "328:49:14"
+            },
+            "returnParameters": {
+              "id": 5182,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "386:0:14"
+            },
+            "scope": 5184,
+            "src": "302:85:14",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 5185,
+        "src": "249:140:14"
+      }
+    ],
+    "src": "0:390:14"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-07-07T18:56:09.180Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "supportsInterface(bytes4)": {
+        "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

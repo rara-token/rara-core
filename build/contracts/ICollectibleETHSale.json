@@ -1,0 +1,532 @@
+{
+  "contractName": "ICollectibleETHSale",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenType",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Purchase",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenType",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenTypePrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenType",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenTypePurchased",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenType",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenTypeSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalPurchased",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "purchase",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenType\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Purchase\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"purchase\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"}],\"name\":\"tokenTypePrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"}],\"name\":\"tokenTypePurchased\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenType\",\"type\":\"uint256\"}],\"name\":\"tokenTypeSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalPurchased\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleETHSale.sol\":\"ICollectibleETHSale\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleETHSale.sol\":{\"keccak256\":\"0xad7b32f396a77bc97f461b387a1e95edaa0a720ff50a98c7bc04380bfb90c5c8\",\"urls\":[\"bzz-raw://987e0ec0c4aeaa1d91c0324f2016538507f3a00dffc3ed1178f4ce270f96f729\",\"dweb:/ipfs/QmPo48keXkmPyMLU4p6NimnRgigz2U9j9S4mRGSezxwrPh\"]},\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleSale.sol\":{\"keccak256\":\"0x457b11266f3803d29a482222ddd531cea26da41aacc9b568f45b2fdb5b75e9ad\",\"urls\":[\"bzz-raw://84c4690cd3aa59dff2570f1396ca2156fe630be803e82bfb81cb68d0e8b76a11\",\"dweb:/ipfs/Qmctzcsvhpg6AS6RSyASZBY83UvyBruuMNe8R33sNMoX7o\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"./ICollectibleSale.sol\";\n\npragma solidity ^0.8.0;\ninterface ICollectibleETHSale is ICollectibleSale {\n    // @notice Purchase the specified token type; it will be minted or transferred\n    // to the indicated address if possible. Send with ETH (BNB, etc.) representing\n    // the maximum amount the caller is willing to pay; if greater than the sale\n    // price, the remainder will be returned.\n    // @param _tokenType The token type to purchase.\n    // @param _to The address to send the token to\n    // @return The tokenID transferred to `to` as a result of this call.\n    function purchase(uint256 _tokenType, address _to) external payable returns (uint256);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleETHSale.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleETHSale.sol",
+    "exportedSymbols": {
+      "ICollectibleETHSale": [
+        2000
+      ],
+      "ICollectibleSale": [
+        2046
+      ]
+    },
+    "id": 2001,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleSale.sol",
+        "file": "./ICollectibleSale.sol",
+        "id": 1987,
+        "nodeType": "ImportDirective",
+        "scope": 2001,
+        "sourceUnit": 2047,
+        "src": "0:32:4",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 1988,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "34:23:4"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 1989,
+              "name": "ICollectibleSale",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 2046,
+              "src": "91:16:4"
+            },
+            "id": 1990,
+            "nodeType": "InheritanceSpecifier",
+            "src": "91:16:4"
+          }
+        ],
+        "contractDependencies": [
+          2046
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 2000,
+        "linearizedBaseContracts": [
+          2000,
+          2046
+        ],
+        "name": "ICollectibleETHSale",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "ae77c237",
+            "id": 1999,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "purchase",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1995,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1992,
+                  "mutability": "mutable",
+                  "name": "_tokenType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1999,
+                  "src": "603:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1991,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "603:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1994,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1999,
+                  "src": "623:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1993,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "623:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "602:33:4"
+            },
+            "returnParameters": {
+              "id": 1998,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1997,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1999,
+                  "src": "662:7:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1996,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "662:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "661:9:4"
+            },
+            "scope": 2000,
+            "src": "585:86:4",
+            "stateMutability": "payable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 2001,
+        "src": "58:615:4"
+      }
+    ],
+    "src": "0:674:4"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleETHSale.sol",
+    "exportedSymbols": {
+      "ICollectibleETHSale": [
+        2000
+      ],
+      "ICollectibleSale": [
+        2046
+      ]
+    },
+    "id": 2001,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/sales/direct/interfaces/ICollectibleSale.sol",
+        "file": "./ICollectibleSale.sol",
+        "id": 1987,
+        "nodeType": "ImportDirective",
+        "scope": 2001,
+        "sourceUnit": 2047,
+        "src": "0:32:4",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 1988,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "34:23:4"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 1989,
+              "name": "ICollectibleSale",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 2046,
+              "src": "91:16:4"
+            },
+            "id": 1990,
+            "nodeType": "InheritanceSpecifier",
+            "src": "91:16:4"
+          }
+        ],
+        "contractDependencies": [
+          2046
+        ],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 2000,
+        "linearizedBaseContracts": [
+          2000,
+          2046
+        ],
+        "name": "ICollectibleETHSale",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "ae77c237",
+            "id": 1999,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "purchase",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1995,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1992,
+                  "mutability": "mutable",
+                  "name": "_tokenType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1999,
+                  "src": "603:18:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1991,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "603:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1994,
+                  "mutability": "mutable",
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1999,
+                  "src": "623:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1993,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "623:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "602:33:4"
+            },
+            "returnParameters": {
+              "id": 1998,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1997,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1999,
+                  "src": "662:7:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1996,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "662:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "661:9:4"
+            },
+            "scope": 2000,
+            "src": "585:86:4",
+            "stateMutability": "payable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 2001,
+        "src": "58:615:4"
+      }
+    ],
+    "src": "0:674:4"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-07-25T15:50:10.524Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

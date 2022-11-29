@@ -1,0 +1,1178 @@
+{
+  "contractName": "IERC721CollectibleOracle",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "totalTypes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tType",
+          "type": "uint256"
+        }
+      ],
+      "name": "typeName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tType",
+          "type": "uint256"
+        }
+      ],
+      "name": "typeSymbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenType",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tType",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "hasTokenType",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"hasTokenType\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenType\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"tType\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalTypes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tType\",\"type\":\"uint256\"}],\"name\":\"typeName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tType\",\"type\":\"uint256\"}],\"name\":\"typeSymbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"tokenType(address,uint256)\":{\"details\":\"Returns the type of the indicated `tokenId`. Reverts if no type exists for this token.\"},\"totalTypes()\":{\"details\":\"Returns the number of types in existence (including those that have zero instances because all were burned). Use this to enumerate all types.\"},\"typeName(uint256)\":{\"details\":\"Returns a name for the indicated type.\"},\"typeSymbol(uint256)\":{\"details\":\"Returns a symbol for the indicated type.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"hasTokenType(address,uint256)\":{\"notice\":\"Returns whether the specified address and ID has a tokenType assigned. A simpler, thinner function than {tokenType} but not necessary to call in advance -- {tokenType} will revert if no type is set.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721CollectibleOracle.sol\":\"IERC721CollectibleOracle\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721CollectibleOracle.sol\":{\"keccak256\":\"0xb4dfe5af9a9225b977eaad91a1d861637edfa3b162b08c97a3c0e7b114291295\",\"urls\":[\"bzz-raw://9d953b640440049d43e689efd241f0c13355d406f928e5b67ca43d09ddbe4efb\",\"dweb:/ipfs/QmWdLjdjYgD314XwUyUEeQKBrEJQaEYoyXAPADpcUW7Nep\"]},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"keccak256\":\"0xf101e8720213560fab41104d53b3cc7ba0456ef3a98455aa7f022391783144a0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3e7820bcf567e6892d937c3cb10db263a4042e446799bca602535868d822384e\",\"dweb:/ipfs/QmPG2oeDjKncqsEeyYGjAN7CwAJmMgHterXGGnpzhha4z7\"]},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796ab6e88af7bf0e78def0f059310c903af6a312b565344e0ff524a0f26e81c6\",\"dweb:/ipfs/QmcsVgLgzWdor3UnAztUkXKNGcysm1MPneWksF72AvnwBx\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n\n/**\n * @title IERC721CollectibleOracle\n * @dev An oracle allowing non-collectible ERC721 tokens to function effectively\n * as collectibles, by reporting their tokenTypes.\n */\npragma solidity ^0.8.0;\ninterface IERC721CollectibleOracle {\n  /**\n   * @dev Returns the number of types in existence (including those that have zero\n   * instances because all were burned). Use this to enumerate all types.\n   */\n  function totalTypes() external view returns (uint256);\n\n  /**\n   * @dev Returns a name for the indicated type.\n   */\n  function typeName(uint256 tType) external view returns (string memory);\n\n  /**\n   * @dev Returns a symbol for the indicated type.\n   */\n  function typeSymbol(uint256 tType) external view returns (string memory);\n\n  /**\n   * @dev Returns the type of the indicated `tokenId`. Reverts if no type\n   * exists for this token.\n   */\n  function tokenType(address token, uint256 tokenId) external view returns (uint256 tType);\n\n  /**\n   * Returns whether the specified address and ID has a tokenType assigned.\n   * A simpler, thinner function than {tokenType} but not necessary to call\n   * in advance -- {tokenType} will revert if no type is set.\n   */\n  function hasTokenType(address token, uint256 tokenId) external view returns (bool);\n}\n",
+  "sourcePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721CollectibleOracle.sol",
+  "ast": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721CollectibleOracle.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        13719
+      ],
+      "IERC721": [
+        12216
+      ],
+      "IERC721CollectibleOracle": [
+        5289
+      ]
+    },
+    "id": 5290,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "file": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "id": 5245,
+        "nodeType": "ImportDirective",
+        "scope": 5290,
+        "sourceUnit": 12217,
+        "src": "0:58:15",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 5246,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "235:23:15"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 5289,
+        "linearizedBaseContracts": [
+          5289
+        ],
+        "name": "IERC721CollectibleOracle",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 5247,
+              "nodeType": "StructuredDocumentation",
+              "src": "298:166:15",
+              "text": " @dev Returns the number of types in existence (including those that have zero\n instances because all were burned). Use this to enumerate all types."
+            },
+            "functionSelector": "f15df2e5",
+            "id": 5252,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "totalTypes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5248,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "486:2:15"
+            },
+            "returnParameters": {
+              "id": 5251,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5250,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5252,
+                  "src": "512:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5249,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "512:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "511:9:15"
+            },
+            "scope": 5289,
+            "src": "467:54:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5253,
+              "nodeType": "StructuredDocumentation",
+              "src": "525:58:15",
+              "text": " @dev Returns a name for the indicated type."
+            },
+            "functionSelector": "a98b69a5",
+            "id": 5260,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "typeName",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5256,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5255,
+                  "mutability": "mutable",
+                  "name": "tType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5260,
+                  "src": "604:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5254,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "604:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "603:15:15"
+            },
+            "returnParameters": {
+              "id": 5259,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5258,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5260,
+                  "src": "642:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5257,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "642:6:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "641:15:15"
+            },
+            "scope": 5289,
+            "src": "586:71:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5261,
+              "nodeType": "StructuredDocumentation",
+              "src": "661:60:15",
+              "text": " @dev Returns a symbol for the indicated type."
+            },
+            "functionSelector": "e29b3379",
+            "id": 5268,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "typeSymbol",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5264,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5263,
+                  "mutability": "mutable",
+                  "name": "tType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5268,
+                  "src": "744:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5262,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "744:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "743:15:15"
+            },
+            "returnParameters": {
+              "id": 5267,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5266,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5268,
+                  "src": "782:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5265,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "782:6:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "781:15:15"
+            },
+            "scope": 5289,
+            "src": "724:73:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5269,
+              "nodeType": "StructuredDocumentation",
+              "src": "801:111:15",
+              "text": " @dev Returns the type of the indicated `tokenId`. Reverts if no type\n exists for this token."
+            },
+            "functionSelector": "d66848dd",
+            "id": 5278,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenType",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5274,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5271,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5278,
+                  "src": "934:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5270,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "934:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5273,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5278,
+                  "src": "949:15:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5272,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "949:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "933:32:15"
+            },
+            "returnParameters": {
+              "id": 5277,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5276,
+                  "mutability": "mutable",
+                  "name": "tType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5278,
+                  "src": "989:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5275,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "989:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "988:15:15"
+            },
+            "scope": 5289,
+            "src": "915:89:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5279,
+              "nodeType": "StructuredDocumentation",
+              "src": "1008:223:15",
+              "text": " Returns whether the specified address and ID has a tokenType assigned.\n A simpler, thinner function than {tokenType} but not necessary to call\n in advance -- {tokenType} will revert if no type is set."
+            },
+            "functionSelector": "267c6380",
+            "id": 5288,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "hasTokenType",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5284,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5281,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5288,
+                  "src": "1256:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5280,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1256:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5283,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5288,
+                  "src": "1271:15:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5282,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1271:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1255:32:15"
+            },
+            "returnParameters": {
+              "id": 5287,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5286,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5288,
+                  "src": "1311:4:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5285,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1311:4:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1310:6:15"
+            },
+            "scope": 5289,
+            "src": "1234:83:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 5290,
+        "src": "259:1060:15"
+      }
+    ],
+    "src": "0:1320:15"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/jake/Documents/Development/Freelance/Rara/Git/rara-core/contracts/token/interfaces/IERC721CollectibleOracle.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        13719
+      ],
+      "IERC721": [
+        12216
+      ],
+      "IERC721CollectibleOracle": [
+        5289
+      ]
+    },
+    "id": 5290,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "file": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "id": 5245,
+        "nodeType": "ImportDirective",
+        "scope": 5290,
+        "sourceUnit": 12217,
+        "src": "0:58:15",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 5246,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "235:23:15"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 5289,
+        "linearizedBaseContracts": [
+          5289
+        ],
+        "name": "IERC721CollectibleOracle",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 5247,
+              "nodeType": "StructuredDocumentation",
+              "src": "298:166:15",
+              "text": " @dev Returns the number of types in existence (including those that have zero\n instances because all were burned). Use this to enumerate all types."
+            },
+            "functionSelector": "f15df2e5",
+            "id": 5252,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "totalTypes",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5248,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "486:2:15"
+            },
+            "returnParameters": {
+              "id": 5251,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5250,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5252,
+                  "src": "512:7:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5249,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "512:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "511:9:15"
+            },
+            "scope": 5289,
+            "src": "467:54:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5253,
+              "nodeType": "StructuredDocumentation",
+              "src": "525:58:15",
+              "text": " @dev Returns a name for the indicated type."
+            },
+            "functionSelector": "a98b69a5",
+            "id": 5260,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "typeName",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5256,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5255,
+                  "mutability": "mutable",
+                  "name": "tType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5260,
+                  "src": "604:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5254,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "604:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "603:15:15"
+            },
+            "returnParameters": {
+              "id": 5259,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5258,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5260,
+                  "src": "642:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5257,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "642:6:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "641:15:15"
+            },
+            "scope": 5289,
+            "src": "586:71:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5261,
+              "nodeType": "StructuredDocumentation",
+              "src": "661:60:15",
+              "text": " @dev Returns a symbol for the indicated type."
+            },
+            "functionSelector": "e29b3379",
+            "id": 5268,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "typeSymbol",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5264,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5263,
+                  "mutability": "mutable",
+                  "name": "tType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5268,
+                  "src": "744:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5262,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "744:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "743:15:15"
+            },
+            "returnParameters": {
+              "id": 5267,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5266,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5268,
+                  "src": "782:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 5265,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "782:6:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "781:15:15"
+            },
+            "scope": 5289,
+            "src": "724:73:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5269,
+              "nodeType": "StructuredDocumentation",
+              "src": "801:111:15",
+              "text": " @dev Returns the type of the indicated `tokenId`. Reverts if no type\n exists for this token."
+            },
+            "functionSelector": "d66848dd",
+            "id": 5278,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenType",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5274,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5271,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5278,
+                  "src": "934:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5270,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "934:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5273,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5278,
+                  "src": "949:15:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5272,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "949:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "933:32:15"
+            },
+            "returnParameters": {
+              "id": 5277,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5276,
+                  "mutability": "mutable",
+                  "name": "tType",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5278,
+                  "src": "989:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5275,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "989:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "988:15:15"
+            },
+            "scope": 5289,
+            "src": "915:89:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 5279,
+              "nodeType": "StructuredDocumentation",
+              "src": "1008:223:15",
+              "text": " Returns whether the specified address and ID has a tokenType assigned.\n A simpler, thinner function than {tokenType} but not necessary to call\n in advance -- {tokenType} will revert if no type is set."
+            },
+            "functionSelector": "267c6380",
+            "id": 5288,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "hasTokenType",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5284,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5281,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5288,
+                  "src": "1256:13:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5280,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1256:7:15",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5283,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5288,
+                  "src": "1271:15:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5282,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1271:7:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1255:32:15"
+            },
+            "returnParameters": {
+              "id": 5287,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5286,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5288,
+                  "src": "1311:4:15",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5285,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1311:4:15",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1310:6:15"
+            },
+            "scope": 5289,
+            "src": "1234:83:15",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 5290,
+        "src": "259:1060:15"
+      }
+    ],
+    "src": "0:1320:15"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-12-07T18:53:42.370Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "tokenType(address,uint256)": {
+        "details": "Returns the type of the indicated `tokenId`. Reverts if no type exists for this token."
+      },
+      "totalTypes()": {
+        "details": "Returns the number of types in existence (including those that have zero instances because all were burned). Use this to enumerate all types."
+      },
+      "typeName(uint256)": {
+        "details": "Returns a name for the indicated type."
+      },
+      "typeSymbol(uint256)": {
+        "details": "Returns a symbol for the indicated type."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "hasTokenType(address,uint256)": {
+        "notice": "Returns whether the specified address and ID has a tokenType assigned. A simpler, thinner function than {tokenType} but not necessary to call in advance -- {tokenType} will revert if no type is set."
+      }
+    },
+    "version": 1
+  }
+}

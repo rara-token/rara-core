@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./RaraToken.sol";
-import "./interfaces/ITokenEmitter.sol";
-import "../utils/boring-solidity/BoringBatchable.sol";
+import "../RaraToken.sol";
+import "../interfaces/ITokenEmitter.sol";
+import "../../utils/boring-solidity/BoringBatchable.sol";
 
 // The RaraEmitter mints 48 Rara for each block, allocating it to designated
 // recipients; leftovers are burned.
@@ -150,6 +150,8 @@ contract RaraEmitter is Context, AccessControlEnumerable, BoringBatchable, IToke
     /**
      * @dev Emit the Rara owed to the indicated target directly to that target's
      * recipient address; uses {mint} to ensure up-to-date quantities.
+     * Ensure the recipient is capable of dealing with Rara held in its own
+     * account and does not need to manually "claim" tokens.
      */
     function emitRara(uint256 _tid) external {
       require(hasRole(MANAGER_ROLE, _msgSender()), "RaraEmitter: must have MANAGER role to emitRara");

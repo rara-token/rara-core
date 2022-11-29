@@ -74,27 +74,45 @@ const bsc = require('./secrets/bsc.json');
        host: "127.0.0.1",
        port: 7545,
        network_id: "*", // Match any network id
-       gas: 4600000
+       gas: 6700000
      },
      test: {
        host: "127.0.0.1",
        port: 7545,
        network_id: "*", // Match any network id
-       gas: 4600000
+       gas: 6700000
      },
      bsc_test: {
-       provider: () => new HDWalletProvider(bsc.mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+       provider: () => new HDWalletProvider(bsc.mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545/`),
        network_id: 97,
        confirmations: 10,
        timeoutBlocks: 200,
-       skipDryRun: true
+       gas: 6700000
      },
      bsc: {
-       provider: () => new HDWalletProvider(bsc.mnemonic, `https://bsc-dataseed1.binance.org`),
+       provider: () => new HDWalletProvider({
+         mnemonic: bsc.mnemonic,
+         providerOrUrl: `https://bsc-dataseed2.binance.org/`,
+         gas: 3000000,
+         chainId: 56
+       }),
        network_id: 56,
-       confirmations: 10,
+       confirmations: 2,
        timeoutBlocks: 200,
-       skipDryRun: true
+       gas: 6700000
+     },
+     moralis_bsc: {
+       provider: () => new HDWalletProvider({
+         mnemonic: bsc.mnemonic,
+         providerOrUrl: `https://speedy-nodes-nyc.moralis.io/d8fbc1893f70ee9ec442ade6/bsc/mainnet`,
+         chainId: 56
+       }),
+       network_id: 56,
+       chain_id: 56,
+       chainId: 56,
+       confirmations: 2,
+       timeoutBlocks: 200,
+       gas: 6700000
      },
    },
    compilers: {
@@ -107,5 +125,8 @@ const bsc = require('./secrets/bsc.json');
          }
        }
      }
-   }
+   },
+   plugins: [
+     'truffle-contract-size'
+  ]
  };
